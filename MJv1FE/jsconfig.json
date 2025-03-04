@@ -1,0 +1,18 @@
+{  
+  "compilerOptions": {  
+    "target": "ES6", // 你可以选择 ES5, ES6, ESNext 等  
+    "module": "commonjs", // 选择模块系统  
+    "baseUrl": "./", // 基础 URL  
+    "lib": ["es2017", "dom"], // 或者更高版本，如 "es2020" 或 "esnext"  
+    "paths": {  
+      "@/*": [  
+        "./src/*"  
+      ]  
+    },  
+    "types": ["element-plus/global"] // 如果你需要其他全局类型声明，可以放在这里  
+  },  
+  "exclude": [  
+    "node_modules",  
+    "dist"  
+  ]  
+}
