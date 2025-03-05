@@ -92,6 +92,10 @@ def update_customer(request):
         obj_customer.checkOutTime = data['checkOutTime']
         obj_customer.idCardNo = data['idCardNo']
         obj_customer.mobile = data['mobile']
+        if obj_customer.image:
+            photo_path = os.path.join(settings.MEDIA_ROOT, str(obj_customer.image))
+            if os.path.isfile(photo_path):  # 检查文件是否存在
+                os.remove(photo_path)  # 删除文件
         obj_customer.image = data['image']
         obj_customer.balance = data['balance']
         # obj_customer.roomType = data['roomType']
@@ -116,8 +120,12 @@ def delete_customer(request):
     # 接受删除的顾客信息
     data = json.loads(request.body.decode('utf-8'))
     try:
-        print(data)
         obj_customer = Customer.objects.get(cno=str(data))
+        # 如果有照片，则删除照片文件
+        if obj_customer.image:
+            photo_path = os.path.join(settings.MEDIA_ROOT, str(obj_customer.image))
+            if os.path.isfile(photo_path):  # 检查文件是否存在
+                os.remove(photo_path)  # 删除文件
         obj_customer.delete()
         # 使用orm获取所有学生的信息
         obj_customer = Customer.objects.all().values()
@@ -138,6 +146,10 @@ def delete_customers(request):
     try:
         for one_customer in data['customers']:
             obj_customer = Customer.objects.get(cno=str(one_customer['cno']))
+            if obj_customer.image:
+                photo_path = os.path.join(settings.MEDIA_ROOT, str(obj_customer.image))
+                if os.path.isfile(photo_path):  # 检查文件是否存在
+                    os.remove(photo_path)  # 删除文件
             obj_customer.delete()
         obj_customer = Customer.objects.all().values()
         # 把结果转为list
