@@ -1,0 +1,77 @@
+# Python 字节码文件  
+*.pyc  
+*.pyo  
+__pycache__/  
+
+# Django 相关的  
+*.log  
+local_settings.py  
+db.sqlite3  
+db.sqlite3-*  
+media/*  # 如果你不想跟踪用户上传的媒体文件  
+
+# 静态文件 (如果你通过 collectstatic 管理)  
+static/*  
+
+# 虚拟环境  
+venv/  
+.venv/  
+env/  
+.env/  
+
+# IDE - VSCode  
+.vscode/*  
+!.vscode/settings.json  
+!.vscode/extensions.json  
+.history/  
+
+# IDE - IntelliJ  
+.idea/  
+
+# 系统文件  
+.DS_Store  
+Thumbs.db  
+
+# 环境变量文件 (注意安全，不要提交包含敏感信息的 .env 文件!)  
+.env  
+.env.local  
+.env.*.local  
+
+# 其他日志文件  
+*.log  
+
+# 临时文件和目录  
+tmp/  
+temp/  
+*/migrations/*  # 如果你不想跟踪 migration 历史  
+!*/migrations/__init__.py  # 但要保留 __init__.py  
+
+# 依赖管理工具特定文件  
+*.egg-info/  
+dist/  
+build/  
+
+# Celery 相关  
+celerybeat.pid  
+celeryd.pid  
+
+# Sphinx 文档  
+docs/_build/  
+
+# Docker 相关  
+docker-compose.override.yml  
+docker-compose.prod.yml  
+
+# Editor backup files  
+*~  
+\#*  
+*.swp  
+
+# OS generated files  
+.localized  
+
+# PyCharm  
+*.iml  
+
+# Jupyter Notebook  
+.ipynb_checkpoints  

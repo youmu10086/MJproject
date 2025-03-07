@@ -1,30 +1,62 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+# Node 依赖  
+/node_modules  
 
-node_modules
-.DS_Store
-dist
-dist-ssr
-coverage
-*.local
+# 生产环境构建输出  
+/dist  
 
-/cypress/videos/
-/cypress/screenshots/
+# 测试环境构建输出  
+/test/output  
+/coverage  
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+# Yarn 依赖  
+yarn-error.log  
 
-*.tsbuildinfo
+# IDE - VSCode  
+.vscode/*  
+!.vscode/settings.json  
+!.vscode/extensions.json  
+.history/  
+
+# IDE - IntelliJ  
+.idea  
+
+# 系统文件  
+.DS_Store  
+Thumbs.db  
+
+# Log 文件  
+*.log  
+
+# 环境变量文件 (注意安全，不要提交包含敏感信息的 .env 文件!)  
+.env  
+.env.local  
+.env.*.local  
+
+# 本地生成的临时文件  
+/tmp  
+/temp  
+
+# 依赖管理工具特定文件  
+package-lock.json  
+yarn.lock  
+npm-debug.log  
+pnpm-lock.yaml  
+
+# ESlint 缓存  
+.eslintcache  
+
+# TypeScript 编译输出  
+*.tsbuildinfo  
+
+# VuePress 默认构建输出  
+.vuepress/dist  
+
+# Netlify 部署相关  
+.netlify  
+
+# Editor backup files  
+*~  
+\#*  
+
+# Miscellaneous  
+/build  
