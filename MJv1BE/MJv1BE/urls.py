@@ -28,8 +28,11 @@ urlpatterns = [
     path('customer/add/', views.add_customer),
     path('customer/delete/', views.delete_customer),
     path('customers/delete/', views.delete_customers),
-    path('upload/', views.upload),   # 上传文件
-    path('room/', views.get_room)
+    path('upload/', views.upload),  # 上传文件
+    path('room/', views.get_room),
+    path('enroll/', views.enroll),
+    path('login/', views.login),
+    path('logout', views.logout),
 ]
 
 # 允许media里所有文件被访问
