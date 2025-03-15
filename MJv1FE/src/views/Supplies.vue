@@ -8,6 +8,7 @@
 
 </template>
 
-<script>
+<script setup>
+import { ArrowRight } from '@element-plus/icons-vue'
 
 </script>

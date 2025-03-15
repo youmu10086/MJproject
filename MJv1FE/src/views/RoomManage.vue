@@ -16,38 +16,34 @@
                     {{ item.roomNo }}
                 </el-button>
             </el-collapse-item>
-            <el-collapse-item title="三楼" name="3"><el-button v-for="(item, index) in roomData" plain
-                    :key="index" :icon="Search" type="primary" :size="size">
+            <el-collapse-item title="三楼" name="3"><el-button v-for="(item, index) in roomData" plain :key="index"
+                    :icon="Search" type="primary" :size="size">
                     {{ item.roomNo }}
                 </el-button>
             </el-collapse-item>
-            <el-collapse-item title="四楼" name="4"><el-button v-for="(item, index) in roomData" plain
-                    :key="index" :icon="Search" type="primary" :size="size">
+            <el-collapse-item title="四楼" name="4"><el-button v-for="(item, index) in roomData" plain :key="index"
+                    :icon="Search" type="primary" :size="size">
                     {{ item.roomNo }}
                 </el-button>
             </el-collapse-item>
         </el-collapse>
     </div>
-    <!-- <p>前面的区域以后再来探索吧</p>
-    <p>_(:зゝ∠)_</p> -->
 
 </template>
 
 <script lang="ts" setup>
 import { ArrowRight, Search } from '@element-plus/icons-vue'
-import { ComponentSize, FormInstance, UploadProps } from 'element-plus'
+import { ComponentSize } from 'element-plus'
 import { onMounted, ref } from 'vue'
-import axios, { AxiosResponse } from 'axios';
-import { dayjs, ElMessage, ElMessageBox, FormItemRule } from 'element-plus'
+import { ElMessage } from 'element-plus'
+import apiClient from '@/services/apiClient';
 
 
 const roomData = ref<Room[]>([])                              // 储存请求信息
 
 const size = ref<ComponentSize>('small')                           // 组件大小
 // 设置默认的 baseURL  
-const apiClient = axios.create({
-    baseURL: '/api',
-});
+
 
 interface Room {
     roomNo: string
@@ -59,6 +55,7 @@ interface Room {
 onMounted(() => {
     getRoom();
 })
+
 const getRoom = () => {
     apiClient
         .get("room/")
@@ -83,8 +80,12 @@ const getRoom = () => {
             }
         })
         .catch(function (err) {
-            console.error(err)
-            ElMessage.error("获取后端结果错误")
+            if (err.status == 401)
+                ElMessage.warning("请先登录")
+            else {
+                console.error(err)
+                ElMessage.error("获取后端结果错误")
+            }
         })
 }
 </script>

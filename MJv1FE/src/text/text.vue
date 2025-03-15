@@ -1,190 +1,63 @@
+<!-- src/components/Login.vue -->
 <template>
-  <el-form ref="ruleFormRef" style="max-width: 600px" :model="ruleForm" :rules="rules" label-width="auto"
-    class="demo-ruleForm" :size="formSize" status-icon>
-    <el-form-item label="Activity name" prop="name">
-      <el-input v-model="ruleForm.name" />
-    </el-form-item>
-    <el-form-item label="Activity zone" prop="region">
-      <el-select v-model="ruleForm.region" placeholder="Activity zone">
-        <el-option label="Zone one" value="shanghai" />
-        <el-option label="Zone two" value="beijing" />
-      </el-select>
-    </el-form-item>
-    <el-form-item label="Activity count" prop="count">
-      <el-select-v2 v-model="ruleForm.count" placeholder="Activity count" :options="options" />
-    </el-form-item>
-    <el-form-item label="Activity time" required>
-      <el-col :span="11">
-        <el-form-item prop="date1">
-          <el-date-picker v-model="ruleForm.date1" type="date" aria-label="Pick a date" placeholder="Pick a date"
-            style="width: 100%" />
-        </el-form-item>
-      </el-col>
-      <el-col class="text-center" :span="2">
-        <span class="text-gray-500">-</span>
-      </el-col>
-      <el-col :span="11">
-        <el-form-item prop="date2">
-          <el-time-picker v-model="ruleForm.date2" aria-label="Pick a time" placeholder="Pick a time"
-            style="width: 100%" />
-        </el-form-item>
-      </el-col>
-    </el-form-item>
-    <el-form-item label="Instant delivery" prop="delivery">
-      <el-switch v-model="ruleForm.delivery" />
-    </el-form-item>
-    <el-form-item label="Activity location" prop="location">
-      <el-segmented v-model="ruleForm.location" :options="locationOptions" />
-    </el-form-item>
-    <el-form-item label="Activity type" prop="type">
-      <el-checkbox-group v-model="ruleForm.type">
-        <el-checkbox value="Online activities" name="type">
-          Online activities
-        </el-checkbox>
-        <el-checkbox value="Promotion activities" name="type">
-          Promotion activities
-        </el-checkbox>
-        <el-checkbox value="Offline activities" name="type">
-          Offline activities
-        </el-checkbox>
-        <el-checkbox value="Simple brand exposure" name="type">
-          Simple brand exposure
-        </el-checkbox>
-      </el-checkbox-group>
-    </el-form-item>
-    <el-form-item label="Resources" prop="resource">
-      <el-radio-group v-model="ruleForm.resource">
-        <el-radio value="Sponsorship">Sponsorship</el-radio>
-        <el-radio value="Venue">Venue</el-radio>
-      </el-radio-group>
-    </el-form-item>
-    <el-form-item label="Activity form" prop="desc">
-      <el-input v-model="ruleForm.desc" type="textarea" />
-    </el-form-item>
-    <el-form-item>
-      <el-button type="primary" @click="submitForm(ruleFormRef)">
-        Create
-      </el-button>
-      <el-button @click="resetForm(ruleFormRef)">Reset</el-button>
-    </el-form-item>
-  </el-form>
+  <div>
+    <h2>Login</h2>
+    <!-- 登录表单 -->
+    <form @submit.prevent="handleLogin">
+      <input v-model="username" type="text" placeholder="Username" required />
+      <input v-model="password" type="password" placeholder="Password" required />
+      <button type="submit">Login</button>
+    </form>
+    <p v-if="errorMessage">{{ errorMessage }}</p>
+  </div>
 </template>
 
-<script lang="ts" setup>
-import { reactive, ref } from 'vue'
-import type { ComponentSize, FormInstance, FormRules } from 'element-plus'
+<script setup>
+import { ref } from 'vue';
+import Cookies from 'js-cookie';
 
-interface RuleForm { // 接口类型
-  name: string
-  region: string
-  count: string
-  date1: string
-  date2: string
-  delivery: boolean
-  location: string
-  type: string[]
-  resource: string
-  desc: string
-}
+const username = ref('');
+const password = ref('');
+const errorMessage = ref('');
 
-const formSize = ref<ComponentSize>('default')
-const ruleFormRef = ref<FormInstance>()
-const ruleForm = ref<RuleForm>({
-  name: 'Hello',
-  region: '',
-  count: '',
-  date1: '',
-  date2: '',
-  delivery: false,
-  location: '',
-  type: [],
-  resource: '',
-  desc: '',
-})
+// 模拟的登录函数，实际应用中应替换为对后端 API 的调用
+const handleLogin = async () => {
+  // 这里我们简单模拟一个令牌生成
+  const generatedToken = 'your-generated-token-here'; // 在实际应用中，这个令牌应该来自后端
 
-const locationOptions = ['Home', 'Company', 'School']
+  // 设置 cookie，假设我们设置一个名为 'authToken' 的 cookie，并设置过期时间为 7 天
+  Cookies.set('authToken', generatedToken, { expires: 7 });
 
-const rules = reactive<FormRules<RuleForm>>({
-  name: [
-    { required: true, message: 'Please input Activity name', trigger: 'blur' },
-    { min: 3, max: 5, message: 'Length should be 3 to 5', trigger: 'blur' },
-  ],
-  region: [
-    {
-      required: true,
-      message: 'Please select Activity zone',
-      trigger: 'change',
-    },
-  ],
-  count: [
-    {
-      required: true,
-      message: 'Please select Activity count',
-      trigger: 'change',
-    },
-  ],
-  date1: [
-    {
-      type: 'date',
-      required: true,
-      message: 'Please pick a date',
-      trigger: 'change',
-    },
-  ],
-  date2: [
-    {
-      type: 'date',
-      required: true,
-      message: 'Please pick a time',
-      trigger: 'change',
-    },
-  ],
-  location: [
-    {
-      required: true,
-      message: 'Please select a location',
-      trigger: 'change',
-    },
-  ],
-  type: [
-    {
-      type: 'array',
-      required: true,
-      message: 'Please select at least one activity type',
-      trigger: 'change',
-    },
-  ],
-  resource: [
-    {
-      required: true,
-      message: 'Please select activity resource',
-      trigger: 'change',
-    },
-  ],
-  desc: [
-    { required: true, message: 'Please input activity form', trigger: 'blur' },
-  ],
-})
-// 用于提交表单并进行验证。当用户尝试提交表单时，这段代码会检查传入的表单实例是否有效，然后调用该实例的 validate 方法。
-// 如果通过验证，则输出 'submit!'；如果未通过验证，则输出错误信息和失败的字段。这样可以确保用户输入的信息是有效的，只有在通过验证后才会进行后续处理。
-const submitForm = async (formEl: FormInstance | undefined) => {
-  if (!formEl) return
-  await formEl.validate((valid, fields) => {
-    if (valid) {
-      console.log('submit!')
-    } else {
-      console.log('error submit!', fields)
-    }
-  })
-}
+  // 清除错误信息（如果有）
+  errorMessage.value = '';
 
-const resetForm = (formEl: FormInstance | undefined) => {
-  if (!formEl) return
-  formEl.resetFields()
-}
-
-const options = Array.from({ length: 10000 }).map((_, idx) => ({
-  value: `${idx + 1}`,
-  label: `${idx + 1}`,
-}))
+  // 在这里可以执行登录成功后的逻辑，比如重定向到另一个页面
+  console.log('Login successful! Token set in cookie.');
+};
 </script>
+
+<style scoped>
+/* 添加一些基本的样式 */
+form {
+  display: flex;
+  flex-direction: column;
+}
+input {
+  margin-bottom: 1em;
+  padding: 0.5em;
+  font-size: 1em;
+}
+button {
+  padding: 0.75em 1.5em;
+  background-color: #42b983;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+button:hover {
+  background-color: #369a6f;
+}
+p {
+  color: red;
+}
+</style>

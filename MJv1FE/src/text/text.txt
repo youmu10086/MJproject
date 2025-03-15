@@ -70,3 +70,73 @@ text/xml
 // const numbers = [1, 2, 3, 4];  
 // const squares = numbers.map(num => num * num);  
 // console.log(squares); // [1, 4, 9, 16]
+
+
+开始时找cookies，看有没有记录
+如果没有就表示没登录，
+有就表示顾客或管理，
+没登陆时预订会弹出提示登录按钮
+cookies有
+const fetchProtectedResource = async () => {
+    try {
+        const response = await apiClient.get('protected-resource');
+        if (response.status === 200) {
+            console.log(response.data); // 成功获取资源  
+        }
+    } catch (error) {
+        console.error('Error fetching resource:', error.response);
+        if (error.response.status === 401) {
+            // 需要刷新 Token  
+            refreshAccessToken(); // 实现刷新 Token 的函数  
+        }
+    }
+};
+const refreshAccessToken = async () => {
+    try {
+        const response = await apiClient.post('refresh-token');
+        if (response.status === 200) {
+            localStorage.setItem('accessToken', response.data.access); // 更新 Access Token  
+            console.log('Access Token refreshed:', response.data.access);
+        }
+    } catch (error) {
+        console.error('Unable to refresh token. Logging out.');
+        logout(); // 处理注销逻辑  
+    }
+};
+
+
+const getlogin = () => {
+const user = loginForm.value;
+
+apiClient.post("login/", user)
+.then((res) => {
+userStore.userInfo.name = res.data.username;
+userStore.updateLoginStatus(true);
+localStorage.setItem('accessToken', res.data.access);
+
+userStore.loginDialogVisible = false; // 登录成功后关闭对话框
+// window.location.reload();
+ElMessage.success("登录成功");
+})
+.catch((err) => {
+console.error(err);
+// 此处可以添加用户通知，例如使用 Element Plus 的 ElNotification
+});
+};
+
+// 注册逻辑
+const getenroll = () => {
+const user = loginForm.value;
+
+apiClient.post("enroll/", user)
+.then((res) => {
+userStore.userInfo.name = res.data.username;
+userStore.updateLoginStatus(true);
+localStorage.setItem('accessToken', res.data.access);
+userStore.loginDialogVisible = false; // 注册成功后关闭对话框
+})
+.catch((err) => {
+console.error(err);
+// 处理注册失败的通知
+});
+};
