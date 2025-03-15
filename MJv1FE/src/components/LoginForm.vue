@@ -29,6 +29,8 @@ import { ref } from 'vue';
 import { useUserStore } from '@/store/userStore';
 import { ElMessage } from 'element-plus';
 import apiClient from '@/services/apiClient';
+import CryptoJS from 'crypto-js';  
+
 
 const userStore = useUserStore();
 const formRef = ref(null);
@@ -79,8 +81,12 @@ const handleSubmit = async () => {
         await formRef.value.validate();
         isSubmitting.value = true;
 
-        const response = await apiClient.post(isLogin.value ? 'login/' : 'enroll/', formData.value);
+        const encryptedPassword = CryptoJS.SHA256(formData.value.password).toString();
 
+        const response = await apiClient.post(isLogin.value ? 'login/' : 'enroll/', {
+            username: formData.value.username,
+            password: encryptedPassword 
+        });
         userStore.$patch(state => {
             state.isLoggedIn = true;
             state.userInfo = {
@@ -90,6 +96,7 @@ const handleSubmit = async () => {
         });
 
         localStorage.setItem('accessToken', response.data.access);
+        window.location.reload();
         ElMessage.success(isLogin.value ? '登录成功' : '注册成功');
         userStore.loginDialogVisible = false;
     } catch (error) {

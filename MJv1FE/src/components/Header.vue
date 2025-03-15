@@ -41,6 +41,7 @@ const handleLogout = async () => {
     await apiClient.post('logout')
     userStore.resetUser()
     localStorage.removeItem('accessToken')
+    window.location.reload();
     ElMessage.success('已安全退出系统')
   } catch (error) {
     ElMessage.error('退出操作失败，请重试')
