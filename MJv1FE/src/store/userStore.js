@@ -5,12 +5,9 @@ export const useUserStore = defineStore("user", () => {
   // 类型验证简化为运行时检查
   const validateRole = (value) => ["customer", "manager"].includes(value);
 
-  // 初始化逻辑（移除类型断言）
   const getInitialState = () => ({
     isLoggedIn: localStorage.getItem("isLoggedIn") === "true",
-    role: validateRole(localStorage.getItem("role"))
-      ? localStorage.getItem("role")
-      : "customer",
+    role: validateRole(localStorage.getItem("role")) ? localStorage.getItem("role") : "customer",
     userInfo: JSON.parse(localStorage.getItem("userInfo") || "null") || {
       name: "",
       contact: "",
@@ -35,9 +32,9 @@ export const useUserStore = defineStore("user", () => {
   // 业务方法
   const resetUser = () => {
     isLoggedIn.value = false;
-    role.value = "customer";
+    role.value = "";
     userInfo.value = { name: "", contact: "" };
-    ["isLoggedIn", "role", "userInfo"].forEach((key) =>
+    ["isLoggedIn", "userInfo"].forEach((key) =>
       localStorage.removeItem(key)
     );
   };

@@ -4,7 +4,6 @@ import RoomManage from "@/views/RoomManage.vue";
 import Employee from "@/views/Employee.vue";
 import Supplies from "@/views/Supplies.vue";
 import Home from "@/views/Home.vue";
-import Login from "@/views/Login.vue";
 import RoomReservation from "@/views/RoomReservation.vue";
 import OnlineService from "@/views/OnlineService.vue";
 import ReviewsFeedback from "@/views/ReviewsFeedback.vue";
@@ -38,11 +37,6 @@ const routes = [
     component: Employee,
   },
   {
-    path: "/login",
-    name: "Login",
-    component: Login,
-  },
-  {
     path: "/roomReservation",
     name: "RoomReservation",
     component: RoomReservation,
@@ -74,16 +68,4 @@ const router = createRouter({
   history: createWebHistory(),
   routes,
 });
-
-// // 在 router/index.ts 中添加
-// router.beforeEach((to, from, next) => {
-//   // 检查用户是否登录，这里只是一个示例，你应该有实际的逻辑
-//   const isLoggedIn = false; // 替换为实际的登录状态检查
-
-//   if (to.path === "/login" || isLoggedIn) {
-//     next();
-//   } else {
-//     next("/login");
-//   }
-// });
 export default router;

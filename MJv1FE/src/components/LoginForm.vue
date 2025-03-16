@@ -7,6 +7,10 @@
                 <el-input v-model="formData.username" placeholder="请输入用户名" prefix-icon="User" clearable />
             </el-form-item>
 
+            <el-form-item v-if="!isLogin" label="账户邮箱" prop="email">
+                <el-input v-model="formData.email" placeholder="请输入邮箱" prefix-icon="Email" clearable />
+            </el-form-item>
+
             <el-form-item label="登录密码" prop="password">
                 <el-input v-model="formData.password" type="password" placeholder="请输入密码" prefix-icon="Lock"
                     show-password clearable />
@@ -16,7 +20,7 @@
                 <el-button type="primary" @click="handleSubmit" :loading="isSubmitting">
                     {{ isLogin ? '立即登录' : '注册账户' }}
                 </el-button>
-                <el-button link @click="toggleAuthMode">
+                <el-button link @click="toggleAuthMode" :key="isLogin">
                     {{ isLogin ? '没有账户？立即注册' : '已有账户？立即登录' }}
                 </el-button>
             </el-form-item>
@@ -29,7 +33,7 @@ import { ref } from 'vue';
 import { useUserStore } from '@/store/userStore';
 import { ElMessage } from 'element-plus';
 import apiClient from '@/services/apiClient';
-import CryptoJS from 'crypto-js';  
+import CryptoJS from 'crypto-js';
 
 
 const userStore = useUserStore();
@@ -37,8 +41,9 @@ const formRef = ref(null);
 const isLogin = ref(true);
 const isSubmitting = ref(false);
 const formData = ref({
-    username: '',
-    password: ''
+    username: '666666',
+    password: '666666',
+    email: '',
 });
 
 // 表单验证规则
@@ -85,10 +90,13 @@ const handleSubmit = async () => {
 
         const response = await apiClient.post(isLogin.value ? 'login/' : 'enroll/', {
             username: formData.value.username,
-            password: encryptedPassword 
+            password: encryptedPassword,
+            email: formData.value.email,
         });
+
         userStore.$patch(state => {
             state.isLoggedIn = true;
+            state.role = response.data.role;
             state.userInfo = {
                 ...state.userInfo,
                 name: response.data.username
@@ -96,7 +104,7 @@ const handleSubmit = async () => {
         });
 
         localStorage.setItem('accessToken', response.data.access);
-        window.location.reload();
+        window.location.href = '/home';
         ElMessage.success(isLogin.value ? '登录成功' : '注册成功');
         userStore.loginDialogVisible = false;
     } catch (error) {

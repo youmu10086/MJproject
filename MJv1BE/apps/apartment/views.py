@@ -2,27 +2,23 @@ import json
 from os import path, remove
 
 from django.conf import settings
-from django.contrib.auth import authenticate
-from django.contrib.auth.models import User
 from django.db.models import Q  # 导入q查询
 from django.forms.models import model_to_dict
 from django.http import JsonResponse
-from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models.customer import *
 from .models.room import *
 from .myTool import *
+from .permissions import IsCustomer, IsManager, IsAdmin
 
 
 # Create your views here.
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, IsManager])# 是否能访问看是否能通过所有权限
 def get_customer(request):  # 显示全部信息
     try:
         obj_customer = Customer.objects.all().values()
@@ -46,7 +42,7 @@ def get_room(request):
 
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, IsManager])
 def query_customer(request):  # 查询功能
     data = json.loads(request.body.decode('utf-8'))
     try:
@@ -65,7 +61,7 @@ def query_customer(request):  # 查询功能
 
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, IsManager])
 def add_customer(request):  # 添加功能
     # 接受添加的顾客信息
     data = json.loads(request.body.decode('utf-8'))
@@ -87,7 +83,7 @@ def add_customer(request):  # 添加功能
 
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, IsManager])
 def update_customer(request):
     data = json.loads(request.body.decode('utf-8'))
     try:
@@ -120,7 +116,7 @@ def update_customer(request):
 
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, IsManager])
 def delete_customer(request):
     data = json.loads(request.body.decode('utf-8'))
     try:
@@ -142,7 +138,7 @@ def delete_customer(request):
 
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, IsManager])
 def delete_customers(request):
     # 接受删除的顾客信息
     data = json.loads(request.body.decode('utf-8'))
@@ -190,89 +186,3 @@ def upload(request):
     except Exception as e:
         return JsonResponse({'code': 0, 'msg': str(e)})
 
-
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def enroll(request):
-    data = json.loads(request.body.decode('utf-8'))
-
-    try:
-        # 创建用户
-        obj_user = User.objects.create_user(username=data['username'], email=data['email'], password=data['password'])
-
-        # 生成 Access 和 Refresh Token
-        refresh = RefreshToken.for_user(obj_user)
-        access = str(refresh.access_token)
-
-        # 使用 JSON 响应返回 Access Token
-        response = Response({'access': access, 'username': obj_user.username}, status=status.HTTP_201_CREATED)
-
-        # 设置 HttpOnly Cookie
-        response.set_cookie(
-            key='refreshToken',
-            value=str(refresh),
-            httponly=True,
-            secure=False,  # 本地测试可以设置为 False，生产环境下改为 True
-            samesite='Lax',
-            max_age=7 * 24 * 60 * 60,
-        )
-        return response
-    except Exception as e:
-        return Response({'code': 0, 'msg': '注册时出现异常:' + str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def login(request):
-    username = request.data.get('username')
-    password = request.data.get('password')
-
-    user = authenticate(request, username=username, password=password)
-    try:
-        if user is not None:
-            refresh = RefreshToken.for_user(user)
-            access = str(refresh.access_token)
-
-            response = Response({'access': access, 'username': username}, status=status.HTTP_200_OK)
-            response.set_cookie(
-                key='refreshToken',
-                value=str(refresh),
-                httponly=True,
-                secure=False,
-                samesite='Lax',
-                max_age=7 * 24 * 60 * 60,
-            )
-            return response
-        else:
-            return Response({'error': 'Invalid credentials.'}, status=status.HTTP_401_UNAUTHORIZED)
-    except Exception as e:
-        return Response({'code': 0, 'msg': '登录时出现异常:' + str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def logout(request):
-    # 清除 Cookie
-    response = Response({'message': '登出成功'}, status=status.HTTP_200_OK)
-    response.delete_cookie('refreshToken')  # 假设你的 Cookie 名称是 'refreshToken'
-
-    # 如果使用 RefreshToken，您可以在数据库中将其状态标记为已注销（如果有存储）
-    # 注意，SimpleJWT 会自动处理令牌的验证，无需手动控制，如果在数据库中有存储，您可以手动标记。
-
-    return response
-
-
-@api_view(['POST'])
-def refresh_token(request):
-    refreshToken = request.COOKIES.get('refreshToken')
-
-    if not refresh_token:
-        return Response({'error': 'No refresh token provided.'}, status=status.HTTP_401_UNAUTHORIZED)
-
-    try:
-        # 验证 Refresh Token
-        token = RefreshToken(refreshToken)
-        access = str(token.access_token)
-        return Response({'access': access}, status=status.HTTP_200_OK)
-    except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_401_UNAUTHORIZED)

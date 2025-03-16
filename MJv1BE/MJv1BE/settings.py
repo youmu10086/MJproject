@@ -13,20 +13,14 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 import os, sys
 from pathlib import Path
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 TEMPLATES_DIR = BASE_DIR / 'templates'
 
 sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-^d9s-61*otl3tvz&455=a8z_4ayor15jc3yvn-mc5=@wgy^8mz'
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 ALLOWED_HOSTS = ['*']
 
@@ -40,16 +34,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'apartment',
+    'account',
     'corsheaders',
 ]
 
-# 定义了 Django 的中间件组件。中间件是处理请求和响应过程中的钩子，它们可以在处理请求时执行某些操作，如修改请求、生成响应、处理异常等。
-# 中间件可以用于多个目的，如认证、日志记录、性能监控等。
 MIDDLEWARE = [
-
-    # ajax请求如果协议、端口、主机一个不同就是跨域访问，保护本地资源不被外部资源访问。
-    # 通过jsonp和cors(django-cors-headers)解决
-
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
@@ -57,7 +46,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
 ]
 
 # 设置白名单
@@ -101,9 +89,6 @@ DATABASES = {
     }
 }
 
-# Password validation
-# https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -127,19 +112,14 @@ USE_I18N = True
 
 USE_TZ = True
 
-# 设置静态文件收集目录
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # 这里是您希望存储静态文件的目录
 
-# 上传文件目录和外部访问路径
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# 配置 Django REST Framework 的默认身份验证类
 REST_FRAMEWORK = {
     # 选择默认的权限类
     'DEFAULT_PERMISSION_CLASSES': [
@@ -160,3 +140,6 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,  # 是否启用刷新令牌旋转
     'BLACKLIST_AFTER_ROTATION': True,  # 刷新令牌旋转后是否将旧令牌加入黑名单
 }
+
+
+AUTH_USER_MODEL = 'account.CustomUser'
