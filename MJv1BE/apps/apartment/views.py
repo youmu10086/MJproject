@@ -6,13 +6,13 @@ from django.db.models import Q  # 导入q查询
 from django.forms.models import model_to_dict
 from django.http import JsonResponse
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from .models.customer import *
 from .models.room import *
 from .myTool import *
-from .permissions import IsCustomer, IsManager, IsAdmin
+from .permissions import IsManager
 
 
 # Create your views here.
@@ -25,19 +25,19 @@ def get_customer(request):  # 显示全部信息
         customers = list(obj_customer)
         return JsonResponse({'code': 1, 'data': customers}, safe=False)
     except Exception as e:
-        return JsonResponse({'code': 0, 'msg': '获取学生信息出现异常，具体错误：' + str(e)})
+        return JsonResponse({'code': 0, 'msg': '获取学生信息出现异常:' + str(e)})
 
 
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def get_room(request):
     try:
         obj_room = Room.objects.all().values()
         rooms = list(obj_room)
         return JsonResponse({'code': 1, 'data': rooms}, safe=False)
     except Exception as e:
-        return JsonResponse({'code': 0, 'msg': str(e)})
+        return JsonResponse({'code': 0, 'msg': '获取房间信息时出现异常:' + str(e)})
 
 
 @api_view(['POST'])
@@ -184,5 +184,5 @@ def upload(request):
         f.close()
         return JsonResponse({'code': 1, 'name': new_name + file_extension})
     except Exception as e:
-        return JsonResponse({'code': 0, 'msg': str(e)})
+        return JsonResponse({'code': 0, 'msg': '上传文件出现异常:' + str(e)})
 

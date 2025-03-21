@@ -59,32 +59,11 @@ onMounted(() => {
 const getRoom = () => {
     apiClient
         .get("room/")
-        .then(function (res) {
+        .then((res) => {
             // 请求成功后执行的函数
             if (res.data.code === 1) {
                 roomData.value = res.data.data
-                // console.log(roomData.value)
-                ElMessage({
-                    message: '加载成功',
-                    type: 'success',
-                    plain: true,
-                    showClose: true,
-                })
-            } else {
-                ElMessage({
-                    message: res.data.msg,
-                    type: 'error',
-                    showClose: true,
-                    plain: true,
-                })
-            }
-        })
-        .catch(function (err) {
-            if (err.status == 401)
-                ElMessage.warning("请先登录")
-            else {
-                console.error(err)
-                ElMessage.error("获取后端结果错误")
+                ElMessage.success( '加载成功')
             }
         })
 }

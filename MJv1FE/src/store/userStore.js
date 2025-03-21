@@ -1,43 +1,67 @@
 import { defineStore } from "pinia";
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
+import apiClient from "@/services/apiClient";
 
 export const useUserStore = defineStore("user", () => {
-  // 类型验证简化为运行时检查
-  const validateRole = (value) => ["customer", "manager"].includes(value);
+  const validateRole = (value) =>
+    ["guest", "customer", "manager", "admin"].includes(value);
 
   const getInitialState = () => ({
     isLoggedIn: localStorage.getItem("isLoggedIn") === "true",
-    role: validateRole(localStorage.getItem("role")) ? localStorage.getItem("role") : "customer",
     userInfo: JSON.parse(localStorage.getItem("userInfo") || "null") || {
-      name: "",
+      username: "",
       contact: "",
     },
+    role: "guest", // 初始化为 "guest"
   });
 
-  // 响应式状态
   const state = getInitialState();
   const isLoggedIn = ref(state.isLoggedIn);
   const role = ref(state.role);
   const userInfo = ref(state.userInfo);
   const loginDialogVisible = ref(false);
 
-  // 自动持久化逻辑
+  // 持久化
   const persistState = () => {
     localStorage.setItem("isLoggedIn", isLoggedIn.value);
-    localStorage.setItem("role", role.value);
     localStorage.setItem("userInfo", JSON.stringify(userInfo.value));
   };
-  watch([isLoggedIn, role, userInfo], persistState, { deep: true });
+  watch([isLoggedIn, userInfo], persistState, { deep: true });
 
-  // 业务方法
   const resetUser = () => {
     isLoggedIn.value = false;
-    role.value = "";
-    userInfo.value = { name: "", contact: "" };
-    ["isLoggedIn", "userInfo"].forEach((key) =>
-      localStorage.removeItem(key)
-    );
+    role.value = "guest";
+    userInfo.value = { username: "", contact: "" };
+    ["isLoggedIn", "userInfo"].forEach((key) => localStorage.removeItem(key));
   };
+
+  const fetchUserRole = async () => {
+    try {
+      const response = await apiClient.post("get_userRole/"); // 不再需要传 username
+      if (response.status === 200) {
+        const { role: userRole } = response.data;
+        if (validateRole(userRole)) {
+          role.value = userRole;
+        } else {
+          console.error(`后端非法返回:${role}`);
+        }
+      } else {
+        console.error("后端出错", response.data.msg);
+      }
+    } catch (error) {
+      console.error(
+        "获得权限时出现错误：",
+        error.response?.data?.msg || error.message
+      );
+    }
+  };
+
+  // 在组件挂载时自动检查并获取角色
+  onMounted(async () => {
+    if (isLoggedIn.value) {
+      await fetchUserRole();
+    }
+  });
 
   return {
     isLoggedIn,
@@ -45,7 +69,10 @@ export const useUserStore = defineStore("user", () => {
     loginDialogVisible,
     role,
     resetUser,
+    fetchUserRole, // 仍然导出 fetchUserRole 方法，以便在需要时调用
     isCustomer: computed(() => role.value === "customer"),
     isManager: computed(() => role.value === "manager"),
+    isAdmin: computed(() => role.value === "admin"),
+    isGuest: computed(() => role.value === "guest"),
   };
 });

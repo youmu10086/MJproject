@@ -145,7 +145,7 @@
                 </el-col>
                 <el-col :span="6" style="padding-left: 5px;padding-top: 5px;">
                     <el-text style="width: 100%" :size="size">{{ roomMessage(customerForm.roomNo)
-                    }}</el-text>
+                        }}</el-text>
                 </el-col>
                 <el-col :span="8" style="padding-left: 5px;">
                     <el-form-item label="性别" prop="gender" label-width="40px">
@@ -168,14 +168,14 @@
                 </el-col>
                 <el-col :span="6" style="padding-left: 5px;padding-top: 5px;">
                     <el-text style="width: 100%" :size="size">{{ timeDifference(customerForm.resideTimePeriod)
-                    }}</el-text>
+                        }}</el-text>
                 </el-col>
             </el-row>
         </el-form>
         <template #footer>
             <div class="dialog-footer">
                 <el-button type="primary" v-show="!isView" @click="submitForm(ruleFormRef)">{{ submitRemand
-                }}</el-button><!-- submitForm(ruleFormRef) -->
+                    }}</el-button><!-- submitForm(ruleFormRef) -->
                 <el-button type="info" @click="DialogVisible = false" v-show="!isView">取消</el-button>
                 <el-button type="primary" v-show="isView" @click="DialogVisible = false">确定</el-button>
             </div>
@@ -185,12 +185,12 @@
 
 <script lang="ts" setup>
 
-const renewalState = (row) => {
+const renewalState = (row: { checkOutTime: null; }) => {
     if (row.checkOutTime === null) return '退租';
     else return '已退';
 }
 
-const roomMessage = (roomNo) => {
+const roomMessage = (roomNo: string) => {
     const roomInfo = findRoom(roomNo);
     if (roomNo === '' || roomInfo === null)
         return '';
@@ -233,7 +233,7 @@ const timeDifference = (times: string[]) => {
     }
 }
 // 退房
-const checkOut = (row) => {
+const checkOut = (row: { resideTimePeriod: (string | number | Date)[]; roomNo: string; name: string; balance: number; cno: any; }) => {
     const startDate = new Date(row.resideTimePeriod[0]);
     const endDate = new Date(row.resideTimePeriod[1]);
 
@@ -270,24 +270,11 @@ const checkOut = (row) => {
 
             // 调用 submitUpdateCustomer，并处理其返回的 Promise  
             submitUpdateCustomer()
-                .then(() => {
-                    ElMessage({
-                        type: 'success',
-                        message: '退租成功',
-                    });
-                })
-                .catch(() => {
-                    ElMessage({
-                        type: 'error',
-                        message: '退租失败',
-                    });
-                });
+                .then(() => ElMessage.success('退租成功'))
+                .catch(() => ElMessage.error('退租失败'));
         })
         .catch(() => {
-            ElMessage({
-                type: 'info',
-                message: '取消退租',
-            });
+            ElMessage.info('取消退租');
         });
 }
 // 续租
@@ -306,13 +293,8 @@ const renewal = (row: { resideTimePeriod: string[]; cno: any; }) => {
 import { onMounted, ref } from 'vue'
 import { Search, Delete, Edit, Star, More, FolderOpened, Plus, ArrowRight } from '@element-plus/icons-vue'
 import { dayjs, ElMessage, ElMessageBox, FormItemRule, ComponentSize, FormInstance, UploadProps } from 'element-plus'
-
-
 import apiClient from '@/services/apiClient';
-// 设置默认的 baseURL  
-// const apiClient = axios.create({
-//     baseURL: '/api',
-// });
+import { AxiosResponse } from 'axios';
 
 const size = ref<ComponentSize>('small')                           // 组件大小
 const customerDate = ref<Customer[]>([])                              // 储存请求信息
@@ -461,7 +443,7 @@ const handleSizeChange = (size: number) => {
     getPageCustomer();
 }
 // 调整当前的页码
-const handleCurrentChange = (pageNumber) => {
+const handleCurrentChange = (pageNumber: number) => {
     currentpage.value = pageNumber;
     getPageCustomer();
 }
@@ -470,12 +452,8 @@ const handleClose = (done: () => void) => {
     if (isView.value) done()
     else {
         ElMessageBox.confirm('信息还未保存，确定退出吗？')
-            .then(() => {
-                done()
-            })
-            .catch(() => {
-                // catch error
-            })
+            .then(() => { done() })
+            .catch(() => { })
     }
 }
 // 根据截至时间改变列的颜色
@@ -519,11 +497,11 @@ const formatDate = (dateString: string): string => {
     }
 };
 // 格式化住宿时间
-const formatResideTime = (beginTime, endTime) => {
+const formatResideTime = (beginTime: string, endTime: string) => {
     return formatDate(beginTime) + '到' + formatDate(endTime);
 }
 // 格式化类型
-const formatType = (row) => {
+const formatType = (row: { roomNo: any; }) => {
     const roomInfo = findRoom(row.roomNo);
     // 根据需要处理未找到的情况  
     const roomType = roomInfo ? roomInfo.roomType || '未知房间类型' : '未找到房间';
@@ -532,7 +510,7 @@ const formatType = (row) => {
     return `${roomType}类${durationType}`;
 }
 // 根据roomNo找room
-const findRoom = (roomId) => {
+const findRoom = (roomId: string) => {
     return roomData.value.find(room => room.roomNo === roomId) || null; // 返回 null 而不是空对象  
 }
 // ————————————————————————————————————————————————————————————————————————————————————————————操作—————————————————————————————————————————————————————————————————————————————————— //
@@ -546,30 +524,15 @@ const getCustomer = () => {
     inputStr.value = '';
     apiClient
         .get("customer/")
-        .then(function (res) {
+        .then((res) => {
             // 请求成功后执行的函数
             if (res.data.code === 1) {
                 flushedDate(res);
-            } else {
-                ElMessage({
-                    message: res.data.msg,
-                    type: 'error',
-                    showClose: true,
-                    plain: true,
-                })
-            }
-        })
-        .catch(function (err) {
-            if (err.status == 401)
-                ElMessage.warning("请先登录")
-            else {
-                console.error(err)
-                ElMessage.error("获取后端结果错误")
             }
         })
 }
 // 根据返回值重新加载页面（customerDate和total.value赋值）
-const flushedDate = (res) => {
+const flushedDate = (res: AxiosResponse<any, any>) => {
     customerDate.value = res.data.data.map((item: any) => ({
         ...item,
         resideTimePeriod: processResideTimePeriod(item), // 自定义处理函数
@@ -583,34 +546,12 @@ const getRoom = () => {
         .get('room/')
         .then((res) => {
             // 请求成功后执行的函数  
-            if (res.data.code === 1) {
+            if (res.data.code === 1)
                 roomData.value = res.data.data;
-                // ElMessage({
-                //     message: '房间信息加载成功',
-                //     type: 'success',
-                //     plain: true,
-                //     showClose: true,
-                // });
-            } else {
-                ElMessage({
-                    message: res.data.msg,
-                    type: 'error',
-                    showClose: true,
-                    plain: true,
-                });
-            }
         })
-        .catch((err) => {
-            if (err.status == 401)
-                ElMessage.warning("请先登录")
-            else {
-                console.error(err)
-                ElMessage.error("获取后端结果错误")
-            }
-        });
 };
 // 显示查看明细对话框
-const viewCustomer = (row) => {
+const viewCustomer = (row: { cno: any; }) => {
     editDialogTitle.value = "查看明细";
     customerForm.value = JSON.parse(JSON.stringify(row));
     customerForm.value.image = getImage(row.cno);
@@ -619,7 +560,7 @@ const viewCustomer = (row) => {
     DialogVisible.value = true;
 }
 // 显示修改信息对话框
-const updateCustomer = (row) => {
+const updateCustomer = (row: { cno: any; }) => {
     editDialogTitle.value = "修改信息"
     submitRemand.value = '修改';
     customerForm.value = JSON.parse(JSON.stringify(row))
@@ -647,8 +588,6 @@ const editCustomerForm = () => {
     customerForm.value.image = '';
     customerForm.value.imageUrl = '';
     customerForm.value.balance = 0;
-    // customerForm.value.roomType = 'A';
-    // customerForm.value.durationType = '日租';
     customerForm.value.resideTimePeriod = ['', '']
 }
 // 关闭对话框重置customerForm
@@ -682,7 +621,8 @@ const submitForm = async (formEl: FormInstance | undefined) => {
         } else console.log('校验时出错', fields)
     })
 }
-function processResideTimePeriod(item: any): string[] {
+// 格式化居住时间
+const processResideTimePeriod = (item: { resideTimePeriod: any; }) => {
     let resideTimePeriodString = item.resideTimePeriod; // 获取原始字符串  
     resideTimePeriodString = resideTimePeriodString.replace(/'/g, '"'); // 替换单引号为双引号
     // 将字符串转换为数组，使用 JSON.parse  
@@ -699,70 +639,26 @@ function processResideTimePeriod(item: any): string[] {
 }
 // 查询
 const queryCustomer = () => {
-    // 使用ajax请求post传递inputstr
     apiClient
-        .post('customer/query/',
-            {
-                inputstr: inputStr.value
-            }
-        )
-        .then(function (res) {
+        .post('customer/query/', { inputstr: inputStr.value })
+        .then((res) => {
             if (res.data.code === 1) {
                 flushedDate(res);
-                ElMessage({
-                    message: '查询成功',
-                    type: 'success',
-                    plain: true,
-                    showClose: true,
-                })
-            } else {
-                // 后端出错
-                ElMessage({
-                    message: res.data.msg,
-                    type: 'error',
-                    showClose: true,
-                    plain: true,
-                })
-            }
-        })
-        .catch(function (err) {
-            if (err.status == 401)
-                ElMessage.warning("请先登录")
-            else {
-                console.error(err)
-                ElMessage.error("获取后端结果错误")
+                ElMessage.success('查询成功')
             }
         })
 }
-const submitUpdateCustomer = async() => {
+const submitUpdateCustomer = async () => {
     return apiClient
         .post("customer/update/", customerForm.value)
-        .then(function (res) {
+        .then((res) => {
             if (res.data.code === 1) {
                 flushedDate(res);
-                ElMessage({
-                    message: '修改成功',
-                    type: 'success',
-                    plain: true,
-                    showClose: true,
-                });
+                ElMessage.success('修改成功');
                 closeEditDialogForm();
-            } else {
-                // 如果返回的 code 不是 1，表示修改失败  
-                ElMessage({
-                    message: res.data.msg,
-                    type: 'error',
-                    showClose: true,
-                    plain: true,
-                });
-                // 抛出一个错误以便在外部捕获  
-                return Promise.reject(new Error(res.data.msg));
-            }
+            } else return Promise.reject(new Error(res.data.msg));
         })
-        .catch(function (err) {
-            console.error(err);
-            ElMessage.error("连接出错");
-            // 抛出一个错误以便在外部捕获  
+        .catch((err) => {
             return Promise.reject(err);
         });
 };
@@ -772,38 +668,18 @@ const submitAddCustomer = () => {
     customerForm.value.checkInTime = now;
     apiClient
         .post("customer/add/", customerForm.value)
-        .then(function (res) {
+        .then((res) => {
             // 请求成功后执行的函数
             if (res.data.code === 1) {
                 flushedDate(res);
 
-                ElMessage({
-                    message: '添加成功',
-                    type: 'success',
-                    plain: true,
-                    showClose: true,
-                })
+                ElMessage.success('添加成功')
                 closeEditDialogForm()
-            } else {
-                ElMessage({
-                    message: res.data.msg,
-                    type: 'error',
-                    showClose: true,
-                    plain: true,
-                })
-            }
-        })
-        .catch(function (err) {
-            if (err.status == 401)
-                ElMessage.error("请先登录")
-            else {
-                console.error(err)
-                ElMessage.error("获取后端结果错误")
             }
         })
 }
 // 删除
-const deleteCustomer = (row) => {
+const deleteCustomer = (row: { name: string; cno: any; }) => {
     ElMessageBox.confirm(
         '是否永久删除姓名为' + row.name + '的顾客信息?',
         '警告',
@@ -817,48 +693,23 @@ const deleteCustomer = (row) => {
         .then(() => {
             apiClient
                 .post("customer/delete/", row.cno)
-                .then(function (res) {
+                .then((res) => {
                     // 请求成功后执行的函数
                     if (res.data.code === 1) {
                         flushedDate(res);
-                        ElMessage({
-                            message: '删除成功',
-                            type: 'success',
-                            plain: true,
-                            showClose: true,
-                        })
+                        ElMessage.success('删除成功')
                         closeEditDialogForm()
-                    } else {
-                        ElMessage({
-                            message: res.data.msg,
-                            type: 'error',
-                            showClose: true,
-                            plain: true,
-                        })
-                    }
-                })
-                .catch(function (err) {
-                    if (err.status == 401)
-                        ElMessage.warning("请先登录")
-                    else {
-                        console.error(err)
-                        ElMessage.error("获取后端结果错误")
                     }
                 })
         })
-        .catch(() => {
-            ElMessage({
-                type: 'info',
-                message: '删除取消',
-            })
-        })
+        .catch()
 }
 // 批量删除
 const selectCustomers = ref([])
-const handleSelectionChange = (data) => {
+const handleSelectionChange = (data: any[]) => {
     selectCustomers.value = data
 }
-const deleteCustomers = (row) => {
+const deleteCustomers = (row: any) => {
     ElMessageBox.confirm(
         '是否批量删除' + selectCustomers.value.length + '个顾客的信息?',
         '警告',
@@ -871,42 +722,16 @@ const deleteCustomers = (row) => {
         .then(() => {
             apiClient
                 .post("customers/delete/", { customers: selectCustomers.value })
-                .then(function (res) {
+                .then((res) => {
                     // 请求成功后执行的函数
                     if (res.data.code === 1) {
                         flushedDate(res);
-
-                        ElMessage({
-                            message: '批量删除成功',
-                            type: 'success',
-                            plain: true,
-                            showClose: true,
-                        })
+                        ElMessage.success('批量删除成功')
                         closeEditDialogForm()
-                    } else {
-                        ElMessage({
-                            message: res.data.msg,
-                            type: 'error',
-                            showClose: true,
-                            plain: true,
-                        })
-                    }
-                })
-                .catch(function (err) {
-                    if (err.status == 401)
-                        ElMessage.warning("请先登录")
-                    else {
-                        console.error(err)
-                        ElMessage.error("获取后端结果错误")
                     }
                 })
         })
-        .catch(() => {
-            ElMessage({
-                type: 'info',
-                message: '删除取消',
-            })
-        })
+        .catch()
 }
 // 判断图片类型
 const beforeAvatarUpload: UploadProps['beforeUpload'] = (rawFile) => {
@@ -920,7 +745,7 @@ const beforeAvatarUpload: UploadProps['beforeUpload'] = (rawFile) => {
     return true
 }
 // 上传文件
-const uploadPicturePost = async (file) => {
+const uploadPicturePost = async (file: { file: string | Blob; }) => {
     try {
         // 创建 FormData 对象
         const fileReq = new FormData();
@@ -935,27 +760,11 @@ const uploadPicturePost = async (file) => {
             // 拼接全称
             customerForm.value.imageUrl = apiClient.defaults.baseURL + 'media/' + res.data.name;
             return res;  // 返回结果以便于后续处理
-        } else {
-            // 后端出错
-            ElMessage({
-                message: res.data.msg,
-                type: 'error',
-                showClose: true,
-                plain: true,
-            });
-            throw new Error(res.data.msg); // 抛出错误以便于后续处理
-        }
-    } catch (err) {
-        if (err.status == 401)
-            ElMessage.warning("请先登录")
-        else {
-            console.error(err)
-            ElMessage.error("获取后端结果错误")
-        }
-    }
+        } else throw new Error(res.data.msg); // 抛出错误以便于后续处理
+    } catch (err) { }
 };
 // 根据id获取image
-const getImage = (cno) => {
+const getImage = (cno: string) => {
     for (let oneCustomer of customerDate.value) {
         if (oneCustomer.cno === cno) {
             return oneCustomer.image;

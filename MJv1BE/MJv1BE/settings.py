@@ -23,6 +23,8 @@ SECRET_KEY = 'django-insecure-^d9s-61*otl3tvz&455=a8z_4ayor15jc3yvn-mc5=@wgy^8mz
 
 DEBUG = True
 ALLOWED_HOSTS = ['*']
+# ALLOWED_HOSTS = ['193.112.246.221', 'localhost', '127.0.0.1']
+
 
 INSTALLED_APPS = [
     'rest_framework',
@@ -50,12 +52,14 @@ MIDDLEWARE = [
 
 # 设置白名单
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
+    "http://localhost:8080",
+    "http://127.0.0.1:8080",
     "https://www.sojson.com",
-    'http://192.168.152.1:8090',  # 前端应用的地址  
     'http://localhost:8080',  # 如果在本地开发的情况
+    'http://193.112.246.221',  # 前端应用的地址
 ]
+
+
 
 ROOT_URLCONF = 'MJv1BE.urls'
 
@@ -88,6 +92,18 @@ DATABASES = {
         'PORT': '3306',
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'MJv1DB',
+#         'USER': 'youmu',
+#         'PASSWORD': '114514',
+#         'HOST': 'localhost',
+#         'PORT': '3306',
+#     }
+# }
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -135,8 +151,8 @@ REST_FRAMEWORK = {
 from datetime import timedelta
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),  # 设置访问令牌过期时间
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),  # 设置刷新令牌过期时间
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),  # 设置访问令牌过期时间
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),  # 设置刷新令牌过期时间
     'ROTATE_REFRESH_TOKENS': True,  # 是否启用刷新令牌旋转
     'BLACKLIST_AFTER_ROTATION': True,  # 刷新令牌旋转后是否将旧令牌加入黑名单
 }

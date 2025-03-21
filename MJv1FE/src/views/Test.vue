@@ -16,12 +16,12 @@ const getenroll = () => {
     const user = { username: '666666', email: '666666', password: '666666' };
 
     apiClient.post("enroll/", user)
-        .then(function (res) {
+        .then((res) => {
             // 存储 Access Token
             console.log(res);
             localStorage.setItem('accessToken', res.data.access);
         })
-        .catch(function (err) {
+        .catch((err) => {
             console.log(err);
         });
 };
@@ -29,7 +29,7 @@ const getenroll = () => {
 const sb = () => {
     console.log(userStore.isLoggedIn);
 
-    console.log(userStore.userInfo)
+    console.log(userStore.role)
 }
 </script>
 

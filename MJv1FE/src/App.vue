@@ -86,6 +86,7 @@ body,
   text-align: center;
   font-size: 15px;
   line-height: 30px;
+  height: 30px;
   position: absolute;
   /* 如果需要固定底部，可以添加这个并调整top属性 */
   bottom: 0;
