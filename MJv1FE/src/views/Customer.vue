@@ -394,7 +394,6 @@ const rules = ref({
         }
     ] as Array<FormItemRule>,
 });
-// Customer interface definition  
 interface Customer {
     cno: string
     name: string
@@ -427,8 +426,6 @@ const customerForm = ref<Customer>({
     image: '',
     imageUrl: '',
     balance: 0,
-    // roomType: 'A',
-    // durationType: '日租',
     resideTimePeriod: ['', '']
 });
 // ————————————————————————————————————————————————————————————————————————————————————页面控制———————————————————————————————————————————————————————————————————————————————— //

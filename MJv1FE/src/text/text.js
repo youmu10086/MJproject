@@ -9,7 +9,6 @@ const getlogin = () => {
       localStorage.setItem("accessToken", res.data.access);
 
       userStore.loginDialogVisible = false; // 登录成功后关闭对话框
-      // window.location.reload();
       ElMessage.success("登录成功");
     })
     .catch((err) => {

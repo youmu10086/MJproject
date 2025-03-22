@@ -37,22 +37,19 @@ export const useUserStore = defineStore("user", () => {
 
   const fetchUserRole = async () => {
     try {
-      const response = await apiClient.post("get_userRole/"); // 不再需要传 username
+      const response = await apiClient.post("get_userRole/");
       if (response.status === 200) {
         const { role: userRole } = response.data;
         if (validateRole(userRole)) {
           role.value = userRole;
-        } else {
-          console.error(`后端非法返回:${role}`);
+          return true // 增加返回成功状态
         }
-      } else {
-        console.error("后端出错", response.data.msg);
+        return false
       }
     } catch (error) {
-      console.error(
-        "获得权限时出现错误：",
-        error.response?.data?.msg || error.message
-      );
+      console.error("获取角色失败:", error);
+      resetUser();
+      throw error // 抛出错误供调用方处理
     }
   };
 

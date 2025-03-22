@@ -5,7 +5,7 @@
 /dist  
 
 # 测试环境构建输出  
-/test/output  
+/Test
 /coverage  
 
 # Yarn 依赖  
@@ -20,7 +20,8 @@ yarn-error.log
 # IDE - IntelliJ  
 .idea  
 
-.text/
+/src/text/
+/src/views/Test.vue
 
 .Test.vue
 

@@ -2,12 +2,19 @@
 import json
 
 from django.contrib.auth import authenticate, get_user_model
+from django.db.models import Q
+from django.http import JsonResponse
 from rest_framework import status
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
+
+import traceback
+from apartment.permissions import IsManager, IsAdmin
+from django.forms.models import model_to_dict
 
 CustomUser = get_user_model()
 
@@ -184,3 +191,82 @@ def refresh_token(request):
         return response
     except Exception as e:
         return Response({'msg': f'Token refresh failed: {str(e)}'}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated, IsAdmin])  # 是否能访问看是否能通过所有权限
+def get_user(request):  # 显示全部信息
+    try:
+        obj_user = CustomUser.objects.all().values()
+        users = list(obj_user)
+        return JsonResponse({'code': 1, 'data': users}, safe=False)
+    except Exception as e:
+        return JsonResponse({'code': 0, 'msg': '获取用户信息出现异常:' + str(e)})
+
+
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated, IsAdmin])
+def query_user(request):  # 查询功能
+    data = json.loads(request.body.decode('utf-8'))
+    try:
+        obj_user = (
+            CustomUser.objects.filter(Q(name__icontains=data['inputstr'])))
+        users = [model_to_dict(user) for user in obj_user]
+        return JsonResponse({'code': 1, 'data': users})
+    except Exception as e:
+        print(traceback.format_exc())  # 打印堆栈跟踪
+        return JsonResponse({'code': 0, 'msg': '查询用户信息时出现异常:' + str(e)})
+
+
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated, IsAdmin])
+def update_user(request):
+    data = json.loads(request.body.decode('utf-8'))
+    try:
+        obj_user = CustomUser.objects.get(id=data['id'])
+        obj_user.username = data['username']
+        # obj_user.mobile = data['mobile']
+        obj_user.save()
+        obj_user = CustomUser.objects.all().values()
+        users = list(obj_user)
+        return JsonResponse({'code': 1, 'data': users})
+    except Exception as e:
+        print(traceback.format_exc())  # 打印堆栈跟踪
+        return JsonResponse({'code': 0, 'msg': '修改用户信息出现异常:' + str(e)})
+
+
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated, IsAdmin])
+def delete_user(request):
+    data = json.loads(request.body.decode('utf-8'))
+    try:
+        obj_user = CustomUser.objects.get(id=str(data))
+        obj_user.delete()
+        obj_users = CustomUser.objects.all().values()
+        users = list(obj_users)
+        return JsonResponse({'code': 1, 'data': users})
+
+    except Exception as e:
+        print(traceback.format_exc())  # 打印堆栈跟踪
+        return JsonResponse({'code': 0, 'msg': '删除时出现异常:' + str(e)})
+
+
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated, IsAdmin])
+def delete_users(request):
+    data = json.loads(request.body.decode('utf-8'))
+    try:
+        for one_user in data['users']:
+            obj_customer = CustomUser.objects.get(id=str(one_user['id']))
+            obj_customer.delete()
+        obj_customers = CustomUser.objects.all().values()
+        customers = list(obj_customers)
+        return JsonResponse({'code': 1, 'data': customers})
+
+    except Exception as e:
+        print(traceback.format_exc())  # 打印堆栈跟踪
+        return JsonResponse({'code': 0, 'msg': '批量删除时出现异常:' + str(e)})

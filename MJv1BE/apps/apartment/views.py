@@ -18,14 +18,14 @@ from .permissions import IsManager
 # Create your views here.
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])
-@permission_classes([IsAuthenticated, IsManager])# 是否能访问看是否能通过所有权限
+@permission_classes([IsAuthenticated, IsManager])  # 是否能访问看是否能通过所有权限
 def get_customer(request):  # 显示全部信息
     try:
         obj_customer = Customer.objects.all().values()
         customers = list(obj_customer)
         return JsonResponse({'code': 1, 'data': customers}, safe=False)
     except Exception as e:
-        return JsonResponse({'code': 0, 'msg': '获取学生信息出现异常:' + str(e)})
+        return JsonResponse({'code': 0, 'msg': '获取顾客信息出现异常:' + str(e)})
 
 
 @api_view(['GET'])
@@ -101,8 +101,6 @@ def update_customer(request):
                 remove(photo_path)  # 删除文件
         obj_customer.image = data['image']
         obj_customer.balance = data['balance']
-        # obj_customer.roomType = data['roomType']
-        # obj_customer.durationType = data['durationType']
         obj_customer.resideTimePeriod = data['resideTimePeriod']
         obj_customer.save()
         obj_customer = Customer.objects.all().values()
@@ -126,8 +124,8 @@ def delete_customer(request):
             if path.isfile(photo_path):  # 检查文件是否存在
                 remove(photo_path)  # 删除文件
         obj_customer.delete()
-        obj_customer = Customer.objects.all().values()
-        customers = list(obj_customer)
+        obj_customers = Customer.objects.all().values()
+        customers = list(obj_customers)
         return JsonResponse({'code': 1, 'data': customers})
 
     except Exception as e:
@@ -185,4 +183,3 @@ def upload(request):
         return JsonResponse({'code': 1, 'name': new_name + file_extension})
     except Exception as e:
         return JsonResponse({'code': 0, 'msg': '上传文件出现异常:' + str(e)})
-

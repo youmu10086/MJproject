@@ -27,25 +27,35 @@
                     </el-icon>
                     <span>住房用品管理</span>
                 </el-menu-item>
-                <el-menu-item index="roomReservation" v-if="userStore.isCustomer||userStore.isGuest">
-                    <el-icon><House /></el-icon>
+                <el-menu-item index="roomReservation" v-if="userStore.isCustomer || userStore.isGuest">
+                    <el-icon>
+                        <House />
+                    </el-icon>
                     <span>预订房间</span>
                 </el-menu-item>
-                <el-menu-item index="reservationManage" v-if="userStore.isCustomer||userStore.isGuest">
-                    <el-icon><More /></el-icon>
+                <el-menu-item index="reservationManage" v-if="userStore.isCustomer || userStore.isGuest">
+                    <el-icon>
+                        <More />
+                    </el-icon>
                     <span>预订管理</span>
                 </el-menu-item>
-                <el-menu-item index="onlineService" v-if="userStore.isCustomer||userStore.isGuest">
-                    <el-icon><Service /></el-icon>
+                <el-menu-item index="onlineService" v-if="userStore.isCustomer || userStore.isGuest">
+                    <el-icon>
+                        <Service />
+                    </el-icon>
                     <span>在线客服</span>
                 </el-menu-item>
-                <el-menu-item index="reviewsFeedback" v-if="userStore.isCustomer||userStore.isGuest">
-                    <el-icon><Comment /></el-icon>
+                <el-menu-item index="reviewsFeedback" v-if="userStore.isCustomer || userStore.isGuest">
+                    <el-icon>
+                        <Comment />
+                    </el-icon>
                     <span>评价反馈</span>
                 </el-menu-item>
-                <el-menu-item index="staffManage" v-if="userStore.isAdmin">
-                    <el-icon><Comment /></el-icon>
-                    <span>staff管理</span>
+                <el-menu-item index="userManage" v-if="userStore.isAdmin">
+                    <el-icon>
+                        <SwitchFilled />
+                    </el-icon>
+                    <span>用户管理</span>
                 </el-menu-item>
             </el-menu>
         </el-col>

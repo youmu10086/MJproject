@@ -55,9 +55,9 @@ const formStatus = ref('login'); // 'login', 'resetPassword', 'enroll'
 
 const isSubmitting = ref(false);
 const formData = ref({
-    username: '666666',
+    username: 'customer',
     password: '666666',
-    email: '',
+    email: '666666@qq.com',
 });
 
 // 表单验证规则  
@@ -126,10 +126,6 @@ const toggleAuthMode = () => {
     else if (formStatus.value === 'resetPassword') formStatus.value = 'login';
     formRef.value?.clearValidate();
 };
-
-const resetPassword = () => {
-    console.log("resetPassword")
-}
 
 // 提交表单  
 const handleSubmit = async () => {

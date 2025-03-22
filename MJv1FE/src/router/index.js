@@ -11,14 +11,15 @@ import RoomReservation from "@/views/RoomReservation.vue";
 import OnlineService from "@/views/OnlineService.vue";
 import ReviewsFeedback from "@/views/ReviewsFeedback.vue";
 import ReservationManage from "@/views/ReservationManage.vue";
-import StaffManage from "@/views/StaffManage.vue";
-import Test from "@/views/Test.vue";
+import userManage from "@/views/userManage.vue";
+// import Test from "@/views/Test.vue";
 
 const routes = [
   {
     path: "/customer",
     name: "顾客管理",
     component: Customer, // 确保这个组件存在
+    meta: { requiresAuth: true, requiredRole: "manager" },
   },
   {
     path: "/home",
@@ -29,16 +30,19 @@ const routes = [
     path: "/supplies",
     name: "住房用品管理",
     component: Supplies,
+    meta: { requiresAuth: true, requiredRole: "manager" },
   },
   {
     path: "/roomManage",
     name: "房间管理",
     component: RoomManage,
+    meta: { requiresAuth: true, requiredRole: "manager" },
   },
   {
     path: "/employee",
     name: "员工管理",
     component: Employee,
+    meta: { requiresAuth: true, requiredRole: "manager" },
   },
   {
     path: "/roomReservation",
@@ -61,15 +65,16 @@ const routes = [
     component: ReviewsFeedback,
   },
   {
-    path: "/staffManage",
-    name: "职员管理",
-    component: StaffManage,
+    path: "/userManage",
+    name: "用户管理",
+    component: userManage,
+    meta: { requiresAuth: true, requiredRole: "admin" },
   },
-  {
-    path: "/test",
-    name: "Test",
-    component: Test,
-  },
+  // {
+  //   path: "/test",
+  //   name: "Test",
+  //   component: Test,
+  // },
   { path: "/", redirect: "/home" }, // 默认重定向到首页
 ];
 
@@ -78,34 +83,37 @@ const router = createRouter({
   routes,
 });
 
-// 受保护的路由列表
-const protectedRoutesFromManager = [
-  "/customer",
-  "/supplies",
-  "/employee",
-  "/roomManage",
-];
-
-const protectedRoutesFromAdmin = ["/staffManage"];
-
-// 全局前置守卫
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const userStore = useUserStore();
 
-  if (protectedRoutesFromManager.includes(to.path)) {
-    if (userStore.role !== "manager") {
-      ElMessage.error("您没有权限访问此页面。");
-      return next({ path: "/home" });
+  // 需要身份验证的路由
+  if (to.meta.requiresAuth) {
+    // 未登录状态
+    if (!userStore.isLoggedIn) {
+      userStore.loginDialogVisible = true;
+      return next(false);
+    }
+
+    // 已登录但需要更新角色状态
+    if (userStore.role === "guest") {
+      try {
+        const success = await userStore.fetchUserRole();
+        if (!success) {
+          ElMessage.error("获取用户权限失败");
+          return next("/home");
+        }
+      } catch (error) {
+        return next("/login");
+      }
+    }
+
+    // 角色权限验证
+    if (to.meta.requiredRole && userStore.role !== to.meta.requiredRole) {
+      ElMessage.error("您没有访问该页面的权限");
+      return next(from.path || "/home");
     }
   }
 
-  if (protectedRoutesFromAdmin.includes(to.path)) {
-    if (userStore.role !== "admin") {
-      ElMessage.error("您没有权限访问此页面。");
-      return next({ path: "/home" });
-    }
-  }
-  
   next();
 });
 

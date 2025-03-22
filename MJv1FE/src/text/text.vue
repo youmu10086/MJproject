@@ -1,63 +1,119 @@
-<!-- src/components/Login.vue -->
 <template>
   <div>
-    <h2>Login</h2>
-    <!-- 登录表单 -->
-    <form @submit.prevent="handleLogin">
-      <input v-model="username" type="text" placeholder="Username" required />
-      <input v-model="password" type="password" placeholder="Password" required />
-      <button type="submit">Login</button>
-    </form>
-    <p v-if="errorMessage">{{ errorMessage }}</p>
+      <el-breadcrumb :separator-icon="ArrowRight" class="no-select">
+          <el-breadcrumb-item to="/Home">首页</el-breadcrumb-item>
+          <el-breadcrumb-item>员工管理</el-breadcrumb-item>
+      </el-breadcrumb>
+
+      <el-card class="main-card" title="添加员工" :body-style="{ padding: '20px' }">
+          <el-form :model="formData" :rules="formRules" ref="formRef" label-width="100px">
+              <el-form-item label="姓名" prop="name">
+                  <el-input v-model="formData.name" placeholder="请输入员工姓名" />
+              </el-form-item>
+
+              <el-form-item label="密码" prop="password">
+                  <el-input type="password" v-model="formData.password" placeholder="请输入员工密码" />
+              </el-form-item>
+
+              <el-form-item label="电子邮件" prop="email">
+                  <el-input v-model="formData.email" placeholder="请输入员工邮箱" />
+              </el-form-item>
+
+              <el-form-item label="电话" prop="phone">
+                  <el-input v-model="formData.phone" placeholder="请输入员工电话" />
+              </el-form-item>
+
+              <el-form-item label="职位" prop="role">
+                  <el-radio-group v-model="formData.role">
+                      <el-radio-button label="manager" value="manager">经理</el-radio-button>
+                      <el-radio-button label="admin" value="admin">管理员</el-radio-button>
+                  </el-radio-group>
+              </el-form-item>
+
+              <el-form-item class="action-buttons">
+                  <el-button type="primary" @click="handleSubmit" :loading="isSubmitting">添加员工</el-button>
+                  <el-button @click="resetForm">重置</el-button>
+              </el-form-item>
+          </el-form>
+      </el-card>
   </div>
 </template>
 
 <script setup>
+
 import { ref } from 'vue';
-import Cookies from 'js-cookie';
+import { ArrowRight } from '@element-plus/icons-vue';
+import { ElMessage } from 'element-plus';
+import apiClient from '@/services/apiClient';  // 确保您的 API 客户端路径正确  
 
-const username = ref('');
-const password = ref('');
-const errorMessage = ref('');
+const formRef = ref(null);
+const isSubmitting = ref(false);
 
-// 模拟的登录函数，实际应用中应替换为对后端 API 的调用
-const handleLogin = async () => {
-  // 这里我们简单模拟一个令牌生成
-  const generatedToken = 'your-generated-token-here'; // 在实际应用中，这个令牌应该来自后端
+const formData = ref({
+  name: '',
+  email: '',
+  phone: '',
+  password: '',
+  role: 'manager'  // 默认角色为 manager  
+});
 
-  // 设置 cookie，假设我们设置一个名为 'authToken' 的 cookie，并设置过期时间为 7 天
-  Cookies.set('authToken', generatedToken, { expires: 7 });
-
-  // 清除错误信息（如果有）
-  errorMessage.value = '';
-
-  // 在这里可以执行登录成功后的逻辑，比如重定向到另一个页面
-  console.log('Login successful! Token set in cookie.');
+const formRules = {
+  name: [
+      { required: true, message: '姓名不能为空', trigger: 'blur' }
+  ],
+  password: [
+      { required: true, message: '密码不能为空', trigger: 'blur' },
+      { min: 6, max: 20, message: '密码长度需为6-20位', trigger: ['blur'] }
+  ],
+  email: [
+      // { required: true, message: '电子邮件不能为空', trigger: 'blur' },  
+      { type: 'email', message: '请输入有效的电子邮件', trigger: ['blur', 'change'] }
+  ],
+  phone: [
+      // { required: true, message: '电话不能为空', trigger: 'blur' }  
+  ],
+  role: [
+      { required: true, message: '职位不能为空', trigger: 'change' }
+  ]
 };
+
+const handleSubmit = async () => {
+  try {
+      await formRef.value.validate();
+      isSubmitting.value = true;
+
+      // 发送请求到后端 API  
+      const response = await apiClient.post('add_employee/', {
+          name: formData.value.name,
+          password: formData.value.password,
+          email: formData.value.email,
+          phone: formData.value.phone,
+          role: formData.value.role,
+      });
+      resetForm();
+      ElMessage.success('添加员工成功');
+  }
+  catch (error) { }
+  finally { isSubmitting.value = false; }
+};
+
+const resetForm = () => {
+  formData.value = {
+      name: '',
+      email: '',
+      phone: '',
+      password: '',
+      role: 'manager'
+  };
+};  
 </script>
 
 <style scoped>
-/* 添加一些基本的样式 */
-form {
-  display: flex;
-  flex-direction: column;
+.main-card {
+  margin: 20px;
 }
-input {
-  margin-bottom: 1em;
-  padding: 0.5em;
-  font-size: 1em;
-}
-button {
-  padding: 0.75em 1.5em;
-  background-color: #42b983;
-  color: white;
-  border: none;
-  cursor: pointer;
-}
-button:hover {
-  background-color: #369a6f;
-}
-p {
-  color: red;
+
+.action-buttons {
+  margin-top: 20px;
 }
 </style>
