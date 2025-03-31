@@ -1,7 +1,7 @@
 <template>
   <el-row>
     <el-col :span="23">
-      <el-link href="/Home" target="_blank" style="font-weight: bold; font-size: 20px;">
+      <el-link href="/Home" style="font-weight: bold; font-size: 20px;">
         美家公寓
       </el-link>
     </el-col>
@@ -50,9 +50,11 @@ const handleLogout = async () => {
 </script>
 
 <style scoped>
+
 .user-avatar {
   cursor: pointer;
   transition: transform 0.2s;
+
 }
 
 .user-avatar:hover {

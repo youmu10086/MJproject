@@ -72,7 +72,6 @@ apiClient.interceptors.response.use(
         ] = `Bearer ${data.access}`;
 
         processQueue(null, data.access);
-        console;
         console.log("accessToken刷新成功");
         return apiClient(originalRequest);
       } catch (refreshError) {

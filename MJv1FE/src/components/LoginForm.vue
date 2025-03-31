@@ -48,6 +48,7 @@ import { ElMessage } from 'element-plus';
 import apiClient from '@/services/apiClient';
 import CryptoJS from 'crypto-js';
 
+
 const userStore = useUserStore();
 const formRef = ref(null);
 
@@ -55,10 +56,11 @@ const formStatus = ref('login'); // 'login', 'resetPassword', 'enroll'
 
 const isSubmitting = ref(false);
 const formData = ref({
-    username: 'customer',
+    username: 'manager',
     password: '666666',
     email: '666666@qq.com',
 });
+
 
 // 表单验证规则  
 const formRules = computed(() => ({
@@ -120,7 +122,6 @@ const handleDialogClose = () => {
 
 // 切换认证模式  
 const toggleAuthMode = () => {
-    console.log(formStatus.value)
     if (formStatus.value === 'login') formStatus.value = 'enroll';
     else if (formStatus.value === 'enroll') formStatus.value = 'login';
     else if (formStatus.value === 'resetPassword') formStatus.value = 'login';
@@ -131,26 +132,32 @@ const toggleAuthMode = () => {
 const handleSubmit = async () => {
 
     if (formStatus.value === 'resetPassword') {
-        try {
-            await formRef.value.validate();
-            isSubmitting.value = true;
+        if (formData.value.username === 'customer' || formData.value.username === 'manager' || formData.value.username === 'admin') {
+            ElMessage.warning('测试账号不允许修改！');
+            return;
+        }
+        else {
+            try {
+                await formRef.value.validate();
+                isSubmitting.value = true;
 
-            const encryptedPassword = CryptoJS.SHA256(formData.value.password).toString();
+                const encryptedPassword = CryptoJS.SHA256(formData.value.password).toString();
 
-            const response = await apiClient.post('reset_password/', {
-                username: formData.value.username,
-                email: formData.value.email,
-                password: encryptedPassword,
-            });
+                const response = await apiClient.post('reset_password/', {
+                    username: formData.value.username,
+                    email: formData.value.email,
+                    password: encryptedPassword,
+                });
 
-            if (response.data.code === 1) {
-                ElMessage.success('密码重置成功');
-                userStore.loginDialogVisible = false;
+                if (response.data.code === 1) {
+                    ElMessage.success('密码重置成功');
+                    userStore.loginDialogVisible = false;
+                }
+            } catch (error) {
+                ElMessage.error(error.response?.data?.msg || '密码重置失败');
+            } finally {
+                isSubmitting.value = false;
             }
-        } catch (error) {
-            ElMessage.error(error.response?.data?.msg || '密码重置失败');
-        } finally {
-            isSubmitting.value = false;
         }
     }
     else {

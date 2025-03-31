@@ -158,12 +158,9 @@ onMounted(() => {
 const fetchUserList = async () => {
     try {
         const response = await apiClient.get('get_user/')
-        console.log
         if (response.data.code === 1) {
             userList.value = response.data.data.map(user => ({
                 ...user,
-                // position: user.role === 'manager' ? '经理' : '管理员',
-                // department: '管理部门' // 根据实际情况调整
             }))
         }
     } catch (error) {
@@ -209,7 +206,7 @@ const deleteUser = async (row) => {
             type: 'warning'
         });
 
-        const response = await apiClient.post('delete_user/', { id: row.id }); // 确保发送的数据格式正确
+        const response = await apiClient.post('delete_user/', row.id); // 确保发送的数据格式正确
         if (response.data.code === 1) {
             ElMessage.success('删除成功');
             fetchUserList();

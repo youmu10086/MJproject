@@ -12,7 +12,7 @@ import OnlineService from "@/views/OnlineService.vue";
 import ReviewsFeedback from "@/views/ReviewsFeedback.vue";
 import ReservationManage from "@/views/ReservationManage.vue";
 import userManage from "@/views/userManage.vue";
-// import Test from "@/views/Test.vue";
+import Test from "@/views/Test.vue";
 
 const routes = [
   {
@@ -70,11 +70,11 @@ const routes = [
     component: userManage,
     meta: { requiresAuth: true, requiredRole: "admin" },
   },
-  // {
-  //   path: "/test",
-  //   name: "Test",
-  //   component: Test,
-  // },
+  {
+    path: "/test",
+    name: "Test",
+    component: Test,
+  },
   { path: "/", redirect: "/home" }, // 默认重定向到首页
 ];
 

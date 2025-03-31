@@ -1,8 +1,9 @@
 <template>
-    <el-row>
+    <el-row :class="{ dark: isDark, light: !isDark }">
         <el-col :span="24">
-            <el-menu active-text-color="#337ecc" background-color="#ffffff" @select="handleSelect" text-color="#606266"
-                router :default-active="$route.path.replace('/', '')">
+            <el-menu active-text-color="var(--menu-active-text-color)" background-color="var(--menu-background-color)"
+                text-color="var(--menu-text-color)" router :default-active="$route.path.replace('/', '')"
+                @select="handleSelect">
                 <el-menu-item index="customer" v-if="userStore.isManager">
                     <el-icon>
                         <UserFilled />
@@ -23,7 +24,7 @@
                 </el-menu-item>
                 <el-menu-item index="supplies" v-if="userStore.isManager">
                     <el-icon>
-                        <Box />
+                       <Briefcase />
                     </el-icon>
                     <span>住房用品管理</span>
                 </el-menu-item>
@@ -63,22 +64,55 @@
 </template>
 
 <script setup>
-import { UserFilled, Avatar, HomeFilled, Box, } from '@element-plus/icons-vue';
+import { UserFilled, Avatar, HomeFilled, Briefcase, House, More, Service, Comment, SwitchFilled } from '@element-plus/icons-vue';
 import { useUserStore } from '@/store/userStore';
 import { useRouter } from 'vue-router';
-import { ref } from 'vue'
+import { ref } from 'vue';
+import { useDark } from '@vueuse/core';
 
 const userStore = useUserStore();
-
-const activeMenu = ref('manage')
-
+const activeMenu = ref('manage');
 const router = useRouter();
-// 开始时请求表的数据
+
+// 主题切换逻辑
+const isDark = useDark(); // 检测当前是否为深色模式
+
+// 路由切换
 const handleSelect = (index) => {
     activeMenu.value = index;
-    router.push(`/${index}`); // 路由切换
+    router.push(`/${index}`);
 };
-
 </script>
 
-<style scoped></style>
+<style scoped>
+.el-menu-item {
+    border-right: none !important;
+}
+
+.dark {
+    --menu-active-text-color: #337ecc;
+    --menu-background-color: #141414;
+    --menu-text-color: #ffffff;
+}
+
+.light {
+    --menu-active-text-color: #337ecc;
+    --menu-background-color: #ffffff;
+    --menu-text-color: #606266;
+}
+
+.el-menu {
+    transition: background-color 0.3s ease, color 0.3s ease;
+    margin-top: 20px;
+}
+
+.el-menu-item {
+    font-size: 12px;
+    color: var(--menu-text-color);
+}
+
+.el-menu-item:hover {
+    color: var(--menu-active-text-color);
+    background-color: var(--menu-background-color);
+}
+</style>

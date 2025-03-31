@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",
+    "@vueuse/core": "^13.0.0",
     "axios": "^1.7.7",
     "cors": "^2.8.5",
     "crypto-js": "^4.2.0",
@@ -23,12 +24,14 @@
     "pinia-plugin-persistedstate": "^4.2.0",
     "promise-polyfill": "^8.3.0",
     "vue": "^3.4.29",
+    "vue-countup-v3": "^1.4.2",
     "vue-router": "^4.4.5"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.1",
+    "sass": "^1.86.0",
     "sass-embedded": "^1.85.1",
-    "vite": "^5.4.14",
+    "vite": "^6.2.2",
     "vue-tsc": "^2.2.2"
   }
 }

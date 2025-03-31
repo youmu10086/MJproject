@@ -1,0 +1,16 @@
+// 引入全局变量
+@use './utils/variables';
+
+// 引入基础样式
+@use './base/reset';
+
+// 引入布局样式
+@use './layouts/header';
+@use './layouts/footer';
+@use './layouts/aside';
+@use './layouts/main';
+
+// 引入组件样式
+@use './components/table';
+
+@use './pages/userManage';

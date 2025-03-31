@@ -22,6 +22,8 @@ sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
 SECRET_KEY = 'django-insecure-^d9s-61*otl3tvz&455=a8z_4ayor15jc3yvn-mc5=@wgy^8mz'
 
 DEBUG = True
+# DEBUG = False
+
 ALLOWED_HOSTS = ['*']
 # ALLOWED_HOSTS = ['193.112.246.221', 'localhost', '127.0.0.1']
 

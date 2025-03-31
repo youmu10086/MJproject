@@ -4,37 +4,37 @@
         <el-breadcrumb-item>入住人员管理</el-breadcrumb-item>
     </el-breadcrumb>
     <!----------------------------------------------------------------------------------- 顶部操作 ------------------------------------------------------------------------------------------->
-    <el-form :inline="true" style="margin-top: 20px;">
+    <el-form :inline="true" class="top-form">
         <el-row>
             <el-col :span="14">
-                <el-input v-model="inputStr" placeholder="输入查询条件" clearable style="width: 240px;"
+                <el-input v-model="inputStr" placeholder="输入查询条件" clearable class="search-input"
                     :prefix-icon="Search" />
             </el-col>
-            <el-col :span="6" style="display: flex; justify-content: flex-end;">
-                <el-button-group style="display: flex;padding-right: 10px;">
+            <el-col :span="6" class="button-group-container">
+                <el-button-group class="button-group">
                     <el-button type="primary" :icon="Search" plain @click="queryCustomer()">查询</el-button>
                     <el-button type="primary" :icon="FolderOpened" plain @click="getCustomer()">全部</el-button>
                     <el-button type="primary" :icon="Plus" plain @click="addCustomer()">添加</el-button>
                 </el-button-group>
             </el-col>
-            <el-col :span="2" style="display: flex; justify-content: flex-end;">
+            <el-col :span="2" class="upload-container">
                 <el-upload>
                     <el-button type="primary" plain>导入excel</el-button>
                 </el-upload>
             </el-col>
-            <el-col :span="2" style="display: flex; justify-content: flex-end;">
+            <el-col :span="2" class="export-container">
                 <el-button type="primary" plain>导出excel</el-button>
             </el-col>
         </el-row>
     </el-form>
     <!------------------------------------------------------------------------------------ 表 -------------------------------------------------------------------------------------------->
-    <el-table :data="currentPageTableData" style="width: 100%; overflow: visible" :size="size" border
-        :row-class-name="tableRowClassName" :default-sort="{ prop: 'roomNo', order: 'descending' }"
-        @selection-change="handleSelectionChange" max-height="420" table-layout="fixed">
+    <el-table :data="currentPageTableData" :size="size" border :row-class-name="tableRowClassName"
+        :default-sort="{ prop: 'roomNo', order: 'descending' }" @selection-change="handleSelectionChange"
+        max-height="400" table-layout="fixed">
         <el-table-column type="selection"></el-table-column>
         <el-table-column prop="name" label="姓名" min-width="50" align="center" show-overflow-tooltip />
         <el-table-column prop="roomNo" label="房间号" min-width="80" align="center" sortable />
-        <el-table-column prop="balance" label="余额" min-width="70" align="center" />
+        <el-table-column prop="balance" label="余额" min-width="70" align="center" show-overflow-tooltip />
         <el-table-column label="类型" min-width="80" align="center" show-overflow-tooltip>
             <template v-slot="scope">
                 {{ formatType(scope.row) }}
@@ -47,20 +47,16 @@
         </el-table-column>
         <el-table-column prop="idCardNo" label="身份证" min-width="150" align="center" show-overflow-tooltip />
         <el-table-column prop="mobile" label="电话号码" min-width="100" align="center" show-overflow-tooltip />
-        <!-- 操作 -->
         <el-table-column label="操作" min-width="240" align="center">
-            <!-- 当你在 el-table-column 中使用 v-slot="scope" 时，Vue 会自动将参数传递给插槽。具体来说，scope 是由 el-table 组件提供的。
-             每当渲染每一行时，el-table 会为这一行提供相关的上下文数据，因此 scope 对象中会包含当前行的所有信息。 -->
             <template v-slot="scope">
                 <el-button plain :size="size" @click="renewal(scope.row)"
                     :disabled="!(scope.row.checkOutTime === null)">续租</el-button>
                 <el-button plain :size="size" @click="checkOut(scope.row)"
-                    :disabled="!(scope.row.checkOutTime === null)">{{ renewalState(scope.row) }}</el-button>
-                <el-button type="primary" :size="size" :icon="Edit" circle plain @click="updateCustomer(scope.row)"
-                    v-model="customerForm" />
-                <el-button type="success" :size="size" :icon="More" circle plain @click="viewCustomer(scope.row)"
-                    v-model="customerForm" />
-                <!-- <el-button type="warning" :size="size" :icon="Star" circle plain /> -->
+                    :disabled="!(scope.row.checkOutTime === null)">
+                    {{ renewalState(scope.row) }}
+                </el-button>
+                <el-button type="primary" :size="size" :icon="Edit" circle plain @click="updateCustomer(scope.row)" />
+                <el-button type="success" :size="size" :icon="More" circle plain @click="viewCustomer(scope.row)" />
                 <el-button type="danger" :size="size" :icon="Delete" circle plain @click="deleteCustomer(scope.row)" />
             </template>
         </el-table-column>
@@ -145,7 +141,7 @@
                 </el-col>
                 <el-col :span="6" style="padding-left: 5px;padding-top: 5px;">
                     <el-text style="width: 100%" :size="size">{{ roomMessage(customerForm.roomNo)
-                        }}</el-text>
+                    }}</el-text>
                 </el-col>
                 <el-col :span="8" style="padding-left: 5px;">
                     <el-form-item label="性别" prop="gender" label-width="40px">
@@ -163,19 +159,20 @@
                     <el-form-item label="入住时间" prop="resideTimePeriod">
                         <el-date-picker type="datetimerange" v-model="customerForm.resideTimePeriod" style="width: 100%"
                             :size="size" unlink-panels range-separator="-" format="YYYY-MM-DD HH:mm:ss"
-                            start-placeholder="开始" end-placeholder="结束" :disabled="isView || isEdit" />
+                            start-placeholder="开始" end-placeholder="结束" :disabled="isView || isEdit"
+                            placement="top-start" />
                     </el-form-item>
                 </el-col>
                 <el-col :span="6" style="padding-left: 5px;padding-top: 5px;">
                     <el-text style="width: 100%" :size="size">{{ timeDifference(customerForm.resideTimePeriod)
-                        }}</el-text>
+                    }}</el-text>
                 </el-col>
             </el-row>
         </el-form>
         <template #footer>
             <div class="dialog-footer">
-                <el-button type="primary" v-show="!isView" @click="submitForm(ruleFormRef)">{{ submitRemand
-                    }}</el-button><!-- submitForm(ruleFormRef) -->
+                <el-button type="primary" v-show="!isView" @click="submitForm(ruleFormRef)" :loading="isSubmitting">{{
+                    submitRemand }}</el-button>
                 <el-button type="info" @click="DialogVisible = false" v-show="!isView">取消</el-button>
                 <el-button type="primary" v-show="isView" @click="DialogVisible = false">确定</el-button>
             </div>
@@ -185,11 +182,12 @@
 
 <script lang="ts" setup>
 
+const isSubmitting = ref(false); // 控制按钮的加载状态
+
 const renewalState = (row: { checkOutTime: null; }) => {
     if (row.checkOutTime === null) return '退租';
     else return '已退';
 }
-
 const roomMessage = (roomNo: string) => {
     const roomInfo = findRoom(roomNo);
     if (roomNo === '' || roomInfo === null)
@@ -202,15 +200,12 @@ const roomMessage = (roomNo: string) => {
     }
 
 }
-
 const deposit = 100;//押金
-
 // 返回时间差
 const timeDifference = (times: string[]) => {
     if (times[0] === '' || times[1] === '')
         return '';
     else {
-        console.log(times)
         const endDate = new Date(times[1]);
         const startDate = new Date(times[0]);
 
@@ -409,10 +404,13 @@ interface Customer {
     resideTimePeriod: string[]
 }
 interface Room {
-    roomNo: string
-    roomAmount: number
-    durationType: string
-    roomType: string
+    roomNo: string;
+    roomAmount: number;
+    durationType: string;
+    roomType: string;
+    roomStatus: string;
+    imageUrl?: string;
+    roomConfig?: string[];
 }
 const customerForm = ref<Customer>({
     cno: '',
@@ -516,7 +514,7 @@ const isEdit = ref(false)        // 修改
 const isView = ref(false)        // 查看
 const isAdd = ref(false)         // 添加
 const isRenewal = ref(false)
-// 获取所有房客信息
+// 获取所有顾客信息
 const getCustomer = () => {
     inputStr.value = '';
     apiClient
@@ -607,17 +605,19 @@ const resetForm = (formEl: FormInstance | undefined) => {
 const ruleFormRef = ref<FormInstance>()
 // 校验
 const submitForm = async (formEl: FormInstance | undefined) => {
-    // 用于提交表单并进行验证。当用户尝试提交表单时，这段代码会检查传入的表单实例是否有效，然后调用该实例的 validate 方法。
-    // 如果通过验证，则输出 'submit!'；如果未通过验证，则输出错误信息和失败的字段。这样可以确保用户输入的信息是有效的，只有在通过验证后才会进行后续处理。
-
-    if (!formEl) return
-    await formEl.validate((valid, fields) => { // 校验方法
-        if (valid) {
-            if (isAdd.value) submitAddCustomer();
-            else submitUpdateCustomer();
-        } else console.log('校验时出错', fields)
-    })
-}
+    if (!formEl) return;
+    isSubmitting.value = true; // 开始加载
+    try {
+        await formEl.validate((valid, fields) => {
+            if (valid) {
+                if (isAdd.value) submitAddCustomer();
+                else submitUpdateCustomer();
+            }
+        });
+    } finally {
+        isSubmitting.value = false; // 提交完成后停止加载
+    }
+};
 // 格式化居住时间
 const processResideTimePeriod = (item: { resideTimePeriod: any; }) => {
     let resideTimePeriodString = item.resideTimePeriod; // 获取原始字符串  
@@ -771,6 +771,30 @@ const getImage = (cno: string) => {
 </script>
 
 <style scoped>
+/* 顶部操作样式 */
+.top-form {
+    margin-top: 20px;
+}
+
+.search-input {
+    width: 240px;
+}
+
+.button-group-container {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.button-group {
+    display: flex;
+    padding-right: 10px;
+}
+
+.action-container {
+    display: flex;
+    justify-content: flex-end;
+}
+
 .avatar-uploader .avatar {
     width: 172px;
     height: 110px;
@@ -804,10 +828,6 @@ const getImage = (cno: string) => {
 
 .el-table .danger-row {
     --el-table-tr-bg-color: var(--el-color-danger-light-9);
-}
-
-.el-table .info-row {
-    --el-table-tr-bg-color: var(--el-color-info-light-9);
 }
 
 .el-table .cell {

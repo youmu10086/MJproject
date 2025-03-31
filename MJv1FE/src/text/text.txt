@@ -65,11 +65,9 @@ text/xml
 
 // const item = { cno: '001', name: '张三', age: 30 };  
 // const newItem = { ...item, mobile: '123456789' };  
-// console.log(newItem); // { cno: '001', name: '张三', age: 30, mobile: '123456789' }  
 
 // const numbers = [1, 2, 3, 4];  
 // const squares = numbers.map(num => num * num);  
-// console.log(squares); // [1, 4, 9, 16]
 
 
 开始时找cookies，看有没有记录
@@ -81,7 +79,6 @@ const fetchProtectedResource = async () => {
     try {
         const response = await apiClient.get('protected-resource');
         if (response.status === 200) {
-            console.log(response.data); // 成功获取资源  
         }
     } catch (error) {
         console.error('Error fetching resource:', error.response);
@@ -96,7 +93,6 @@ const refreshAccessToken = async () => {
         const response = await apiClient.post('refresh-token');
         if (response.status === 200) {
             localStorage.setItem('accessToken', response.data.access); // 更新 Access Token  
-            console.log('Access Token refreshed:', response.data.access);
         }
     } catch (error) {
         console.error('Unable to refresh token. Logging out.');
