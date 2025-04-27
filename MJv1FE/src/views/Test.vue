@@ -1,36 +1,43 @@
 <template>
-    <button @click="sb">getenroll</button>
+    <el-input v-model="inputMsg" @keyup.enter="send">
+        <template #append>
+            <el-button @click="send">发送</el-button>
+        </template>
+    </el-input>
 </template>
 
-<script setup lang="ts">
-import axios from 'axios';
-import { useUserStore } from '@/store/userStore';
+<script setup>
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 
-const apiClient = axios.create({
-    baseURL: '/api',
-});
+const messages = ref([])
+let socket = null
 
-const userStore = useUserStore();
+// 初始化连接
+const initWebSocket = (roomId) => {
+    const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws'
+    socket = new WebSocket(`${protocol}://${location.host}/ws/chat/${roomId}/`)
 
-const getenroll = () => {
-    const user = { username: '666666', email: '666666', password: '666666' };
+    socket.onmessage = (e) => {
+        messages.value.push(JSON.parse(e.data))
+    }
 
-    apiClient.post("enroll/", user)
-        .then((res) => {
-            // 存储 Access Token
-            console.log(res);
-            localStorage.setItem('accessToken', res.data.access);
-        })
-        .catch((err) => {
-            console.log(err);
-        });
-};
+    socket.onclose = () => {
+        console.log('连接断开，尝试重连...')
+        setTimeout(() => initWebSocket(roomId), 5000)  // 断线重连机制[6,8](@ref)
+    }
+}
 
-const sb = () => {
-    console.log(userStore.isLoggedIn);
-
-    console.log(userStore.role)
+onMounted(() => initWebSocket('general'))  // 默认进入公共聊天室
+onBeforeUnmount(() => socket?.close())
+const inputMsg = ref('')
+const send = () => {
+    if (socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify({
+            user: '当前用户',
+            content: inputMsg.value,
+            timestamp: Date.now()
+        }))
+        inputMsg.value = ''
+    }
 }
 </script>
-
-<style scoped></style>

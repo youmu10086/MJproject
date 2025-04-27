@@ -1,30 +1,62 @@
 // src/services/apiClient.js
 import axios from "axios";
-import { ElMessage } from "element-plus";
+import { ElMessage, ElLoading } from "element-plus";
 
+let loadingInstance = null; // 存储全局加载实例
+
+/**
+ * 创建 Axios 实例，用于与后端 API 通信
+ * @type {import('axios').AxiosInstance}
+ */
 const apiClient = axios.create({
-  baseURL: "/api", // 替换为您的 Django 后端 URL
+  baseURL: "/api", // API 基础路径
   withCredentials: true, // 允许跨域请求携带 cookies
+  timeout: 10000, // 请求超时时间
+  headers: {
+    "Content-Type": "application/json", // 默认请求头
+  },
 });
 
 // 添加请求拦截器，自动附加 Access Token
 apiClient.interceptors.request.use(
+  /**
+   * 请求拦截器，用于在请求头中附加 Authorization Token
+   * @param {import('axios').InternalAxiosRequestConfig} config - 请求配置对象
+   * @returns {import('axios').InternalAxiosRequestConfig} 修改后的请求配置对象
+   */
   (config) => {
+    // 启动全局加载
+    loadingInstance = ElLoading.service({
+      lock: true,
+      text: "加载中...",
+      background: "rgba(0, 0, 0, 0.7)",
+    });
+
     const accessToken = localStorage.getItem("accessToken");
     if (accessToken) {
       config.headers["Authorization"] = `Bearer ${accessToken}`;
     }
     return config;
   },
+  /**
+   * 请求错误处理
+   * @param {any} error - 请求错误对象
+   * @returns {Promise<never>} 拒绝的 Promise
+   */
   (error) => {
-    // 可以在这里处理请求错误
+    if (loadingInstance) loadingInstance.close(); // 关闭加载
     return Promise.reject(error);
   }
 );
 
-let isRefreshing = false;
-let failedQueue = [];
+let isRefreshing = false; // 是否正在刷新 Token
+let failedQueue = []; // 存储等待刷新 Token 的请求队列
 
+/**
+ * 处理等待队列中的请求
+ * @param {any} error - 错误对象
+ * @param {string|null} token - 刷新后的 Token
+ */
 const processQueue = (error, token = null) => {
   failedQueue.forEach((prom) => {
     if (error) {
@@ -36,11 +68,27 @@ const processQueue = (error, token = null) => {
   failedQueue = [];
 };
 
+// 添加响应拦截器，处理错误和 Token 刷新逻辑
 apiClient.interceptors.response.use(
-  (response) => response,
+  /**
+   * 响应成功处理
+   * @param {import('axios').AxiosResponse} response - 响应对象
+   * @returns {import('axios').AxiosResponse} 响应对象
+   */
+  (response) => {
+    if (loadingInstance) loadingInstance.close(); // 关闭加载
+    return response;
+  },
+  /**
+   * 响应错误处理
+   * @param {any} error - 响应错误对象
+   * @returns {Promise<never>} 拒绝的 Promise
+   */
   async (error) => {
+    if (loadingInstance) loadingInstance.close(); // 关闭加载
     const originalRequest = error.config;
 
+    // 如果返回 401 且请求未重试，则尝试刷新 Token
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
@@ -72,11 +120,9 @@ apiClient.interceptors.response.use(
         ] = `Bearer ${data.access}`;
 
         processQueue(null, data.access);
-        console.log("accessToken刷新成功");
         return apiClient(originalRequest);
       } catch (refreshError) {
         // 刷新失败处理
-
         localStorage.removeItem("accessToken");
         try {
           await apiClient.post("logout/");
@@ -89,6 +135,7 @@ apiClient.interceptors.response.use(
       }
     }
 
+    // 处理其他错误
     if (error.response) {
       const { status, data } = error.response;
 
@@ -110,7 +157,11 @@ apiClient.interceptors.response.use(
   }
 );
 
-// 默认错误消息映射
+/**
+ * 获取默认错误消息
+ * @param {number} status - HTTP 状态码
+ * @returns {string} 默认错误消息
+ */
 const getDefaultMessage = (status) => {
   const messages = {
     400: "请求参数错误",
@@ -123,4 +174,5 @@ const getDefaultMessage = (status) => {
   };
   return messages[status];
 };
+
 export default apiClient;

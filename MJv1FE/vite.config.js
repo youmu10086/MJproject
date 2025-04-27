@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [vue()],
   resolve: {
     alias: {
-      "@": fileURLToPath(new URL("./src", import.meta.url))
+      "@": fileURLToPath(new URL("./src", import.meta.url)) // 路径别名
     }
   },
   server: {
@@ -19,5 +19,24 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api/, "")
       }
     }
-  }
+  },
+  build: {
+    minify: 'terser',   // 使用 Terser 压缩代码
+    terserOptions: {
+      compress: {
+        drop_console: true,   // 移除 console 语句
+        drop_debugger: true    // 移除 debugger 语句
+      }
+    }
+  },
+  // css: {
+  //   preprocessorOptions: {
+  //     scss: {
+  //       additionalData: '@import "@/assets/scss/variables.scss";'
+  //     }
+  //   }
+  // },
+  optimizeDeps: {
+    include: ["element-plus/es/locale/lang/zh-cn"]
+  },
 });

@@ -132,7 +132,7 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import apiClient from '@/services/apiClient'
@@ -147,7 +147,11 @@ const userList = ref([])
 const selectedUser = ref([])
 const searchKeyword = ref('')
 const editDialogVisible = ref(false)
-const currentUser = ref({})
+const currentUser = ref({
+    id: null,
+    username: '',
+    mobile: ''
+})
 
 // 初始化加载数据
 onMounted(() => {

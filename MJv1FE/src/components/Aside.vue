@@ -16,7 +16,7 @@
                     </el-icon>
                     <span>公寓职工管理</span>
                 </el-menu-item>
-                <el-menu-item index="roomManage" v-if="userStore.isManager">
+                <el-menu-item index="room" v-if="userStore.isManager">
                     <el-icon>
                         <HomeFilled />
                     </el-icon>
@@ -28,7 +28,7 @@
                     </el-icon>
                     <span>住房用品管理</span>
                 </el-menu-item>
-                <el-menu-item index="roomReservation" v-if="userStore.isCustomer || userStore.isGuest">
+                <el-menu-item index="room" v-if="userStore.isCustomer || userStore.isGuest">
                     <el-icon>
                         <House />
                     </el-icon>
@@ -63,7 +63,7 @@
     </el-row>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { UserFilled, Avatar, HomeFilled, Briefcase, House, More, Service, Comment, SwitchFilled } from '@element-plus/icons-vue';
 import { useUserStore } from '@/store/userStore';
 import { useRouter } from 'vue-router';
@@ -92,12 +92,12 @@ const handleSelect = (index) => {
 .dark {
     --menu-active-text-color: #337ecc;
     --menu-background-color: #141414;
-    --menu-text-color: #ffffff;
+    --menu-text-color: #FAFAFA;
 }
 
 .light {
     --menu-active-text-color: #337ecc;
-    --menu-background-color: #ffffff;
+    --menu-background-color: #FAFAFA;
     --menu-text-color: #606266;
 }
 

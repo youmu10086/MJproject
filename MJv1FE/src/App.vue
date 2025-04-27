@@ -16,7 +16,11 @@
     </el-container>
   </el-container>
 
+  <!-- 浮动按钮 -->
   <FloatButton></FloatButton>
+
+  <!-- 消息卡片 -->
+  <MessageCard></MessageCard>
 </template>
 
 <script setup lang="ts">
@@ -25,10 +29,12 @@ import LoginForm from './components/LoginForm.vue';
 import Header from './components/Header.vue';
 import Aside from './components/Aside.vue';
 import FloatButton from './components/DarkThemeFloatButton.vue';
+import MessageCard from './components/MessageCard.vue';
+import ProgressBar from './components/ProgressBar.vue';
 
 </script>
 
-<style>
+<style >
 /* 使用CSS变量定义颜色 */
 :root {
   --header-bg-color: #FAFAFA;
@@ -87,11 +93,5 @@ body,
 
 .no-select {
   user-select: none;
-}
-
-/* 给所有表格容器添加圆角 */
-.el-table {
-  border-radius: 12px;
-  overflow: hidden;
 }
 </style>

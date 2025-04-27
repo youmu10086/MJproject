@@ -91,12 +91,12 @@ const stats = ref([
     trend: 'up',
     trendValue: '+24.7%',
     trendColor: '#52c41a',
-    suffix: '万'
+    suffix: '亿'
   },
   {
     icon: markRaw(ChatRound), // 使用 markRaw 标记组件对象
     title: '用户满意度',
-    value: 98.5,
+    value: 120,
     trend: 'up',
     trendValue: '+0.8%',
     trendColor: '#52c41a',

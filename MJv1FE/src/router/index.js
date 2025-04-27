@@ -2,23 +2,22 @@ import { createRouter, createWebHistory } from "vue-router";
 import { useUserStore } from "@/store/userStore";
 import { ElMessage } from "element-plus";
 
-import Customer from "@/views/Customer.vue";
-import RoomManage from "@/views/RoomManage.vue";
-import Employee from "@/views/Employee.vue";
-import Supplies from "@/views/Supplies.vue";
-import Home from "@/views/Home.vue";
-import RoomReservation from "@/views/RoomReservation.vue";
-import OnlineService from "@/views/OnlineService.vue";
-import ReviewsFeedback from "@/views/ReviewsFeedback.vue";
-import ReservationManage from "@/views/ReservationManage.vue";
-import userManage from "@/views/userManage.vue";
-import Test from "@/views/Test.vue";
+const Customer = () => import("@/views/Customer.vue");
+const Employee = () => import("@/views/Employee.vue");
+const Supplies = () => import("@/views/Supplies.vue");
+const Home = () => import("@/views/Home.vue");
+const OnlineService = () => import("@/views/OnlineService.vue");
+const ReviewsFeedback = () => import("@/views/ReviewsFeedback.vue");
+const ReservationManage = () => import("@/views/ReservationManage.vue");
+const userManage = () => import("@/views/userManage.vue");
+const Test = () => import("@/views/Test.vue");
+const Room = () => import("@/views/Room.vue");
 
 const routes = [
   {
     path: "/customer",
     name: "顾客管理",
-    component: Customer, // 确保这个组件存在
+    component: Customer,
     meta: { requiresAuth: true, requiredRole: "manager" },
   },
   {
@@ -33,21 +32,16 @@ const routes = [
     meta: { requiresAuth: true, requiredRole: "manager" },
   },
   {
-    path: "/roomManage",
+    path: "/room",
     name: "房间管理",
-    component: RoomManage,
-    meta: { requiresAuth: true, requiredRole: "manager" },
+    component: Room,
+    meta: { requiresAuth: true, requiredRole: ["manager", "customer", "guest"] },
   },
   {
     path: "/employee",
     name: "员工管理",
     component: Employee,
     meta: { requiresAuth: true, requiredRole: "manager" },
-  },
-  {
-    path: "/roomReservation",
-    name: "预订房间",
-    component: RoomReservation,
   },
   {
     path: "/onlineService",
@@ -75,7 +69,7 @@ const routes = [
     name: "Test",
     component: Test,
   },
-  { path: "/", redirect: "/home" }, // 默认重定向到首页
+  { path: "/", redirect: "/home" },
 ];
 
 const router = createRouter({
@@ -108,7 +102,7 @@ router.beforeEach(async (to, from, next) => {
     }
 
     // 角色权限验证
-    if (to.meta.requiredRole && userStore.role !== to.meta.requiredRole) {
+    if (to.meta.requiredRole && !to.meta.requiredRole.includes(userStore.role)) {
       ElMessage.error("您没有访问该页面的权限");
       return next(from.path || "/home");
     }

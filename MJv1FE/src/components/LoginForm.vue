@@ -41,7 +41,7 @@
     </el-dialog>
 </template>
 
-<script setup>
+<script setup lang='ts'>
 import { ref, computed } from 'vue';
 import { useUserStore } from '@/store/userStore';
 import { ElMessage } from 'element-plus';
@@ -56,11 +56,11 @@ const formStatus = ref('login'); // 'login', 'resetPassword', 'enroll'
 
 const isSubmitting = ref(false);
 const formData = ref({
-    username: 'manager',
+    username: 'customer',
     password: '666666',
     email: '666666@qq.com',
+    confirmPassword: '', // Added confirmPassword property
 });
-
 
 // 表单验证规则  
 const formRules = computed(() => ({
@@ -69,7 +69,7 @@ const formRules = computed(() => ({
         { min: 3, max: 20, message: '用户名长度需为3-20个字符', trigger: ['blur'] }
     ],
     email: [
-        { type: 'email', message: '请输入有效的电子邮件', trigger: ['blur', 'change'] }
+        { type: 'email' as const, message: '请输入有效的电子邮件', trigger: ['blur', 'change'] }
     ],
     password: [
         { required: true, message: '密码不能为空', trigger: 'blur' },
