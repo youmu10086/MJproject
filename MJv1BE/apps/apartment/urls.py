@@ -16,4 +16,5 @@ urlpatterns = [
     path('room/config/', views.get_room_config, name='config_room'),
     path('room/config/add/', views.add_room_config, name='add_room_config'),
     path('room/config/delete/', views.delete_room_config, name='delete_room_config'),
+    path('customer/reserve/', views.customer_reserve, name='reserve_customer'),
 ]

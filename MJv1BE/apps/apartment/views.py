@@ -6,6 +6,8 @@ from django.db import transaction
 from django.db.models import Q, F  # 导入q查询
 from django.forms.models import model_to_dict
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.utils import json
@@ -14,18 +16,6 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from .models import Customer, Room, RoomConfig
 from .myTool import *
 from .permissions import IsManager
-
-
-@api_view(['GET'])
-@authentication_classes([JWTAuthentication])
-@permission_classes([IsAuthenticated, IsManager])  # 是否能访问看是否能通过所有权限
-def get_customer(request):  # 显示全部信息
-    try:
-        obj_customer = Customer.objects.all().values()
-        customers = list(obj_customer)
-        return JsonResponse({'code': 1, 'data': customers}, safe=False)
-    except Exception as e:
-        return JsonResponse({'code': 0, 'msg': '获取顾客信息出现异常:' + str(e)})
 
 
 @api_view(['GET'])
@@ -211,6 +201,7 @@ def update_room(request):
 @api_view(['DELETE'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated, IsManager])
+@transaction.atomic  # 添加事务管理
 def delete_room(request, room_no):
     try:
         room = Room.objects.get(room_no=room_no)
@@ -226,81 +217,153 @@ def delete_room(request, room_no):
         return JsonResponse({'code': 0, 'msg': '删除房间出现异常: ' + str(e)})
 
 
-@api_view(['POST'])
+@api_view(['GET'])
 @authentication_classes([JWTAuthentication])
-@permission_classes([IsAuthenticated, IsManager])
-def query_customer(request):  # 查询功能
-    data = json.loads(request.body.decode('utf-8'))
+@permission_classes([IsAuthenticated, IsManager])  # 是否能访问看是否能通过所有权限
+@transaction.atomic  # 添加事务管理
+def get_customer(request):  # 显示全部信息
     try:
-        obj_customer = (
-            Customer.objects.filter(Q(name__icontains=data['inputstr']) | Q(roomNo=data['inputstr']) |
-                                    Q(checkOutTime__icontains=data['inputstr']) | Q(
-                checkInTime__icontains=data['inputstr'])
-                                    | Q(idCardNo__icontains=data['inputstr']) | Q(mobile__icontains=data['inputstr'])))
-        customers = [model_to_dict(customer) for customer in obj_customer]
-        return JsonResponse({'code': 1, 'data': customers})
-    except Exception as e:
-        import traceback
-        print(traceback.format_exc())  # 打印堆栈跟踪
-        return JsonResponse({'code': 0, 'msg': '查询顾客信息出现异常:' + str(e)})
-
-
-@api_view(['POST'])
-@authentication_classes([JWTAuthentication])
-@permission_classes([IsAuthenticated, IsManager])
-def add_customer(request):  # 添加功能
-    # 接受添加的顾客信息
-    data = json.loads(request.body.decode('utf-8'))
-    try:
-        obj_customer = Customer(name=data['name'], roomNo=data['roomNo'], checkInTime=data['checkInTime'],
-                                gender=data['gender'], checkOutTime=data['checkOutTime'], idCardNo=data['idCardNo'],
-                                mobile=data['mobile'], image=data['image'], balance=data['balance'],
-                                resideTimePeriod=data['resideTimePeriod'])
-        obj_customer.cno = get_cno()
-        obj_customer.save()
-        customers = Customer.objects.all().values()
-        customers_list = list(customers)
-        return JsonResponse({'code': 1, 'data': customers_list})
-    except Exception as e:
-        import traceback
-        print(traceback.format_exc())  # 打印堆栈跟踪
-        return JsonResponse({'code': 0, 'msg': '添加顾客信息出现异常:' + str(e)})
-
-
-@api_view(['POST'])
-@authentication_classes([JWTAuthentication])
-@permission_classes([IsAuthenticated, IsManager])
-def update_customer(request):
-    data = json.loads(request.body.decode('utf-8'))
-    try:
-        obj_customer = Customer.objects.get(cno=data['cno'])
-        obj_customer.name = data['name']
-        obj_customer.roomNo = data['roomNo']
-        obj_customer.checkInTime = data['checkInTime']
-        obj_customer.gender = data['gender']
-        obj_customer.checkOutTime = data['checkOutTime']
-        obj_customer.idCardNo = data['idCardNo']
-        obj_customer.mobile = data['mobile']
-        if obj_customer.image:
-            photo_path = path.join(settings.MEDIA_ROOT, str(obj_customer.image))
-            if path.isfile(photo_path):  # 检查文件是否存在
-                remove(photo_path)  # 删除文件
-        obj_customer.image = data['image']
-        obj_customer.balance = data['balance']
-        obj_customer.resideTimePeriod = data['resideTimePeriod']
-        obj_customer.save()
         obj_customer = Customer.objects.all().values()
         customers = list(obj_customer)
-        return JsonResponse({'code': 1, 'data': customers})
+        return JsonResponse({'code': 1, 'data': customers}, safe=False)
     except Exception as e:
-        import traceback
-        print(traceback.format_exc())  # 打印堆栈跟踪
-        return JsonResponse({'code': 0, 'msg': '修改顾客信息出现异常:' + str(e)})
+        return JsonResponse({'code': 0, 'msg': '获取顾客信息出现异常:' + str(e)})
 
 
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated, IsManager])
+@transaction.atomic  # 添加事务管理
+def query_customer(request):
+    # 使用 request.data 获取请求数据
+    input_str = request.data.get('inputstr')  # 获取 'inputstr'
+
+    if not input_str:
+        return JsonResponse({'code': 0, 'msg': '请求缺少参数: inputstr'}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        obj_customer = Customer.objects.filter(
+            Q(name__icontains=input_str) | Q(room__room_no=input_str) | Q(checkOutTime__icontains=input_str) | Q(
+                checkInTime__icontains=input_str) | Q(idCardNo__icontains=input_str) | Q(
+                mobile__icontains=input_str) | Q(status__icontains=input_str))
+
+        customers = [model_to_dict(customer) for customer in obj_customer]
+        return JsonResponse({'code': 1, 'data': customers}, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc())  # 打印堆栈跟踪
+        return JsonResponse({'code': 0, 'msg': '查询顾客信息出现异常: ' + str(e)},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated, IsManager])
+@transaction.atomic  # 添加事务管理
+def add_customer(request):
+    try:
+        data = request.data  # 使用 request.data 直接获取 JSON 数据
+        # 确保所有必需的字段存在
+        required_fields = ['name', 'roomNo', 'checkInTime', 'gender', 'idCardNo', 'mobile', 'balance',
+                           'resideTimePeriod']
+        for field in required_fields:
+            if field not in data:
+                return JsonResponse({'code': 0, 'msg': f'缺少必需字段: {field}'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 获取房间对象
+        room_no = data['roomNo']
+        room = Room.objects.get(room_no=room_no)
+
+        # 更新房间状态为已入住
+        room.room_status = 'occupied'
+        room.save()
+
+        obj_customer = Customer(
+            name=data['name'],
+            room_id=data['roomNo'],  # 使用外键的ID来设置房间
+            checkInTime=data['checkInTime'],
+            gender=data['gender'],
+            checkOutTime=data.get('checkOutTime', None),  # 允许为空
+            idCardNo=data['idCardNo'],
+            mobile=data['mobile'],
+            image=data.get('image', None),  # 允许为空
+            balance=data['balance'],
+            resideTimePeriod=data['resideTimePeriod'],
+            status=data.get('status', None)
+        )
+        obj_customer.cno = get_cno()
+        obj_customer.save()
+
+        obj_customers = Customer.objects.all().values()
+        customers = list(obj_customers)
+        return JsonResponse({'code': 1, 'data': customers})
+
+    except Exception as e:
+        print(traceback.format_exc())  # 打印堆栈跟踪
+        return JsonResponse({'code': 0, 'msg': '添加顾客信息出现异常: ' + str(e)},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated, IsManager])
+@transaction.atomic  # 添加事务管理
+def update_customer(request):
+    try:
+        data = request.data  # 使用 request.data 直接获取 JSON 数据
+        customer_id = data.get('cno')
+
+        if not customer_id:
+            return JsonResponse({'code': 0, 'msg': '缺少顾客编号: cno'}, status=status.HTTP_400_BAD_REQUEST)
+
+        obj_customer = Customer.objects.get(cno=customer_id)
+
+        if data.get('status') == '已退宿':
+            # 获取房间对象
+            room_no = data['roomNo']
+            room = Room.objects.get(room_no=room_no)
+
+            # 更新房间状态为已入住
+            room.room_status = 'vacant'
+            room.save()
+
+        obj_customer.name = data.get('name', obj_customer.name)
+        obj_customer.checkInTime = data.get('checkInTime', obj_customer.checkInTime)
+        obj_customer.gender = data.get('gender', obj_customer.gender)
+        obj_customer.checkOutTime = data.get('checkOutTime', obj_customer.checkOutTime)
+        obj_customer.idCardNo = data.get('idCardNo', obj_customer.idCardNo)
+        obj_customer.mobile = data.get('mobile', obj_customer.mobile)
+        obj_customer.status = data.get('status', obj_customer.status)
+
+        # 处理并更新图像
+        if data.get('image'):
+            if obj_customer.image:  # 如果之前有图片，先删除旧图
+                photo_path = path.join(settings.MEDIA_ROOT, str(obj_customer.image))
+                if path.isfile(photo_path):  # 检查文件是否存在
+                    remove(photo_path)  # 删除文件
+            obj_customer.image = data['image']  # 更新为新图片
+
+        obj_customer.balance = data.get('balance', obj_customer.balance)
+        obj_customer.resideTimePeriod = data.get('resideTimePeriod', obj_customer.resideTimePeriod)
+
+        # 保存更新
+        obj_customer.save()
+
+        obj_customers = Customer.objects.all().values()
+        customers = list(obj_customers)
+        return JsonResponse({'code': 1, 'data': customers})
+
+    except Exception as e:
+        print(traceback.format_exc())  # 打印堆栈跟踪
+        return JsonResponse({'code': 0, 'msg': '修改顾客信息出现异常: ' + str(e)},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated, IsManager])
+@transaction.atomic  # 添加事务管理
 def delete_customer(request):
     data = json.loads(request.body.decode('utf-8'))
     try:
@@ -323,6 +386,7 @@ def delete_customer(request):
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated, IsManager])
+@transaction.atomic  # 添加事务管理
 def delete_customers(request):
     # 接受删除的顾客信息
     data = json.loads(request.body.decode('utf-8'))
@@ -349,6 +413,7 @@ def delete_customers(request):
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
+@transaction.atomic  # 添加事务管理
 def upload(request):
     """接受上传的文件"""
     rev_file = request.FILES.get('avatar')
@@ -369,3 +434,46 @@ def upload(request):
         return JsonResponse({'code': 1, 'name': new_name + file_extension})
     except Exception as e:
         return JsonResponse({'code': 0, 'msg': '上传文件出现异常:' + str(e)})
+
+
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+@transaction.atomic  # 添加事务管理
+def customer_reserve(request):
+    try:
+        data = request.data
+
+        required_fields = ['name', 'roomNo', 'gender', 'idCardNo', 'mobile', 'balance', 'resideTimePeriod',
+                           'checkInTime']
+        for field in required_fields:
+            if field not in data:
+                return JsonResponse({'code': 0, 'msg': f'缺少必需字段: {field}'}, status=status.HTTP_400_BAD_REQUEST)
+
+        room_no = data['roomNo']
+        room = Room.objects.get(room_no=room_no)
+
+        room.room_status = 'reserved'
+        room.save()
+
+        obj_customer = Customer(
+            name=data['name'],
+            room_id=data['roomNo'],  # 使用外键的ID来设置房间
+            gender=data['gender'],
+            idCardNo=data['idCardNo'],
+            mobile=data['mobile'],
+            image=data.get('image', None),  # 允许为空
+            balance=data['balance'],
+            resideTimePeriod=data['resideTimePeriod'],
+            status='已预订',
+            checkInTime=data['checkInTime'],
+        )
+        obj_customer.cno = get_cno()
+        obj_customer.save()
+
+        return JsonResponse({'code': 1})
+
+    except Exception as e:
+        print(traceback.format_exc())  # 打印堆栈跟踪
+        return JsonResponse({'code': 0, 'msg': '添加顾客信息出现异常: ' + str(e)},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
