@@ -2,6 +2,7 @@ import traceback
 from os import path, remove
 
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.db.models import Q, F  # 导入q查询
 from django.forms.models import model_to_dict
@@ -13,6 +14,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.utils import json
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
+from account.models import CustomUser
 from .models import Customer, Room, RoomConfig
 from .myTool import *
 from .permissions import IsManager
@@ -415,15 +417,11 @@ def delete_customers(request):
 @permission_classes([IsAuthenticated])
 @transaction.atomic  # 添加事务管理
 def upload(request):
-    """接受上传的文件"""
     rev_file = request.FILES.get('avatar')
     if not rev_file:
         return JsonResponse({'code': 0, 'msg': '未检测到图片文件'}, status=400)
     new_name = get_random_str()
-    file_extension = path.splitext(rev_file.name)[1]  # 获取文件扩展名(.jpg)
-    # settings.MEDIA_ROOT：这是Django配置文件中定义的一个设置，表示保存上传文件的目录的绝对路径。
-    # new_name + file_extension：这是将之前生成的唯一文件名（new_name）与文件扩展名（file_extension）连接，形成完整的文件名（例如"unique_name.jpg"）。
-    # os.path.join(...)：使用os.path.join()函数来构建一个完整的文件路径。这个函数会根据当前操作系统的文件路径分隔符（如Windows下为 \，Linux / Unix下为 /）正确地连接目录和文件名，从而生成完整的路径。
+    file_extension = path.splitext(rev_file.name)[1]
     file_path = path.join(settings.MEDIA_ROOT, new_name + file_extension)
     # 写入
     try:
@@ -477,3 +475,83 @@ def customer_reserve(request):
         print(traceback.format_exc())  # 打印堆栈跟踪
         return JsonResponse({'code': 0, 'msg': '添加顾客信息出现异常: ' + str(e)},
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+@transaction.atomic  # 添加事务管理
+def customer_cancel_reserve(request):
+    try:
+        data = request.data
+
+        if 'cno' not in data:
+            return JsonResponse({'code': 0, 'msg': '缺少必需字段: cno'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if 'roomNo' not in data:
+            return JsonResponse({'code': 0, 'msg': '缺少必需字段: roomNo'}, status=status.HTTP_400_BAD_REQUEST)
+
+        cno = data['cno']
+        customer = Customer.objects.get(cno=str(cno))
+        customer.status = '已取消预订'
+        customer.save()
+
+        room_no = data['roomNo']
+        room = Room.objects.get(room_no=room_no)
+
+        room.room_status = 'vacant'
+        room.save()
+
+        return JsonResponse({'code': 1})
+
+    except Exception as e:
+        print(traceback.format_exc())  # 打印堆栈跟踪
+        return JsonResponse({'code': 0, 'msg': '取消预订出现异常: ' + str(e)},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def get_customer_reservations(request, user_id):
+    try:
+        # 权限检查：普通用户只能查看自己的记录
+        if not request.user.is_staff and request.user.id != int(user_id):
+            return JsonResponse(
+                {'code': 0, 'msg': '无权查看该用户记录'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        # 直接查询并返回结果
+        reservations = Customer.objects.filter(user_id=user_id) \
+            .select_related('room') \
+            .order_by('-checkInTime')
+
+        # 转换为字典列表
+        reservations_data = []
+        for r in reservations:
+            reservations_data.append({
+                'cno': r.cno,
+                'name': r.name,
+                'room_no': r.room.room_no if r.room else None,
+                'check_in_time': r.checkInTime,
+                'check_out_time': r.checkOutTime,
+                'resideTimePeriod': r.resideTimePeriod,
+                'status': r.status
+            })
+
+        return JsonResponse({
+            'code': 1,
+            'data': reservations_data
+        })
+
+    except ObjectDoesNotExist:
+        return JsonResponse(
+            {'code': 0, 'msg': '用户不存在'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    except Exception as e:
+        return JsonResponse(
+            {'code': 0, 'msg': f'获取租住记录失败: {str(e)}'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )

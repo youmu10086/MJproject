@@ -1,0 +1,127 @@
+@use "sass:list";
+.home-page {
+  font-family: "Arial", sans-serif;
+  padding: 20px;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  --carousel-item-bg-color: rgb(51.2, 126.4, 204);
+
+  &.dark {
+    --carousel-item-bg-color: #1e1e1e;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 20px;
+    height: 180px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+
+    h1 {
+      color: var(--text-color);
+      font-size: 2.5em;
+    }
+
+    p {
+      color: #7a7a7a;
+      font-size: 1.2em;
+    }
+  }
+
+  .carousel {
+    margin-bottom: 20px;
+  }
+
+  .dashboard-cards {
+    margin-top: 40px;
+
+    .stat-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+
+      &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      }
+
+      .card-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(var(--primary-color), 0.1);
+        margin-bottom: 20px;
+
+        .icon {
+          width: 24px;
+          height: 24px;
+          color: var(--primary-color);
+        }
+      }
+
+      .stat-title {
+        font-size: 0.95rem;
+        color: var(--text-color);
+        opacity: 0.8;
+        margin-bottom: 8px;
+      }
+
+      .stat-value {
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: var(--text-color);
+        display: flex;
+        align-items: baseline;
+
+        .suffix {
+          font-size: 0.9rem;
+          margin-left: 4px;
+          opacity: 0.8;
+        }
+      }
+
+      .stat-trend {
+        margin-top: 12px;
+        display: flex;
+        align-items: center;
+        font-size: 0.9rem;
+        gap: 4px;
+      }
+    }
+
+    // 不同卡片颜色主题
+    @for $i from 0 through 3 {
+      .theme-#{$i} {
+        $colors: (#409eff, #67c23a, #e6a23c, #f56c6c);
+        --theme-color: list.nth($colors, $i + 1);
+
+        .card-icon {
+          background: rgba(list.nth($colors, $i + 1), 0.1);
+
+          .icon {
+            color: list.nth($colors, $i + 1);
+          }
+        }
+      }
+    }
+  }
+}
+
+.el-carousel__item {
+  background: var(--carousel-item-bg-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #ffffff;
+  font-size: 2em;
+  height: 280px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}

@@ -1,0 +1,139 @@
+.avatar-uploader {
+  .avatar {
+    width: 172px;
+    height: 110px;
+    display: block;
+    border-radius: 4px;
+    object-fit: cover;
+  }
+
+  .el-upload {
+    border: 1px dashed var(--el-border-color);
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: var(--el-transition-duration-fast);
+
+    &:hover {
+      border-color: var(--el-color-primary);
+    }
+  }
+
+  .el-icon.avatar-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 172px;
+    height: 110px;
+    text-align: center;
+    line-height: 110px;
+  }
+}
+
+.option-input {
+  width: 150px;
+  margin-right: 8px;
+}
+
+.add-config-tag {
+  flex-grow: 1;
+  width: 400px;
+  display: inline-block;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.config-tag-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.config-tag {
+  margin: 0;
+}
+
+.optimized-form {
+  padding: 0;
+}
+
+:root {
+  --card-bg: #F5F5F5;
+}
+
+.dark {
+  --card-bg: #262727;
+}
+
+.optimized-form .form-section {
+  margin-bottom: 10px;
+  padding: 10px;
+  background: var(--card-bg);
+  border-radius: 8px;
+}
+
+.dialog-footer {
+  text-align: right;
+}
+
+.dialog-footer .el-button {
+  min-width: 100px;
+  margin-left: 15px;
+}
+
+.container {
+  padding: 20px 0 20px 0;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.floor-card {
+  border-radius: 12px;
+  transition: transform 0.3s ease;
+}
+
+// .floor-card:hover {
+//   transform: translateY(-2px);
+// }
+
+.floor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.room-col {
+  padding: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.room-button {
+  height: 60px;
+  width: 70%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.room-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.room-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.room-number {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}

@@ -4,10 +4,6 @@ import { ElMessage, ElLoading } from "element-plus";
 
 let loadingInstance = null; // 存储全局加载实例
 
-/**
- * 创建 Axios 实例，用于与后端 API 通信
- * @type {import('axios').AxiosInstance}
- */
 const apiClient = axios.create({
   baseURL: "/api", // API 基础路径
   withCredentials: true, // 允许跨域请求携带 cookies
@@ -19,11 +15,6 @@ const apiClient = axios.create({
 
 // 添加请求拦截器，自动附加 Access Token
 apiClient.interceptors.request.use(
-  /**
-   * 请求拦截器，用于在请求头中附加 Authorization Token
-   * @param {import('axios').InternalAxiosRequestConfig} config - 请求配置对象
-   * @returns {import('axios').InternalAxiosRequestConfig} 修改后的请求配置对象
-   */
   (config) => {
     // 启动全局加载
     loadingInstance = ElLoading.service({
@@ -33,16 +24,9 @@ apiClient.interceptors.request.use(
     });
 
     const accessToken = localStorage.getItem("accessToken");
-    if (accessToken) {
-      config.headers["Authorization"] = `Bearer ${accessToken}`;
-    }
+    if (accessToken) config.headers["Authorization"] = `Bearer ${accessToken}`;
     return config;
   },
-  /**
-   * 请求错误处理
-   * @param {any} error - 请求错误对象
-   * @returns {Promise<never>} 拒绝的 Promise
-   */
   (error) => {
     if (loadingInstance) loadingInstance.close(); // 关闭加载
     return Promise.reject(error);
@@ -52,11 +36,6 @@ apiClient.interceptors.request.use(
 let isRefreshing = false; // 是否正在刷新 Token
 let failedQueue = []; // 存储等待刷新 Token 的请求队列
 
-/**
- * 处理等待队列中的请求
- * @param {any} error - 错误对象
- * @param {string|null} token - 刷新后的 Token
- */
 const processQueue = (error, token = null) => {
   failedQueue.forEach((prom) => {
     if (error) {
@@ -70,20 +49,10 @@ const processQueue = (error, token = null) => {
 
 // 添加响应拦截器，处理错误和 Token 刷新逻辑
 apiClient.interceptors.response.use(
-  /**
-   * 响应成功处理
-   * @param {import('axios').AxiosResponse} response - 响应对象
-   * @returns {import('axios').AxiosResponse} 响应对象
-   */
   (response) => {
     if (loadingInstance) loadingInstance.close(); // 关闭加载
     return response;
   },
-  /**
-   * 响应错误处理
-   * @param {any} error - 响应错误对象
-   * @returns {Promise<never>} 拒绝的 Promise
-   */
   async (error) => {
     if (loadingInstance) loadingInstance.close(); // 关闭加载
     const originalRequest = error.config;
@@ -157,11 +126,6 @@ apiClient.interceptors.response.use(
   }
 );
 
-/**
- * 获取默认错误消息
- * @param {number} status - HTTP 状态码
- * @returns {string} 默认错误消息
- */
 const getDefaultMessage = (status) => {
   const messages = {
     400: "请求参数错误",

@@ -12,6 +12,7 @@ const ReservationManage = () => import("@/views/ReservationManage.vue");
 const userManage = () => import("@/views/userManage.vue");
 const Test = () => import("@/views/Test.vue");
 const Room = () => import("@/views/Room.vue");
+const NotFound = () => import("@/views/NotFound.vue");
 
 const routes = [
   {
@@ -35,7 +36,10 @@ const routes = [
     path: "/room",
     name: "房间管理",
     component: Room,
-    meta: { requiresAuth: true, requiredRole: ["manager", "customer", "guest"] },
+    meta: {
+      requiresAuth: true,
+      requiredRole: ["manager", "customer", "guest"],
+    },
   },
   {
     path: "/employee",
@@ -50,7 +54,7 @@ const routes = [
   },
   {
     path: "/reservationManage",
-    name: "预订管理",
+    name: "历史记录",
     component: ReservationManage,
   },
   {
@@ -70,6 +74,11 @@ const routes = [
     component: Test,
   },
   { path: "/", redirect: "/home" },
+  {
+    path: "/:pathMatch(.*)*", // 通配符路由
+    name: "NotFound",
+    component: NotFound,
+  },
 ];
 
 const router = createRouter({
@@ -102,7 +111,10 @@ router.beforeEach(async (to, from, next) => {
     }
 
     // 角色权限验证
-    if (to.meta.requiredRole && !to.meta.requiredRole.includes(userStore.role)) {
+    if (
+      to.meta.requiredRole &&
+      !to.meta.requiredRole.includes(userStore.role)
+    ) {
       ElMessage.error("您没有访问该页面的权限");
       return next(from.path || "/home");
     }

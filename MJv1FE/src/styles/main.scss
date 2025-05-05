@@ -1,16 +1,30 @@
 // 引入全局变量
-@use './utils/variables';
+@use "./base/variables";
 
-// 引入基础样式
-@use './base/reset';
+// 引入全局样式重置
+@use "./base/reset";
+
+// 引入全局字体样式
+@use "./base/typography";
+
+// 引入全局混入
+@use "./mixins/mixins";
 
 // 引入布局样式
-@use './layouts/header';
-@use './layouts/footer';
-@use './layouts/aside';
-@use './layouts/main';
+@use "./layout";
+
+@use "./components/aside.scss";
 
 // 引入组件样式
-@use './components/table';
+@use "./views/home";
+@use "./views/customer";
+@use "./views/room";
+@use "./views/userManage.scss";
+@use "./components/float-button";
+@use "./components/dark-theme-float-button";
 
-@use './pages/userManage';
+@import "@fontsource/noto-sans-sc/index.css";
+
+body {
+  font-family: "Noto Sans SC", Arial, sans-serif;
+}

@@ -128,7 +128,8 @@ def login(request):
             refresh = RefreshToken.for_user(user)
             access = str(refresh.access_token)
             role = user.role
-            response = Response({'access': access, 'username': username, 'role': role}, status=status.HTTP_200_OK)
+            user_id = user.id
+            response = Response({'access': access, 'username': username, 'role': role, 'id': user_id}, status=status.HTTP_200_OK)
             set_refresh_cookie(response, refresh)
             return response
         else:

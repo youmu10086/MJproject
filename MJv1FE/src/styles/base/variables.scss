@@ -1,0 +1,34 @@
+:root {
+  /* 全局颜色变量 */
+  --header-bg-color: #fafafa;
+  --footer-bg-color: #ffffff;
+  --background-color: #ffffff;
+  --text-color: #333;
+  --statistic-title-color: #333;
+
+  /* 全局边框变量 */
+  --table-border-radius: 10px;
+  --table-border-color: #dcdcdc;
+
+  /* 主色 */
+  --primary-color: #409eff;
+  --warning-bg: rgb(252.5, 245.7, 235.5); // 浅色主题黄色背景
+  --success-bg: rgb(239.8, 248.9, 235.3); // 浅色主题绿色背景
+  --danger-bg: rgb(254, 240.3, 240.3); // 浅色主题红色背景
+}
+
+.dark {
+  /* 深色主题颜色变量 */
+  --header-bg-color: #141414;
+  --footer-bg-color: #141414;
+  --background-color: #141414;
+  --text-color: #ffffff;
+  --statistic-title-color: #ffffff;
+
+  /* 深色主题边框 */
+  --border-color: #333;
+
+  --warning-bg: rgb(41, 34.2, 24); // 深色主题黄色背景
+  --success-bg: rgb(28.3, 37.4, 23.8); // 深色主题绿色背景
+  --danger-bg: rgb(42.5, 28.8, 28.8); // 深色主题红色背景
+}

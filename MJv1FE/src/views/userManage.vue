@@ -12,7 +12,7 @@
                 <div class="card-header">
                     <span class="header-title">添加新员工</span>
                     <div class="header-actions">
-                        <el-button type="info" plain @click="resetForm">重置表单</el-button>
+                        <el-button aria-label="提交" type="info" plain @click="resetForm">重置表单</el-button>
                     </div>
                 </div>
             </template>
@@ -51,7 +51,7 @@
                     <!-- 第三行 -->
                     <el-col :xs="24" :sm="12" :md="10">
                         <el-form-item class="submit-button">
-                            <el-button type="primary" @click="handleSubmit" :loading="isSubmitting" icon="Plus">
+                            <el-button aria-label="提交" type="primary" @click="handleSubmit" :loading="isSubmitting" icon="Plus">
                                 添加员工
                             </el-button>
                         </el-form-item>
@@ -85,13 +85,13 @@
                 <el-input v-model="searchKeyword" placeholder="输入姓名搜索..." clearable style="width: 260px"
                     @clear="handleSearch">
                     <template #append>
-                        <el-button icon="Search" @click="handleSearch" />
+                        <el-button aria-label="提交" icon="Search" @click="handleSearch" />
                     </template>
                 </el-input>
             </div>
 
             <div class="toolbar-right">
-                <el-button type="danger" :disabled="selectedUser.length === 0" @click="handleBatchDelete" icon="Delete"
+                <el-button aria-label="提交" type="danger" :disabled="selectedUser.length === 0" @click="handleBatchDelete" icon="Delete"
                     plain>
                     批量删除 ({{ selectedUser.length }})
                 </el-button>
@@ -134,10 +134,11 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import apiClient from '@/services/apiClient'
 import { ArrowRight } from '@element-plus/icons-vue'
 import { useUserStore } from '@/store/userStore'
+import showConfirmDialog from '@/utils/showConfirmDialog'
 
 const userStore = useUserStore();
 
@@ -204,11 +205,7 @@ const deleteUser = async (row) => {
     }
 
     try {
-        await ElMessageBox.confirm(`确认删除 ${row.username} 吗？`, '警告', {
-            confirmButtonText: '确认',
-            cancelButtonText: '取消',
-            type: 'warning'
-        });
+        await showConfirmDialog(`确认删除 ${row.username} 吗？`, '警告');
 
         const response = await apiClient.post('delete_user/', row.id); // 确保发送的数据格式正确
         if (response.data.code === 1) {
@@ -238,12 +235,7 @@ const handleBatchDelete = async () => {
     }
 
     try {
-        await ElMessageBox.confirm(`确认删除选中的 ${selectedUser.value.length} 位用户吗？`, '警告', {
-            confirmButtonText: '确认',
-            cancelButtonText: '取消',
-            type: 'warning'
-        })
-
+        await showConfirmDialog(`确认删除选中的 ${selectedUser.value.length} 位用户吗？`, '警告');
         const response = await apiClient.post('delete_users/', {
             users: selectedUser.value.map(user => (user.id))
         })
@@ -365,97 +357,3 @@ const resetForm = () => {
     };
 };  
 </script>
-
-<style scoped>
-.user-management {
-    padding: 20px;
-    max-width: 1400px;
-    margin: 0 auto;
-}
-
-.breadcrumb {
-    margin-bottom: 20px;
-}
-
-.main-card {
-    margin-bottom: 24px;
-    border-radius: 8px;
-
-    :deep(.el-card__header) {
-        background-color: #f8f9fa;
-        border-bottom: 1px solid #e9ecef;
-        padding: 16px 24px;
-    }
-
-    .card-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-
-        .header-title {
-            font-size: 16px;
-            font-weight: 500;
-            color: var(--el-color-primary);
-        }
-    }
-}
-
-.action-toolbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-    padding: 12px 0;
-
-    .toolbar-left {
-        display: flex;
-        gap: 12px;
-    }
-}
-
-.submit-button {
-    :deep(.el-form-item__content) {
-        justify-content: flex-end;
-    }
-}
-
-.el-table {
-    margin-top: 16px;
-    border-radius: 8px;
-
-    :deep(th) {
-        background-color: #f8f9fa !important;
-    }
-}
-
-.el-radio-group {
-    :deep(.el-radio-button) {
-        margin-right: 8px;
-
-        &:last-child {
-            margin-right: 0;
-        }
-    }
-}
-
-@media (max-width: 768px) {
-    .action-toolbar {
-        flex-direction: column;
-        gap: 12px;
-        align-items: stretch;
-    }
-
-    .toolbar-left,
-    .toolbar-right {
-        width: 100%;
-
-        .el-input {
-            width: 100%;
-        }
-
-        .el-button {
-            width: 100%;
-        }
-    }
-}
-</style>

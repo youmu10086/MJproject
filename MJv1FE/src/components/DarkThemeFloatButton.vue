@@ -1,10 +1,12 @@
 <template>
-    <el-button class="float-button" :class="{ 'dark-mode': isDark }" type="primary" circle @click="() => toggleTheme()">
+    <el-button :aria-label="isDark ? '切换到浅色模式' : '切换到深色模式'" class="float-button" :class="{ 'dark-mode': isDark }"
+        type="primary" circle @click="toggleTheme()">
         <el-icon>
             <component :is="isDark ? Moon : Sunny" />
         </el-icon>
     </el-button>
 </template>
+
 <script setup lang="ts">
 import { Moon, Sunny } from '@element-plus/icons-vue'; // 引入图标组件
 import { useDark, useToggle } from '@vueuse/core';
@@ -12,55 +14,3 @@ import { useDark, useToggle } from '@vueuse/core';
 const isDark = useDark(); // 检测当前是否为深色模式
 const toggleTheme = useToggle(isDark); // 切换主题
 </script>
-
-<style scoped>
-/* 悬浮按钮样式 */
-.float-button {
-    position: fixed;
-    bottom: 50px;
-    left: 50px;
-    z-index: 2000;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
-    background-color: #ffffff;
-    /* 浅色模式背景 */
-    color: #333;
-    border: none;
-    /* 浅色模式文字颜色 */
-}
-
-.float-button:hover {
-    transform: scale(1.1);
-    /* 悬停时放大 */
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
-    /* 悬停时增加阴影 */
-}
-
-/* 深色模式样式 */
-.float-button.dark-mode {
-    background-color: #333;
-    /* 深色模式背景 */
-    color: #ffffff;
-    /* 深色模式文字颜色 */
-    box-shadow: 0 0px 12px rgba(255, 255, 255, 0.2);
-    /* 深色模式阴影 */
-}
-
-.float-button.dark-mode:hover {
-    box-shadow: 0 0 16px rgba(255, 255, 255, 0.3);
-    /* 深色模式悬停阴影 */
-}
-
-/* 图标样式 */
-.el-icon-sun {
-    font-size: 20px;
-    color: #f39c12;
-    /* 浅色模式图标颜色 */
-}
-
-.el-icon-moon {
-    font-size: 20px;
-    color: #3498db;
-    /* 深色模式图标颜色 */
-}
-</style>

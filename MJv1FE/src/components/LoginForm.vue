@@ -24,7 +24,7 @@
 
             <!-- 主要操作按钮 -->
             <el-form-item class="action-buttons">
-                <el-button type="primary" @click="handleSubmit" :loading="isSubmitting">
+                <el-button aria-label="提交" type="primary" @click="handleSubmit" :loading="isSubmitting">
                     {{ submitButtonContent }}
                 </el-button>
             </el-form-item>
@@ -177,9 +177,10 @@ const handleSubmit = async () => {
                 state.isLoggedIn = true;
                 state.role = response.data.role;
                 state.userInfo = {
-                    ...state.userInfo,
-                    name: response.data.username
+                    username: response.data.username,
+                    id: response.data.id,
                 };
+                console.log(response.data);
             });
 
             localStorage.setItem('accessToken', response.data.access);

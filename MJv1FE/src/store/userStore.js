@@ -10,7 +10,7 @@ export const useUserStore = defineStore("user", () => {
     isLoggedIn: localStorage.getItem("isLoggedIn") === "true",
     userInfo: JSON.parse(localStorage.getItem("userInfo") || "null") || {
       username: "",
-      contact: "",
+      id: "",
     },
     role: "guest", // 初始化为 "guest"
   });
@@ -31,10 +31,9 @@ export const useUserStore = defineStore("user", () => {
   const resetUser = () => {
     isLoggedIn.value = false;
     role.value = "guest";
-    userInfo.value = { username: "", contact: "" };
+    userInfo.value = { username: "", id: "" };
     ["isLoggedIn", "userInfo"].forEach((key) => localStorage.removeItem(key));
   };
-
   const fetchUserRole = async () => {
     try {
       const response = await apiClient.post("get_userRole/");
@@ -42,14 +41,14 @@ export const useUserStore = defineStore("user", () => {
         const { role: userRole } = response.data;
         if (validateRole(userRole)) {
           role.value = userRole;
-          return true // 增加返回成功状态
+          return true; // 增加返回成功状态
         }
-        return false
+        return false;
       }
     } catch (error) {
       console.error("获取角色失败:", error);
       resetUser();
-      throw error // 抛出错误供调用方处理
+      throw error; // 抛出错误供调用方处理
     }
   };
 

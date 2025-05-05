@@ -4,48 +4,46 @@
         <el-breadcrumb-item>公寓房间管理</el-breadcrumb-item>
     </el-breadcrumb>
     <div class="container" :class="{ dark: isDark }">
-        <div class="room-management">
-            <el-skeleton :rows="5" animated v-if="loading" />
-            <el-empty v-else-if="!hasRooms" description="暂无房间数据" />
-            <template v-else>
-                <!-- 所有房间 -->
-                <el-card shadow="hover" class="floor-card">
-                    <template #header>
-                        <div class="floor-header">
-                            <span class="floor-title">当前楼层：{{ currentFloor.title }}</span>
-                            <el-button-group>
-                                <el-button v-for="floor in floors" :key="floor.name"
-                                    :type="floor.name === currentFloor.name ? 'primary' : 'default'"
-                                    @click="switchFloor(floor)">
-                                    {{ floor.title }}
-                                </el-button>
-                            </el-button-group>
-                            <el-button-group class="right-aligned">
-                                <el-button v-if="isManager" @click="openAddRoomDialog">添加房间</el-button>
-                                <el-button v-if="isManager">添加楼层</el-button>
-                            </el-button-group>
-                        </div>
-                    </template>
-
-                    <el-row v-if="getFloorRooms(currentFloor.name).length" :gutter="12">
-                        <el-col v-for="room in getFloorRooms(currentFloor.name)" :key="room.roomNo || Math.random()"
-                            :xs="12" :sm="8" :md="6" :lg="4" :xl="8" class="room-col">
-                            <el-button class="room-button" :type="getRoomStatus(room).type" :size="size"
-                                @click="openRoomDialog(room)" :plain="true">
-                                <div class="room-info">
-                                    <span class="room-number">{{ room.roomNo || '未知房间号' }}</span>
-                                    <el-tag v-if="getRoomStatus(room).status" :type="getRoomStatus(room).type"
-                                        size="small" class="mt-1">
-                                        {{ getRoomStatus(room).status }}
-                                    </el-tag>
-                                </div>
+        <el-skeleton :rows="5" animated v-if="loading" />
+        <el-empty v-else-if="!hasRooms" description="暂无房间数据" />
+        <template v-else>
+            <!-- 所有房间 -->
+            <el-card shadow="never" class="floor-card">
+                <template #header>
+                    <div class="floor-header">
+                        <span class="floor-title">当前楼层：{{ currentFloor.title }}</span>
+                        <el-button-group>
+                            <el-button aria-label="提交" v-for="floor in floors" :key="floor.name"
+                                :type="floor.name === currentFloor.name ? 'primary' : 'default'"
+                                @click="switchFloor(floor)">
+                                {{ floor.title }}
                             </el-button>
-                        </el-col>
-                    </el-row>
-                    <el-empty v-else description="暂无房间数据" />
-                </el-card>
-            </template>
-        </div>
+                        </el-button-group>
+                        <el-button-group class="right-aligned">
+                            <el-button v-if="isManager" @click="openAddRoomDialog">添加房间</el-button>
+                            <el-button v-if="isManager">添加楼层</el-button>
+                        </el-button-group>
+                    </div>
+                </template>
+
+                <el-row v-if="getFloorRooms(currentFloor.name).length" :gutter="12">
+                    <el-col v-for="room in getFloorRooms(currentFloor.name)" :key="room.roomNo || Math.random()"
+                        :xs="12" :sm="8" :md="6" :lg="4" :xl="8" class="room-col">
+                        <el-button class="room-button" :type="getRoomStatus(room).type" :size="size"
+                            @click="openRoomDialog(room)" :plain="true">
+                            <div class="room-info">
+                                <span class="room-number">{{ room.roomNo || '未知房间号' }}</span>
+                                <el-tag v-if="getRoomStatus(room).status" :type="getRoomStatus(room).type" size="small"
+                                    class="mt-1">
+                                    {{ getRoomStatus(room).status }}
+                                </el-tag>
+                            </div>
+                        </el-button>
+                    </el-col>
+                </el-row>
+                <el-empty v-else description="暂无房间数据" />
+            </el-card>
+        </template>
     </div>
     <el-dialog v-model="roomDialogVisible" :title="roomDialogTitle" width="900px" :close-on-click-modal="false"
         @closed="resetRoomForm">
@@ -203,7 +201,7 @@
                 </el-col>
                 <el-col :span="6" style="padding-left: 5px;padding-top: 5px;">
                     <el-text style="width: 100%" :size="size">{{ roomMessage(customerForm.roomNo)
-                    }}</el-text>
+                        }}</el-text>
                 </el-col>
                 <el-col :span="8" style="padding-left: 5px;">
                     <el-form-item label="性别" prop="gender" label-width="40px">
@@ -225,7 +223,7 @@
                 </el-col>
                 <el-col :span="6" style="padding-left: 5px;padding-top: 5px;">
                     <el-text style="width: 100%" :size="size">{{ timeDifference(customerForm.resideTimePeriod)
-                    }}</el-text>
+                        }}</el-text>
                 </el-col>
             </el-row>
         </el-form>
@@ -242,13 +240,13 @@
 <script lang="ts" setup>
 import { ElMessage, ElUpload, UploadProps, FormInstance, FormItemRule } from 'element-plus';
 import { ArrowRight } from '@element-plus/icons-vue';
-import { ComponentSize, ElMessageBox } from 'element-plus';
+import { ComponentSize } from 'element-plus';
 import { onMounted, ref, computed } from 'vue';
 import apiClient from '@/services/apiClient';
 import { useDark } from '@vueuse/core';
 import { useUserStore } from '@/store/userStore';
 import { Plus } from '@element-plus/icons-vue';
-
+import showConfirmDialog from '@/utils/showConfirmDialog';
 
 const customerFormisSubmitting = ref(false); // 提交状态
 
@@ -262,17 +260,13 @@ const submitForm = async (formEl: FormInstance | undefined) => {
     }
 
     try {
-        await ElMessageBox.confirm('请缴纳50元定金以继续预订', '缴纳定金', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            type: 'warning',
-            showClose: false // 是否显示关闭按钮，可以根据需要设置
-        });
+        await showConfirmDialog('请缴纳50元定金以继续预订', '缴纳定金');
 
         const now = new Date();
         customerForm.value.checkInTime = now;
         customerForm.value.status = '已预订'; // 设置状态为已预订
         customerForm.value.balance = 0; // 余额设置为0
+        customerForm.value.user_id = userStore.userInfo.id; // 设置用户ID
         const response = await apiClient.post("customer/reserve/", customerForm.value);
         if (response.data.code === 1) {
             ElMessage.success('房间预订成功');
@@ -420,7 +414,7 @@ const rules = ref({
 const customerDialogVisible = ref(false); // 控制弹窗的显示
 // 退出对话框时询问
 const handleClose = (done: () => void) => {
-    ElMessageBox.confirm('信息还未保存，确定退出吗？')
+    showConfirmDialog('信息还未保存，确定退出吗？', '警告')
         .then(() => { done() })
         .catch(() => { })
 }
@@ -457,8 +451,8 @@ interface Customer {
     balance: number
     resideTimePeriod: string[]
     status: string
+    user_id?: string
 }
-
 const customerForm = ref<Customer>({
     cno: '',
     name: '',
@@ -656,11 +650,7 @@ const deleteRoomConfig = async () => {
         ElMessage.error('配置不存在或已被删除');
         return;
     }
-    ElMessageBox.confirm('确定要删除该配置吗？', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning',
-    })
+    showConfirmDialog('确定要删除该配置吗？', '提示')
         .then(async () => {
             roomConfigSubmitting.value = true; // 提交中状态
             try {
@@ -749,9 +739,6 @@ const submitRoomForm = () => {
         reservedRoom(); // 预订房间
     }
 };
-
-
-
 // 重置房间表单
 const resetRoomForm = () => {
     roomForm.value = {
@@ -836,146 +823,3 @@ onMounted(() => {
     getRoomConfig()
 })
 </script>
-
-<style scoped>
-.avatar-uploader {
-    .avatar {
-        width: 172px;
-        height: 110px;
-        display: block;
-        border-radius: 4px;
-        object-fit: cover;
-    }
-
-    .el-upload {
-        border: 1px dashed var(--el-border-color);
-        border-radius: 4px;
-        cursor: pointer;
-        position: relative;
-        overflow: hidden;
-        transition: var(--el-transition-duration-fast);
-
-        &:hover {
-            border-color: var(--el-color-primary);
-        }
-    }
-
-    .el-icon.avatar-uploader-icon {
-        font-size: 28px;
-        color: #8c939d;
-        width: 172px;
-        height: 110px;
-        text-align: center;
-        line-height: 110px;
-    }
-}
-
-
-.option-input {
-    width: 150px;
-    margin-right: 8px;
-}
-
-.add-config-tag {
-    flex-grow: 1;
-    width: 400px;
-    display: inline-block;
-    align-items: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.config-tag-group {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    align-items: center;
-}
-
-.config-tag {
-    margin: 0;
-}
-
-.optimized-form {
-    padding: 0;
-}
-
-:root {
-    --card-bg: #CDD0D6;
-}
-
-.dark {
-    --card-bg: #409eff;
-}
-
-.optimized-form .form-section {
-    margin-bottom: 10px;
-    padding: 10px;
-    background: var(--card-bg);
-    border-radius: 8px;
-}
-
-.dialog-footer {
-    text-align: right;
-}
-
-.dialog-footer .el-button {
-    min-width: 100px;
-    margin-left: 15px;
-}
-
-.container {
-    padding: 20px 0 20px 0;
-    max-width: 1400px;
-    margin: 0 auto;
-}
-
-.floor-card {
-    border-radius: 12px;
-    transition: transform 0.3s ease;
-}
-
-.floor-card:hover {
-    transform: translateY(-2px);
-}
-
-.floor-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.room-col {
-    padding: 8px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.room-button {
-    height: 60px;
-    width: 70%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-}
-
-.room-button:hover {
-    transform: scale(1.1);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-.room-info {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.room-number {
-    font-size: 14px;
-    font-weight: 500;
-    margin-bottom: 4px;
-}
-</style>

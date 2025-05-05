@@ -8,6 +8,7 @@ import zhCn from "element-plus/es/locale/lang/zh-cn"; // 引入中文语言包
 import router from "./router"; // 导入路由
 import "element-plus/theme-chalk/dark/css-vars.css";
 import piniaPluginPersistedstate from "pinia-plugin-persistedstate";
+import "@/styles/main.scss";
 
 // 创建 Vue 应用实例
 const app = createApp(App);
@@ -22,9 +23,6 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 // 使用 Element Plus 插件
 app.use(ElementPlus, { locale: zhCn });
 
-// 全局注册 RouterView 和 RouterLink 组件。
-// 添加全局 $router 和 $route 属性。
-// 启用 useRouter() 和 useRoute() 组合式函数。
 app.use(router);
 app.use(pinia);
 // 挂载应用实例

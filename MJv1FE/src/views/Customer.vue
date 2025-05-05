@@ -28,41 +28,30 @@
         </el-row>
     </el-form>
     <!------------------------------------------------------------------------------------ 表 -------------------------------------------------------------------------------------------->
-    <el-table :data="currentPageTableData" :size="size" border :row-class-name="tableRowClassName"
-        :default-sort="{ prop: 'roomNo', order: 'descending' }" @selection-change="handleSelectionChange"
-        max-height="400" table-layout="fixed">
-        <el-table-column type="selection"></el-table-column>
-        <el-table-column prop="name" label="姓名" min-width="50" align="center" show-overflow-tooltip />
-        <el-table-column prop="roomNo" label="房间号" min-width="80" align="center" sortable />
-        <el-table-column prop="balance" label="余额" min-width="70" align="center" show-overflow-tooltip />
-        <el-table-column prop="status" label="状态" min-width="70" align="center" show-overflow-tooltip />
+    <base-table :table-data="currentPageTableData" :columns="columns" :size="size" :row-class-name="tableRowClassName"
+        :default-sort="{ prop: 'roomNo', order: 'descending' }" :max-height="400" show-selection
+        @selection-change="handleSelectionChange">
+        <!-- 自定义列：住宿时间 -->
+        <template #resideTimePeriod="{ scope }">
+            {{ formatResideTime(scope.row.resideTimePeriod[0], scope.row.resideTimePeriod[1]) }}
+        </template>
 
-        <el-table-column prop="resideTimePeriod" label="住宿时间" min-width="260" align="center" show-overflow-tooltip>
-            <template v-slot="scope">
-                {{ formatResideTime(scope.row.resideTimePeriod[0], scope.row.resideTimePeriod[1]) }}
-            </template>
-        </el-table-column>
-        <el-table-column prop="idCardNo" label="身份证" min-width="150" align="center" show-overflow-tooltip />
-        <el-table-column prop="mobile" label="电话号码" min-width="100" align="center" show-overflow-tooltip />
-        <el-table-column label="操作" min-width="240" align="center">
-            <template v-slot="scope">
-                <div class="button-group">
-                    <el-button v-if="scope.row.status === '已入住'" plain :size="size"
-                        @click="renewal(scope.row)">续租</el-button>
-                    <el-button v-if="scope.row.status === '已入住'" plain :size="size"
-                        @click="checkOut(scope.row)">退宿</el-button>
-                    <el-button v-if="scope.row.status === '已预订'" plain :size="size"
-                        @click="checkInForServed(scope.row)">预订顾客入住</el-button>
-                    <el-button v-if="scope.row.status === '已退宿'" plain :size="size" disabled>该顾客已退宿</el-button>
-                    <el-button type="primary" :size="size" :icon="Edit" circle plain
-                        @click="updateCustomer(scope.row)" />
-                    <el-button type="success" :size="size" :icon="More" circle plain @click="viewCustomer(scope.row)" />
-                    <el-button type="danger" :size="size" :icon="Delete" circle plain
-                        @click="deleteCustomer(scope.row)" />
-                </div>
-            </template>
-        </el-table-column>
-    </el-table>
+        <!-- 自定义操作列 -->
+        <template #actions="{ scope }">
+            <div class="button-group">
+                <el-button v-if="scope.row.status === '已入住'" plain :size="size"
+                    @click="renewal(scope.row)">续租</el-button>
+                <el-button v-if="scope.row.status === '已入住'" plain :size="size"
+                    @click="checkOut(scope.row)">退宿</el-button>
+                <el-button v-if="scope.row.status === '已预订'" plain :size="size"
+                    @click="checkInForServed(scope.row)">预订顾客入住</el-button>
+                <el-button v-if="scope.row.status === '已退宿'" plain :size="size" disabled>该顾客已退宿</el-button>
+                <el-button type="primary" :size="size" :icon="Edit" circle plain @click="updateCustomer(scope.row)" />
+                <el-button type="success" :size="size" :icon="More" circle plain @click="viewCustomer(scope.row)" />
+                <el-button type="danger" :size="size" :icon="Delete" circle plain @click="deleteCustomer(scope.row)" />
+            </div>
+        </template>
+    </base-table>
     <!--------------------------------------------------------------------------------- 底部操作 ------------------------------------------------------>
     <el-row style="margin-top: 10px;">
         <el-col :span="8" style="text-align: left;">
@@ -148,7 +137,7 @@
                 </el-col>
                 <el-col :span="6" style="padding-left: 5px;padding-top: 5px;">
                     <el-text style="width: 100%" :size="size">{{ roomMessage(customerForm.roomNo)
-                    }}</el-text>
+                        }}</el-text>
                 </el-col>
                 <el-col :span="8" style="padding-left: 5px;">
                     <el-form-item label="性别" prop="gender" label-width="40px">
@@ -174,7 +163,7 @@
                 </el-col>
                 <el-col :span="6" style="padding-left: 5px;padding-top: 5px;">
                     <el-text style="width: 100%" :size="size">{{ timeDifference(customerForm.resideTimePeriod)
-                    }}</el-text>
+                        }}</el-text>
                 </el-col>
             </el-row>
         </el-form>
@@ -194,6 +183,19 @@
 </template>
 
 <script lang="ts" setup>
+import BaseTable from '@/components/BaseTable.vue';
+
+const columns = [
+    { prop: 'name', label: '姓名', minWidth: 50, showOverflowTooltip: true },
+    { prop: 'roomNo', label: '房间号', minWidth: 80, sortable: true },
+    { prop: 'balance', label: '余额', minWidth: 70, showOverflowTooltip: true },
+    { prop: 'status', label: '状态', minWidth: 70, showOverflowTooltip: true },
+    { prop: 'resideTimePeriod', label: '住宿时间', minWidth: 260, showOverflowTooltip: true },
+    { prop: 'idCardNo', label: '身份证', minWidth: 150, showOverflowTooltip: true },
+    { prop: 'mobile', label: '电话号码', minWidth: 100, showOverflowTooltip: true },
+];
+
+import showConfirmDialog from '@/utils/showConfirmDialog';
 
 const isSubmitting = ref(false); // 控制按钮的加载状态
 const roomMessage = (roomNo: string) => {
@@ -254,15 +256,7 @@ const checkOut = (row: { resideTimePeriod: (string | number | Date)[]; roomNo: s
             minimumAmount = timeDifference * info.roomAmount;
         }
     }
-    ElMessageBox.confirm(
-        '确定为顾客' + row.name + '退宿吗？(若退宿请返还押金' + deposit + '元、充值剩余' + (row.balance - minimumAmount) + '元)',
-        '警告',
-        {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            type: 'warning',
-        }
-    )
+    showConfirmDialog('确定为顾客' + row.name + '退宿吗？(若退宿请返还押金' + deposit + '元、充值剩余' + (row.balance - minimumAmount) + '元)', '警告')
         .then(() => {
             customerForm.value = JSON.parse(JSON.stringify(row));
             customerForm.value.image = getImage(row.cno);
@@ -281,29 +275,36 @@ const checkOut = (row: { resideTimePeriod: (string | number | Date)[]; roomNo: s
 }
 // 续租
 const oldResideTimePeriod = ref<string[]>([]);
-const renewal = (row: { resideTimePeriod: string[]; cno: any; }) => {
-    oldResideTimePeriod.value = row.resideTimePeriod
-    customerForm.value = JSON.parse(JSON.stringify(row))
-    customerForm.value.image = getImage(row.cno);
-    customerForm.value.imageUrl = apiClient.defaults.baseURL + 'media/' + customerForm.value.image;
+const renewal = (row: { resideTimePeriod: string[]; cno: any }) => {
+    oldResideTimePeriod.value = row.resideTimePeriod;
+    initializeCustomerForm(row, { resideTimePeriod: ['', ''] }); // 清空居住时间
     customerDialogStatus.value = CustomerDialogStatus.RENEWAL;
     customerDialogVisible.value = true;
-}
+};
 
 // 预订顾客办理入住
-const checkInForServed = (row: { resideTimePeriod: string[]; cno: any; }) => {
-    customerForm.value = JSON.parse(JSON.stringify(row))
-    customerForm.value.checkInTime = new Date();
-    customerForm.value.status = '已入住';
-    customerForm.value.image = getImage(row.cno);
-    customerForm.value.imageUrl = apiClient.defaults.baseURL + 'media/' + customerForm.value.image;
+const checkInForServed = (row: { resideTimePeriod: string[]; cno: any }) => {
+    initializeCustomerForm(row, {
+        checkInTime: new Date(),
+        status: '已入住',
+    }); // 设置入住时间和状态
     customerDialogStatus.value = CustomerDialogStatus.CHECKINFORSERVED;
     customerDialogVisible.value = true;
-}
+};
+const initializeCustomerForm = (row: any, overrides: Partial<Customer> = {}) => {
+    // 深拷贝 row 数据到 customerForm
+    customerForm.value = { ...JSON.parse(JSON.stringify(row)) };
 
+    // 获取图片并拼接 URL
+    customerForm.value.image = getImage(row.cno);
+    customerForm.value.imageUrl = `${apiClient.defaults.baseURL}media/${customerForm.value.image}`;
+
+    // 应用 overrides 参数覆盖指定字段
+    Object.assign(customerForm.value, overrides);
+};
 import { computed, onMounted, ref } from 'vue'
 import { Search, Delete, Edit, Star, More, FolderOpened, Plus, ArrowRight } from '@element-plus/icons-vue'
-import { dayjs, ElMessage, ElMessageBox, FormItemRule, ComponentSize, FormInstance, UploadProps } from 'element-plus'
+import { dayjs, ElMessage, FormItemRule, ComponentSize, FormInstance, UploadProps } from 'element-plus'
 import apiClient from '@/services/apiClient';
 import { AxiosResponse } from 'axios';
 
@@ -357,7 +358,7 @@ const rules = ref({
                 const room = roomData.value.find(room => room.roomNo === value);
                 if (room.roomStatus === 'reserved' && customerDialogStatus.value === CustomerDialogStatus.CHECKINFORSERVED && customerForm.value.roomNo === value)
                     return callback(); // 预约用户入住时跳过验证
-                else if(room.roomStatus === 'occupied' && customerDialogStatus.value === CustomerDialogStatus.RENEWAL && customerForm.value.roomNo === value)
+                else if (room.roomStatus === 'occupied' && customerDialogStatus.value === CustomerDialogStatus.RENEWAL && customerForm.value.roomNo === value)
                     return callback(); // 入住用户续租时跳过验证
                 else if (room.roomStatus !== 'vacant')
                     return callback(new Error('该房间已被占用'));
@@ -500,7 +501,7 @@ const handleCurrentChange = (pageNumber: number) => {
 const handleClose = (done: () => void) => {
     if (customerDialogStatus.value === CustomerDialogStatus.VIEW) done()
     else {
-        ElMessageBox.confirm('信息还未保存，确定退出吗？')
+        showConfirmDialog('信息还未保存，确定退出吗？', '警告')
             .then(() => { done() })
             .catch(() => { })
     }
@@ -509,11 +510,10 @@ const handleClose = (done: () => void) => {
 const tableRowClassName = ({ row }: { row: Customer }) => {
     const now = dayjs();
     const resideTimePeriod = dayjs(row.resideTimePeriod[1], undefined, true)
-    if (now.isAfter(resideTimePeriod))
-        return 'danger-row'
-    else if (Math.abs(now.diff(resideTimePeriod, 'day')) < 1) {
-        return 'warning-row'
-    }
+    if (row.status == '已退宿') return ''
+    else if (resideTimePeriod.isBefore(now)) return 'danger-row'; // 过期
+    else if (resideTimePeriod.isAfter(now.add(1, 'day'))) return 'success-row'; // 正常
+    else return 'warning-row'; // 即将到期
 }
 // 根据页面设置加载当前页顾客的信息
 const getPageCustomer = () => {
@@ -528,27 +528,8 @@ onMounted(() => {
     getCustomer();
     getRoom();
 })
-// 格式为年月日时
-const formatDate = (dateString: string): string => {
-    // 将 ISO 8601 格式的字符串转换为日期对象  
-    const date = new Date(dateString);
+import { formatResideTime, processResideTimePeriod } from '@/utils/dateUtils'; // 引入工具函数
 
-    // 检查日期对象是否有效  
-    if (!isNaN(date.getTime())) {
-        const year = date.getUTCFullYear(); // 获取年份  
-        const month = date.getUTCMonth() + 1; // 获取月份（注意：月份从0开始，所以要加1）  
-        const day = date.getUTCDate(); // 获取日期  
-        const hours = date.getUTCHours(); // 获取小时数  
-
-        return `${year}年${month}月${day}日${hours}时`; // 输出格式化的日期  
-    } else {
-        return '无效的日期';
-    }
-};
-// 格式化住宿时间
-const formatResideTime = (beginTime: string, endTime: string) => {
-    return formatDate(beginTime) + '到' + formatDate(endTime);
-}
 // ————————————————————————————————————————————————————————————————————————————————————————————操作—————————————————————————————————————————————————————————————————————————————————— //
 const customerDialogVisible = ref(false) // 显示dialog
 // 获取所有房客信息
@@ -593,21 +574,17 @@ const getRoom = async () => {
     }
 };
 // 显示查看明细对话框
-const viewCustomer = (row: { cno: any; }) => {
-    customerForm.value = JSON.parse(JSON.stringify(row));
-    customerForm.value.image = getImage(row.cno);
-    customerForm.value.imageUrl = apiClient.defaults.baseURL + 'media/' + customerForm.value.image;
+const viewCustomer = (row: { cno: any }) => {
+    initializeCustomerForm(row); // 不需要额外覆盖字段
     customerDialogStatus.value = CustomerDialogStatus.VIEW;
     customerDialogVisible.value = true;
-}
+};
 // 显示修改信息对话框
-const updateCustomer = (row: { cno: any; }) => {
-    customerForm.value = JSON.parse(JSON.stringify(row))
-    customerForm.value.image = getImage(row.cno);
-    customerForm.value.imageUrl = apiClient.defaults.baseURL + 'media/' + customerForm.value.image;
+const updateCustomer = (row: { cno: any }) => {
+    initializeCustomerForm(row); // 调用封装的函数
     customerDialogStatus.value = CustomerDialogStatus.EDIT;
     customerDialogVisible.value = true;
-}
+};
 // 显示添加对话框
 const addCustomer = () => {
     customerDialogStatus.value = CustomerDialogStatus.ADD;
@@ -648,7 +625,7 @@ const submitRemand = computed(() => {
     else
         return ''
 })
-// 重置表单
+// 重置表单验证状态
 const resetForm = (formEl: FormInstance | undefined) => {
     if (!formEl) return
     formEl.clearValidate()
@@ -669,22 +646,6 @@ const submitForm = async (formEl: FormInstance | undefined) => {
         isSubmitting.value = false; // 提交完成后停止加载
     }
 };
-// 格式化居住时间
-const processResideTimePeriod = (item: { resideTimePeriod: any; }) => {
-    let resideTimePeriodString = item.resideTimePeriod; // 获取原始字符串  
-    resideTimePeriodString = resideTimePeriodString.replace(/'/g, '"'); // 替换单引号为双引号
-    // 将字符串转换为数组，使用 JSON.parse  
-    let resideTimePeriod: string[] = [];
-
-    try {
-        // 使用 JSON.parse 将字符串转换为数组  
-        resideTimePeriod = JSON.parse(resideTimePeriodString);
-    } catch (error) {
-        console.error('Error parsing resideTimePeriodString:', error);
-        // 在解析失败时，可以设置一个空数组或处理错误的逻辑  
-    }
-    return resideTimePeriod; // 返回得到的数组  
-}
 // 查询
 const queryCustomer = () => {
     apiClient
@@ -697,7 +658,6 @@ const queryCustomer = () => {
         })
 }
 const submitUpdateCustomer = async () => {
-    console.log(customerForm.value);
     return apiClient
         .post("customer/update/", customerForm.value)
         .then((res) => {
@@ -729,16 +689,8 @@ const submitAddCustomer = () => {
 }
 // 删除
 const deleteCustomer = (row: { name: string; cno: any; }) => {
-    ElMessageBox.confirm(
-        '是否永久删除姓名为' + row.name + '的顾客信息?',
-        '警告',
-        {
-            confirmButtonText: '是',
-            cancelButtonText: '否',
-            type: 'warning',
-            center: true,
-        }
-    )
+    showConfirmDialog('是否永久删除姓名为' + row.name + '的顾客信息?', '警告')
+
         .then(() => {
             apiClient
                 .post("customer/delete/", row.cno)
@@ -759,15 +711,7 @@ const handleSelectionChange = (data: any[]) => {
     selectCustomers.value = data
 }
 const deleteCustomers = (row: any) => {
-    ElMessageBox.confirm(
-        '是否批量删除' + selectCustomers.value.length + '个顾客的信息?',
-        '警告',
-        {
-            confirmButtonText: '是',
-            cancelButtonText: '否',
-            type: 'warning',
-            center: true,
-        })
+    showConfirmDialog('是否批量删除' + selectCustomers.value.length + '个顾客的信息?', '警告')
         .then(() => {
             apiClient
                 .post("customers/delete/", { customers: selectCustomers.value })
@@ -821,63 +765,3 @@ const getImage = (cno: string) => {
     }
 }
 </script>
-
-<style scoped>
-/* 顶部操作样式 */
-.top-form {
-    margin-top: 20px;
-}
-
-.search-input {
-    width: 240px;
-}
-
-.button-group-container {
-    display: flex;
-    justify-content: flex-end;
-}
-
-.button-group {
-    display: flex;
-    padding-right: 10px;
-}
-
-.avatar-uploader {
-    .avatar {
-        width: 172px;
-        height: 110px;
-        display: block;
-        border-radius: 4px;
-        object-fit: cover;
-    }
-
-    .el-upload {
-        border: 1px dashed var(--el-border-color);
-        border-radius: 4px;
-        cursor: pointer;
-        position: relative;
-        overflow: hidden;
-        transition: var(--el-transition-duration-fast);
-
-        &:hover {
-            border-color: var(--el-color-primary);
-        }
-    }
-
-    .el-icon.avatar-uploader-icon {
-        font-size: 28px;
-        color: #8c939d;
-        width: 172px;
-        height: 110px;
-        text-align: center;
-        line-height: 110px;
-    }
-}
-
-.button-group {
-    display: flex;
-    margin-right: 0;
-    justify-content: flex-end;
-    /* 将按钮组推向右侧 */
-}
-</style>

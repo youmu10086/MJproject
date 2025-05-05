@@ -1,0 +1,42 @@
+html,
+body,
+#app {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.el-container {
+  height: 100%;
+  margin-bottom: 0;
+}
+
+.el-header {
+  background-color: var(--header-bg-color);
+  color: var(--text-color);
+  font-weight: bold;
+  line-height: 60px;
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+.el-aside {
+  background-color: var(--header-bg-color);
+  color: var(--text-color);
+  text-align: center;
+}
+
+.el-main {
+  background-color: var(--footer-bg-color);
+  color: var(--text-color);
+  overflow-y: auto;
+  height: calc(100vh - 55px);
+  padding: 20px;
+}
+
+.no-select {
+  -webkit-user-select: none;
+  user-select: none;
+}

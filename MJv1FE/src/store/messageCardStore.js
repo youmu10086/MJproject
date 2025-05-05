@@ -6,11 +6,6 @@ export const useMessageCardStore = defineStore("messageCard", () => {
   const messageCardIsDisplayed = ref(
     localStorage.getItem("isDisplay") === "true"
   );
-
-  /**
-   * 设置消息卡片的显示状态
-   * @param {boolean} isDisplayed - 是否显示消息卡片
-   */
   const setMessageCardDisplayed = (isDisplayed) => {
     messageCardIsDisplayed.value = isDisplayed;
     localStorage.setItem("isDisplay", isDisplayed.toString());

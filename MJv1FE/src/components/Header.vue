@@ -8,13 +8,13 @@
     <el-col :span="1">
       <el-popover v-if="userStore.isLoggedIn" placement="bottom-end" trigger="hover" width="155">
         <template #reference>
-          <el-avatar :title="userStore.userInfo.name" class="user-avatar">
+          <el-avatar :title="userStore.userInfo.username" class="user-avatar">
             {{ nameInitial }}
           </el-avatar>
         </template>
         <div class="button-group">
-          <el-button type="danger" plain @click="handleLogout">退出登录</el-button>
-          <el-button type="primary" plain :icon="Setting" circle class="setting-button" />
+          <el-button aria-label="退出登录" type="danger" plain @click="handleLogout">退出登录</el-button>
+          <el-button aria-label="设置" type="primary" plain :icon="Setting" circle class="setting-button" />
         </div>
       </el-popover>
       <el-avatar v-else @click="userStore.loginDialogVisible = true" class="user-avatar">
@@ -34,7 +34,7 @@ import { Setting } from '@element-plus/icons-vue';
 const userStore = useUserStore();
 
 const nameInitial = computed(() =>
-  userStore.userInfo.name?.charAt(0)?.toUpperCase() || ''
+  userStore.userInfo.username?.charAt(0)?.toUpperCase() || ''
 );
 
 const handleLogout = async () => {

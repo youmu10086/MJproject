@@ -38,7 +38,7 @@
                     <el-icon>
                         <More />
                     </el-icon>
-                    <span>预订管理</span>
+                    <span>我的订单</span>
                 </el-menu-item>
                 <el-menu-item index="onlineService" v-if="userStore.isCustomer || userStore.isGuest">
                     <el-icon>
@@ -83,36 +83,3 @@ const handleSelect = (index) => {
     router.push(`/${index}`);
 };
 </script>
-
-<style scoped>
-.el-menu-item {
-    border-right: none !important;
-}
-
-.dark {
-    --menu-active-text-color: #337ecc;
-    --menu-background-color: #141414;
-    --menu-text-color: #FAFAFA;
-}
-
-.light {
-    --menu-active-text-color: #337ecc;
-    --menu-background-color: #FAFAFA;
-    --menu-text-color: #606266;
-}
-
-.el-menu {
-    transition: background-color 0.3s ease, color 0.3s ease;
-    margin-top: 20px;
-}
-
-.el-menu-item {
-    font-size: 12px;
-    color: var(--menu-text-color);
-}
-
-.el-menu-item:hover {
-    color: var(--menu-active-text-color);
-    background-color: var(--menu-background-color);
-}
-</style>

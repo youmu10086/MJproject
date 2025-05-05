@@ -1,0 +1,30 @@
+.el-menu-item {
+  border-right: none !important;
+}
+
+.dark {
+  --menu-active-text-color: #337ecc;
+  --menu-background-color: #141414;
+  --menu-text-color: #fafafa;
+}
+
+.light {
+  --menu-active-text-color: #337ecc;
+  --menu-background-color: #fafafa;
+  --menu-text-color: #606266;
+}
+
+.el-menu {
+  transition: background-color 0.3s ease, color 0.3s ease;
+  margin-top: 20px;
+}
+
+.el-menu-item {
+  font-size: 12px;
+  color: var(--menu-text-color);
+}
+
+.el-menu-item:hover {
+  color: var(--menu-active-text-color);
+  background-color: var(--menu-background-color);
+}
