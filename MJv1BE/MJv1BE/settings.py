@@ -39,7 +39,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'apartment',
     'account',
+    'chat',
     'corsheaders',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -60,8 +62,6 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:8080',  # 如果在本地开发的情况
     'http://193.112.246.221',  # 前端应用的地址
 ]
-
-
 
 ROOT_URLCONF = 'MJv1BE.urls'
 
@@ -159,7 +159,13 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': True,  # 刷新令牌旋转后是否将旧令牌加入黑名单
 }
 
-
 AUTH_USER_MODEL = 'account.CustomUser'
 
+ASGI_APPLICATION = 'MJv1BE.asgi.application'
 
+# 配置通道层（使用内存层，仅用于开发环境）
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}
