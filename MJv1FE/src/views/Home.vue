@@ -69,7 +69,7 @@ const stats = ref([
   {
     icon: markRaw(User), // 使用 markRaw 标记组件对象
     title: '今日活跃用户',
-    value: 1423,
+    value: 423,
     trend: 'up',
     trendValue: '+12.5%',
     trendColor: '#52c41a',
@@ -87,16 +87,16 @@ const stats = ref([
   {
     icon: markRaw(Money), // 使用 markRaw 标记组件对象
     title: '年度总营收',
-    value: 256.8,
+    value: 156.8,
     trend: 'up',
     trendValue: '+24.7%',
     trendColor: '#52c41a',
-    suffix: '亿'
+    suffix: '万'
   },
   {
     icon: markRaw(ChatRound), // 使用 markRaw 标记组件对象
     title: '用户满意度',
-    value: 120,
+    value: 96.5,
     trend: 'up',
     trendValue: '+0.8%',
     trendColor: '#52c41a',

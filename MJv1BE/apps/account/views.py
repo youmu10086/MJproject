@@ -78,7 +78,8 @@ def enroll(request):
         response = Response({
             'access': access,
             'username': obj_user.username,
-            'role': role
+            'role': role,
+            'id': obj_user.id,
         }, status=status.HTTP_201_CREATED)
 
         set_refresh_cookie(response, refresh)

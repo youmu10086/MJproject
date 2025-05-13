@@ -1,6 +1,6 @@
 <template>
     <el-dialog v-model="userStore.loginDialogVisible" :title="formStatusTitle" width="500" class="auth-dialog"
-        @closed="handleDialogClose">
+        @closed="handleDialogClose" @keydown.enter="handleSubmit">
         <el-form :model="formData" :rules="formRules" ref="formRef" label-width="100px" label-position="top"
             status-icon>
             <el-form-item label="账户名称" prop="username">
@@ -180,7 +180,6 @@ const handleSubmit = async () => {
                     username: response.data.username,
                     id: response.data.id,
                 };
-                console.log(response.data);
             });
 
             localStorage.setItem('accessToken', response.data.access);

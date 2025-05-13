@@ -1,14 +1,10 @@
 @use "sass:list";
+
 .home-page {
   font-family: "Arial", sans-serif;
   padding: 20px;
   background-color: var(--background-color);
   color: var(--text-color);
-  --carousel-item-bg-color: rgb(51.2, 126.4, 204);
-
-  &.dark {
-    --carousel-item-bg-color: #1e1e1e;
-  }
 
   .header {
     text-align: center;
@@ -22,7 +18,7 @@
     }
 
     p {
-      color: #7a7a7a;
+      color: var(--stat-title-color);
       font-size: 1.2em;
     }
   }
@@ -40,14 +36,14 @@
       padding: 24px;
       margin-bottom: 20px;
       transition: all 0.3s ease;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 4px 12px var(--box-shadow-color);
       cursor: pointer;
       position: relative;
       overflow: hidden;
 
       &:hover {
         transform: translateY(-5px);
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        box-shadow: 0 8px 24px var(--box-shadow-hover-color);
       }
 
       .card-icon {
@@ -63,13 +59,13 @@
         .icon {
           width: 24px;
           height: 24px;
-          color: var(--primary-color);
+          color: rgb(var(--primary-color));
         }
       }
 
       .stat-title {
         font-size: 0.95rem;
-        color: var(--text-color);
+        color: var(--stat-title-color);
         opacity: 0.8;
         margin-bottom: 8px;
       }

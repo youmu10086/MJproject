@@ -1,0 +1,113 @@
+.container {
+    padding: var(--container-padding) 0;
+    max-width: var(--container-max-width);
+    margin: 0 auto;
+    display: flex;
+    height: 75vh;
+    flex-direction: column;
+}
+
+.chat-window {
+    border: 1px solid var(--chat-window-border);
+    border-radius: 8px;
+    padding: 10px;
+    background-color: var(--chat-window-bg);
+    color: var(--chat-window-text);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    box-sizing: border-box;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.messages {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    overflow-y: auto;
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: var(--messages-bg);
+    border-radius: 8px;
+    border: 1px solid var(--messages-border);
+    position: relative;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.message {
+    margin-bottom: 10px;
+    padding: 8px 12px;
+    border-radius: 18px;
+    max-width: 70%;
+    box-shadow: 0 2px 4px var(--message-shadow);
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.message.user {
+    background-color: var(--message-user-bg);
+    color: var(--message-user-text);
+    align-self: flex-end;
+    text-align: right;
+    margin-left: 30%;
+}
+
+.message.service {
+    background-color: var(--message-service-bg);
+    color: var(--message-service-text);
+    align-self: flex-start;
+    text-align: left;
+    margin-right: 30%;
+}
+
+.input-area {
+    display: flex;
+    gap: 10px;
+}
+
+/* 动画效果 */
+.message-enter-active {
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.5, 1);
+}
+
+.message-leave-active {
+    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.5, 1);
+    position: absolute;
+}
+
+.message-enter-from {
+    opacity: 0;
+}
+
+.message.user.message-enter-from {
+    transform: translateX(20px);
+}
+
+.message.service.message-enter-from {
+    transform: translateX(-20px);
+}
+
+.message-leave-to {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+/* 气泡动画 */
+@keyframes bubble {
+    0% {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+
+    50% {
+        transform: scale(1.02);
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.message-enter-active {
+    animation: bubble 0.35s ease-out;
+}

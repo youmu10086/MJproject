@@ -20,7 +20,8 @@
 @use "./views/customer";
 @use "./views/room";
 @use "./views/userManage.scss";
-@use "./components/float-button";
+@use "./views/onlineService.scss";
+
 @use "./components/dark-theme-float-button";
 
 @import "@fontsource/noto-sans-sc/index.css";

@@ -1,6 +1,6 @@
 <template>
-    <el-button :aria-label="isDark ? '切换到浅色模式' : '切换到深色模式'" class="float-button" :class="{ 'dark-mode': isDark }"
-        type="primary" circle @click="toggleTheme()">
+    <el-button :aria-label="isDark ? '切换到浅色模式' : '切换到深色模式'" class="float-button" type="primary" circle
+        @click="toggleTheme()">
         <el-icon>
             <component :is="isDark ? Moon : Sunny" />
         </el-icon>

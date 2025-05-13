@@ -14,11 +14,9 @@
         </template>
         <!-- 自定义操作列 -->
         <template #actions="{ scope }">
-                <el-button type="success" size="small" @click="viewDetails(scope.row)">查看详情</el-button>
-                <el-button type="danger" size="small" v-if="scope.row.status === '已预订'"
-                    @click="cancelReservation(scope.row)">
-                    取消预订
-                </el-button>
+            <el-button type="success" size="small" @click="viewDetails(scope.row)">查看详情</el-button>
+            <el-button type="danger" size="small" v-if="scope.row.status === '已预订'"
+                @click="cancelReservation(scope.row)"> 取消预订 </el-button>
         </template>
     </base-table>
 
@@ -30,7 +28,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { ElMessage, ElMessageBox } from 'element-plus';
+import { ElMessage } from 'element-plus';
 import apiClient from '@/services/apiClient'; // 引入封装的 API 客户端
 import { ArrowRight } from '@element-plus/icons-vue';
 import { useUserStore } from '@/store/userStore';
@@ -120,6 +118,10 @@ const rowClassName = (row) => {
 
 // 页面加载时获取数据
 onMounted(() => {
+    if(!userStore.isLoggedIn) {
+        ElMessage.error('请先登录');
+        return;
+    }
     fetchReservationHistory();
 });
 </script>

@@ -2,10 +2,10 @@ import { createRouter, createWebHistory } from "vue-router";
 import { useUserStore } from "@/store/userStore";
 import { ElMessage } from "element-plus";
 
+import Home from "@/views/Home.vue";
 const Customer = () => import("@/views/Customer.vue");
 const Employee = () => import("@/views/Employee.vue");
 const Supplies = () => import("@/views/Supplies.vue");
-const Home = () => import("@/views/Home.vue");
 const OnlineService = () => import("@/views/OnlineService.vue");
 const ReviewsFeedback = () => import("@/views/ReviewsFeedback.vue");
 const ReservationManage = () => import("@/views/ReservationManage.vue");
@@ -36,10 +36,7 @@ const routes = [
     path: "/room",
     name: "房间管理",
     component: Room,
-    meta: {
-      requiresAuth: true,
-      requiredRole: ["manager", "customer", "guest"],
-    },
+    meta: { requiredRole: ["manager", "customer", "guest"] },
   },
   {
     path: "/employee",
@@ -56,6 +53,7 @@ const routes = [
     path: "/reservationManage",
     name: "历史记录",
     component: ReservationManage,
+    meta: { requiresAuth: true, requiredRole: "customer" },
   },
   {
     path: "/reviewsFeedback",

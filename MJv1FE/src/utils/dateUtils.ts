@@ -50,7 +50,6 @@ export const processResideTimePeriod = (item: { resideTimePeriod: any }): string
     let resideTimePeriodString = item.resideTimePeriod;
 
     if (!resideTimePeriodString || typeof resideTimePeriodString !== 'string') {
-        console.error('Invalid resideTimePeriodString:', resideTimePeriodString);
         return [];
     }
 
@@ -61,7 +60,6 @@ export const processResideTimePeriod = (item: { resideTimePeriod: any }): string
         // 使用 JSON.parse 将字符串转换为数组
         return JSON.parse(resideTimePeriodString);
     } catch (error) {
-        console.error('Error parsing resideTimePeriodString:', error);
         return [];
     }
 };

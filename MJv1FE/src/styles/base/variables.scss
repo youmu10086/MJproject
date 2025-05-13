@@ -15,6 +15,44 @@
   --warning-bg: rgb(252.5, 245.7, 235.5); // 浅色主题黄色背景
   --success-bg: rgb(239.8, 248.9, 235.3); // 浅色主题绿色背景
   --danger-bg: rgb(254, 240.3, 240.3); // 浅色主题红色背景
+
+  --float-bg-color: #fff;
+  --float-text-color: #333;
+  --float-bg-color-hover: #f0f0f0;
+  --float-box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  --float-hover-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+
+  --menu-active-text-color: #337ecc;
+  --menu-background-color: #fafafa;
+  --menu-text-color: #606266;
+
+  --container-padding: 20px;
+  --container-max-width: 1400px;
+
+  /* 默认主题颜色 */
+  --chat-window-bg: #f9f9f9;
+  --chat-window-border: #ddd;
+  --chat-window-text: #000;
+
+  --messages-bg: #fff;
+  --messages-border: #ddd;
+
+  --message-user-bg: #d1e7ff;
+  --message-user-text: #000;
+
+  --message-service-bg: #f1f1f1;
+  --message-service-text: #000;
+
+  --message-shadow: rgba(0, 0, 0, 0.1);
+
+  --home-background-color: #ffffff;
+  --home-text-color: #333333;
+  --card-bg: #f9f9f9;
+  --primary-color: 64, 158, 255; /* RGB 格式便于透明度控制 */
+  --carousel-item-bg-color: rgb(51.2, 126.4, 204);
+  --stat-title-color: #7a7a7a;
+  --box-shadow-color: rgba(0, 0, 0, 0.08);
+  --box-shadow-hover-color: rgba(0, 0, 0, 0.12);
 }
 
 .dark {
@@ -31,4 +69,39 @@
   --warning-bg: rgb(41, 34.2, 24); // 深色主题黄色背景
   --success-bg: rgb(28.3, 37.4, 23.8); // 深色主题绿色背景
   --danger-bg: rgb(42.5, 28.8, 28.8); // 深色主题红色背景
+
+  --float-bg-color: #333;
+  --float-text-color: #fff;
+  --float-bg-color-hover: #444;
+  --float-box-shadow: 0 0px 12px rgba(255, 255, 255, 0.2);
+  --float-hover-shadow: 0 0 16px rgba(255, 255, 255, 0.3);
+
+  --menu-active-text-color: #337ecc;
+  --menu-background-color: #141414;
+  --menu-text-color: #fafafa;
+
+  /* 深色主题颜色 */
+  --chat-window-bg: #2c2c2c;
+  --chat-window-border: #444;
+  --chat-window-text: #fff;
+
+  --messages-bg: #1e1e1e;
+  --messages-border: #333;
+
+  --message-user-bg: #4a90e2;
+  --message-user-text: #fff;
+
+  --message-service-bg: #333;
+  --message-service-text: #fff;
+
+  --message-shadow: rgba(0, 0, 0, 0.3);
+
+  --home-background-color: #1e1e1e;
+  --home-text-color: #cccccc;
+  --card-bg: #2c2c2c;
+  --primary-color: 102, 177, 255;
+  --carousel-item-bg-color: #1e1e1e;
+  --stat-title-color: #aaaaaa;
+  --box-shadow-color: rgba(0, 0, 0, 0.3);
+  --box-shadow-hover-color: rgba(0, 0, 0, 0.5);
 }

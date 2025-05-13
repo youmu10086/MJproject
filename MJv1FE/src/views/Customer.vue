@@ -4,27 +4,29 @@
         <el-breadcrumb-item>入住人员管理</el-breadcrumb-item>
     </el-breadcrumb>
     <!----------------------------------------------------------------------------------- 顶部操作 ------------------------------------------------------------------------------------------->
-    <el-form :inline="true" class="top-form">
+    <el-form :inline="true" class="top-form" @submit.prevent=queryCustomer>
         <el-row>
-            <el-col :span="14">
+            <el-col :span="18">
                 <el-input v-model="inputStr" placeholder="输入查询条件" clearable class="search-input"
                     :prefix-icon="Search" />
             </el-col>
             <el-col :span="6" class="button-group-container">
                 <el-button-group class="button-group">
-                    <el-button type="primary" :icon="Search" plain @click="queryCustomer()">查询</el-button>
-                    <el-button type="primary" :icon="FolderOpened" plain @click="getCustomer()">全部</el-button>
+                    <el-button type="primary" v-if="inputStrIsEmpty" :icon="Refresh" plain
+                        @click="getCustomer()">刷新</el-button>
+                    <el-button type="primary" v-else :icon="Search" plain @click="queryCustomer()">查询</el-button>
+
                     <el-button type="primary" :icon="Plus" plain @click="addCustomer()">现场入住</el-button>
                 </el-button-group>
             </el-col>
-            <el-col :span="2" class="upload-container">
+            <!-- <el-col :span="2" class="upload-container">
                 <el-upload>
                     <el-button type="primary" plain>导入excel</el-button>
                 </el-upload>
             </el-col>
             <el-col :span="2" class="export-container">
                 <el-button type="primary" plain>导出excel</el-button>
-            </el-col>
+            </el-col> -->
         </el-row>
     </el-form>
     <!------------------------------------------------------------------------------------ 表 -------------------------------------------------------------------------------------------->
@@ -46,6 +48,8 @@
                 <el-button v-if="scope.row.status === '已预订'" plain :size="size"
                     @click="checkInForServed(scope.row)">预订顾客入住</el-button>
                 <el-button v-if="scope.row.status === '已退宿'" plain :size="size" disabled>该顾客已退宿</el-button>
+                <el-button v-if="scope.row.status === '已取消预订'" plain :size="size" disabled>该顾客取消预订</el-button>
+
                 <el-button type="primary" :size="size" :icon="Edit" circle plain @click="updateCustomer(scope.row)" />
                 <el-button type="success" :size="size" :icon="More" circle plain @click="viewCustomer(scope.row)" />
                 <el-button type="danger" :size="size" :icon="Delete" circle plain @click="deleteCustomer(scope.row)" />
@@ -174,7 +178,6 @@
                         submitRemand }}</el-button>
                 <el-button type="info" @click="customerDialogVisible = false"
                     v-show="customerDialogStatus !== CustomerDialogStatus.VIEW">取消</el-button>
-
                 <el-button type="primary" v-show="customerDialogStatus === CustomerDialogStatus.VIEW"
                     @click="customerDialogVisible = false">确定</el-button>
             </div>
@@ -303,7 +306,7 @@ const initializeCustomerForm = (row: any, overrides: Partial<Customer> = {}) => 
     Object.assign(customerForm.value, overrides);
 };
 import { computed, onMounted, ref } from 'vue'
-import { Search, Delete, Edit, Star, More, FolderOpened, Plus, ArrowRight } from '@element-plus/icons-vue'
+import { Search, Delete, Edit, Refresh, More, FolderOpened, Plus, ArrowRight } from '@element-plus/icons-vue'
 import { dayjs, ElMessage, FormItemRule, ComponentSize, FormInstance, UploadProps } from 'element-plus'
 import apiClient from '@/services/apiClient';
 import { AxiosResponse } from 'axios';
@@ -324,6 +327,9 @@ const roomData = ref<Room[]>([])
 
 const currentPageTableData = ref<Customer[]>([])                   // 当前展示的信息
 const inputStr = ref('')
+const inputStrIsEmpty = computed(() => {
+    return inputStr.value === ''
+})
 const customerDialogTitle = computed(() => {
     if (customerDialogStatus.value === CustomerDialogStatus.ADD)
         return '现场入住'

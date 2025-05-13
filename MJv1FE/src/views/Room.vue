@@ -575,9 +575,6 @@ const addRoom = async () => {
         RoomFormSubmitting.value = true; // 提交中状态
         // 检查表单必填项
         if (!roomForm.value.roomNo || !roomForm.value.roomType || !roomForm.value.roomAmount) {
-            console.log('房间号:', roomForm.value.roomNo);
-            console.log('房间类型:', roomForm.value.roomType);
-            console.log('房间金额:', roomForm.value.roomAmount);
             ElMessage.error('请填写完整的房间信息');
             return;
         }
@@ -798,7 +795,6 @@ const getRoom = async () => {
             }));
         }
     } finally {
-        // console.log('房间数据:', roomData.value);
         loading.value = false;
     }
 };
