@@ -55,8 +55,9 @@ class Customer(models.Model):
     resideTimePeriod = models.CharField(db_column='resideTimePeriod', max_length=100, null=False)
     idCardNo = models.CharField(db_column='IDCardNo', max_length=20, null=False)
     image = models.CharField(db_column='Image', max_length=100, null=True)
-    balance = models.DecimalField(max_digits=10, decimal_places=2, null=True, db_column='Balance')
+    balance = models.DecimalField(max_digits=10, decimal_places=2, null=True, db_column='Balance', default=0)
     status = models.CharField(db_column='Status', choices=status_choice, max_length=20, null=False, default='未知')
+    # rate = models.DecimalField(max_digits=10, decimal_places=2, null=True, db_column='Rate', default=5)
     user = models.ForeignKey(
         CustomUser,  # 使用你的自定义用户模型
         on_delete=models.CASCADE,  # 用户删除时，关联的客户记录也被删除

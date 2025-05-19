@@ -13,16 +13,19 @@
     "lint": "eslint --ext .js,.vue src",
     "lint:fix": "eslint --ext .js,.vue src --fix",
     "lint:style": "stylelint --fix --cache --cache-location .stylelintcache",
-    "build:report": "vue-cli-service build --report"
+    "build:report": "vue-cli-service build --report",
+    "postbuild": "node scripts/critical-css.cjs"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",
     "@fontsource/noto-sans-sc": "^5.2.5",
     "@vueuse/core": "^13.0.0",
+    "animate.css": "^4.1.1",
     "axios": "^1.7.7",
     "cors": "^2.8.5",
     "crypto-js": "^4.2.0",
     "dayjs": "^1.11.13",
+    "echarts": "^5.6.0",
     "element-plus": "^2.9.8",
     "js-cookie": "^3.0.5",
     "pinia": "^3.0.2",
@@ -30,10 +33,12 @@
     "promise-polyfill": "^8.3.0",
     "vue": "^3.4.29",
     "vue-countup-v3": "^1.4.2",
+    "vue-echarts": "^7.0.3",
     "vue-router": "^4.4.5"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.1",
+    "critical": "^7.2.1",
     "sass": "^1.87.0",
     "sass-embedded": "^1.87.0",
     "terser": "^5.39.0",

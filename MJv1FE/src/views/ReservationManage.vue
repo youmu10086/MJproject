@@ -1,29 +1,32 @@
 <template>
-    <!-- 面包屑导航 -->
-    <el-breadcrumb :separator-icon="ArrowRight" class="no-select mb-4">
-        <el-breadcrumb-item to="/Home">首页</el-breadcrumb-item>
-        <el-breadcrumb-item>租住记录</el-breadcrumb-item>
-    </el-breadcrumb>
+    <div>
+        <!-- 面包屑导航 -->
+        <el-breadcrumb :separator-icon="ArrowRight" class="no-select mb-4">
+            <el-breadcrumb-item to="/Home">首页</el-breadcrumb-item>
+            <el-breadcrumb-item>租住记录</el-breadcrumb-item>
+        </el-breadcrumb>
 
-    <!-- 历史记录表格 -->
-    <base-table :table-data="reservations" :columns="columns" :size="'small'" :row-class-name="rowClassName"
-        :default-sort="{ prop: 'check_in_time', order: 'descending' }" :max-height="400">
+        <!-- 历史记录表格 -->
+        <base-table :table-data="reservations" :columns="columns" :size="'small'" :row-class-name="rowClassName"
+            :default-sort="{ prop: 'check_in_time', order: 'descending' }" :max-height="400">
 
-        <template #resideTimePeriod="{ scope }">
-            {{ formatResideTime(scope.row.resideTimePeriod[0], scope.row.resideTimePeriod[1]) }}
-        </template>
-        <!-- 自定义操作列 -->
-        <template #actions="{ scope }">
-            <el-button type="success" size="small" @click="viewDetails(scope.row)">查看详情</el-button>
-            <el-button type="danger" size="small" v-if="scope.row.status === '已预订'"
-                @click="cancelReservation(scope.row)"> 取消预订 </el-button>
-        </template>
-    </base-table>
+            <template #resideTimePeriod="{ scope }">
+                {{ formatResideTime(scope.row.resideTimePeriod[0], scope.row.resideTimePeriod[1]) }}
+            </template>
+            <!-- 自定义操作列 -->
+            <template #actions="{ scope }">
+                <el-button type="success" size="small" @click="viewDetails(scope.row)">查看详情</el-button>
+                <el-button type="danger" size="small" v-if="scope.row.status === '已预订'"
+                    @click="cancelReservation(scope.row)"> 取消预订 </el-button>
+            </template>
+        </base-table>
 
-    <!-- 分页 -->
-    <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :total="total"
-        :page-sizes="[5, 10, 20, 50]" layout="total, sizes, prev, pager, next, jumper" @size-change="handleSizeChange"
-        @current-change="handleCurrentChange" style="margin-top: 20px; text-align: right;" />
+        <!-- 分页 -->
+        <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :total="total"
+            :page-sizes="[5, 10, 20, 50]" layout="total, sizes, prev, pager, next, jumper"
+            @size-change="handleSizeChange" @current-change="handleCurrentChange"
+            style="margin-top: 20px; text-align: right;" />
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -118,7 +121,7 @@ const rowClassName = (row) => {
 
 // 页面加载时获取数据
 onMounted(() => {
-    if(!userStore.isLoggedIn) {
+    if (!userStore.isLoggedIn) {
         ElMessage.error('请先登录');
         return;
     }

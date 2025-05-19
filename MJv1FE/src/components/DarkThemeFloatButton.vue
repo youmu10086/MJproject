@@ -14,3 +14,10 @@ import { useDark, useToggle } from '@vueuse/core';
 const isDark = useDark(); // 检测当前是否为深色模式
 const toggleTheme = useToggle(isDark); // 切换主题
 </script>
+
+<style scoped lang="scss">
+
+.float-button:hover {
+    transform: rotate(45deg);
+}
+</style>

@@ -1,7 +1,7 @@
 <template>
   <el-row>
 
-    <el-link href="/home" style="font-weight: bold; font-size: 20px;">
+    <el-link @click="router.push('/home')" style="font-weight: bold; font-size: 20px;">
       美家公寓
     </el-link>
     <div class="header-right">
@@ -32,9 +32,11 @@ import { useUserStore } from '@/store/userStore';
 import { ElMessage } from 'element-plus';
 import apiClient from '@/services/apiClient';
 import { Setting } from '@element-plus/icons-vue';
-import { useDeviceStore } from '@/store/device';
+import { useDeviceStore } from '@/store/deviceStore';
 import DropDown from './DropDown.vue';
+import { useRouter } from 'vue-router';
 
+const router = useRouter();
 
 const userStore = useUserStore();
 const deviceStore = useDeviceStore();
@@ -70,6 +72,7 @@ const handleLogout = async () => {
   transform: translateY(-50%);
   /* 修正垂直居中偏移 */
   gap: 20px;
+  
   /* drop-down 和头像之间的间距 */
 }
 

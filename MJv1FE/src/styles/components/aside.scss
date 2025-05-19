@@ -9,8 +9,3 @@
   color: var(--menu-active-text-color);
   background-color: var(--menu-background-color);
 }
-
-/* 移除右边框（如果需要） */
-.el-menu-item {
-  border-right: none !important;
-}

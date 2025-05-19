@@ -1,5 +1,5 @@
 <template>
-  <div class="home-page" :class="{ dark: isDark }">
+  <div class="home-page">
     <main class="main-container">
       <header class="header">
         <h1>美佳公寓智能管理平台</h1>

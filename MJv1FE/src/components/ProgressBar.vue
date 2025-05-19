@@ -42,7 +42,7 @@ const error = () => {
     width: 100%;
     height: 3px;
     background-color: #f5f5f5;
-    z-index: 9999;
+    /* z-index: 9999; */
 }
 
 .progress-bar {

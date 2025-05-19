@@ -19,8 +19,7 @@ apiClient.interceptors.request.use(
     // 启动全局加载
     loadingInstance = ElLoading.service({
       lock: true,
-      text: "加载中...",
-      background: "rgba(0, 0, 0, 0.7)",
+      background: "rgba(0, 0, 0, 0)",
     });
 
     const accessToken = localStorage.getItem("accessToken");

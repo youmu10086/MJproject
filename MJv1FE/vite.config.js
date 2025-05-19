@@ -40,6 +40,6 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ["element-plus/es/locale/lang/zh-cn"],
+    include: ["element-plus/es/locale/lang/zh-cn",'echarts', 'vue-echarts'],
   },
 });

@@ -39,7 +39,7 @@
       box-shadow: 0 4px 12px var(--box-shadow-color);
       cursor: pointer;
       position: relative;
-      overflow: hidden;
+      // overflow: hidden;
 
       &:hover {
         transform: translateY(-5px);

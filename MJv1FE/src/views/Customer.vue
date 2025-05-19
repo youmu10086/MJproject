@@ -1,25 +1,27 @@
 <template>
-    <el-breadcrumb :separator-icon="ArrowRight" class="no-select">
-        <el-breadcrumb-item to="/Home">首页</el-breadcrumb-item>
-        <el-breadcrumb-item>入住人员管理</el-breadcrumb-item>
-    </el-breadcrumb>
-    <!----------------------------------------------------------------------------------- 顶部操作 ------------------------------------------------------------------------------------------->
-    <el-form :inline="true" class="top-form" @submit.prevent=queryCustomer>
-        <el-row>
-            <el-col :span="18">
-                <el-input v-model="inputStr" placeholder="输入查询条件" clearable class="search-input"
-                    :prefix-icon="Search" />
-            </el-col>
-            <el-col :span="6" class="button-group-container">
-                <el-button-group class="button-group">
-                    <el-button type="primary" v-if="inputStrIsEmpty" :icon="Refresh" plain
-                        @click="getCustomer()">刷新</el-button>
-                    <el-button type="primary" v-else :icon="Search" plain @click="queryCustomer()">查询</el-button>
+    <div>
 
-                    <el-button type="primary" :icon="Plus" plain @click="addCustomer()">现场入住</el-button>
-                </el-button-group>
-            </el-col>
-            <!-- <el-col :span="2" class="upload-container">
+        <el-breadcrumb :separator-icon="ArrowRight" class="no-select">
+            <el-breadcrumb-item to="/Home">首页</el-breadcrumb-item>
+            <el-breadcrumb-item>入住人员管理</el-breadcrumb-item>
+        </el-breadcrumb>
+        <!----------------------------------------------------------------------------------- 顶部操作 ------------------------------------------------------------------------------------------->
+        <el-form :inline="true" class="top-form" @submit.prevent=queryCustomer>
+            <el-row>
+                <el-col :span="18">
+                    <el-input v-model="inputStr" placeholder="输入查询条件" clearable class="search-input"
+                        :prefix-icon="Search" />
+                </el-col>
+                <el-col :span="6" class="button-group-container">
+                    <el-button-group class="button-group">
+                        <el-button type="primary" v-if="inputStrIsEmpty" :icon="Refresh" plain
+                            @click="getCustomer()">刷新</el-button>
+                        <el-button type="primary" v-else :icon="Search" plain @click="queryCustomer()">查询</el-button>
+
+                        <el-button type="primary" :icon="Plus" plain @click="addCustomer()">现场入住</el-button>
+                    </el-button-group>
+                </el-col>
+                <!-- <el-col :span="2" class="upload-container">
                 <el-upload>
                     <el-button type="primary" plain>导入excel</el-button>
                 </el-upload>
@@ -27,162 +29,165 @@
             <el-col :span="2" class="export-container">
                 <el-button type="primary" plain>导出excel</el-button>
             </el-col> -->
-        </el-row>
-    </el-form>
-    <!------------------------------------------------------------------------------------ 表 -------------------------------------------------------------------------------------------->
-    <base-table :table-data="currentPageTableData" :columns="columns" :size="size" :row-class-name="tableRowClassName"
-        :default-sort="{ prop: 'roomNo', order: 'descending' }" :max-height="400" show-selection
-        @selection-change="handleSelectionChange">
-        <!-- 自定义列：住宿时间 -->
-        <template #resideTimePeriod="{ scope }">
-            {{ formatResideTime(scope.row.resideTimePeriod[0], scope.row.resideTimePeriod[1]) }}
-        </template>
-
-        <!-- 自定义操作列 -->
-        <template #actions="{ scope }">
-            <div class="button-group">
-                <el-button v-if="scope.row.status === '已入住'" plain :size="size"
-                    @click="renewal(scope.row)">续租</el-button>
-                <el-button v-if="scope.row.status === '已入住'" plain :size="size"
-                    @click="checkOut(scope.row)">退宿</el-button>
-                <el-button v-if="scope.row.status === '已预订'" plain :size="size"
-                    @click="checkInForServed(scope.row)">预订顾客入住</el-button>
-                <el-button v-if="scope.row.status === '已退宿'" plain :size="size" disabled>该顾客已退宿</el-button>
-                <el-button v-if="scope.row.status === '已取消预订'" plain :size="size" disabled>该顾客取消预订</el-button>
-
-                <el-button type="primary" :size="size" :icon="Edit" circle plain @click="updateCustomer(scope.row)" />
-                <el-button type="success" :size="size" :icon="More" circle plain @click="viewCustomer(scope.row)" />
-                <el-button type="danger" :size="size" :icon="Delete" circle plain @click="deleteCustomer(scope.row)" />
-            </div>
-        </template>
-    </base-table>
-    <!--------------------------------------------------------------------------------- 底部操作 ------------------------------------------------------>
-    <el-row style="margin-top: 10px;">
-        <el-col :span="8" style="text-align: left;">
-            <el-button type="primary" :icon="Delete" plain @click="deleteCustomers">批量删除</el-button>
-        </el-col>
-        <el-col :span="16" style="text-align: right;">
-            <div style="display: inline-block;">
-                <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange"
-                    v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[5, 10, 20, 50]"
-                    :size="size" layout="total, sizes, prev, pager, next, jumper" :total="total" />
-            </div>
-        </el-col>
-    </el-row>
-    <!-------------------------------------------------------------------- 表单 ------------------------------------------------------------------>
-    <el-dialog v-model="customerDialogVisible" :title="customerDialogTitle" style="width: 50%"
-        :before-close="handleClose" draggable @closed="closeCustomerDialogForm" @open="resetForm(ruleFormRef)"
-        top="150px">
-        <el-form :inline="true" label-width="110px" label-position="right" :model="customerForm" :rules="rules"
-            ref="ruleFormRef">
-            <el-row style="display: flex; align-items: center;">
-                <el-col :span="12" style="padding-right: 5px;">
-                    <el-form-item label="编号" prop="cno" v-show="customerDialogStatus !== CustomerDialogStatus.ADD">
-                        <el-input style="width: 100%;" v-model="customerForm.cno" :size="size" disabled
-                            v-show="customerDialogStatus !== CustomerDialogStatus.ADD"></el-input>
-                    </el-form-item>
-                    <el-form-item label="姓名" prop="name">
-                        <el-input style="width: 100%;" v-model="customerForm.name" :size="size"
-                            :disabled="customerDialogStatus === CustomerDialogStatus.VIEW || customerDialogStatus === CustomerDialogStatus.RENEWAL"></el-input>
-                    </el-form-item>
-                    <el-form-item label="身份号" prop="idCardNo">
-                        <el-input style="width: 100%;" v-model="customerForm.idCardNo" :size="size"
-                            :disabled="customerDialogStatus === CustomerDialogStatus.VIEW || customerDialogStatus === CustomerDialogStatus.RENEWAL"></el-input>
-                    </el-form-item>
-                </el-col>
-                <el-col :span="12" style="padding-right: 5px;"> <!-- 证件照部分 -->
-                    <el-form-item label="证件照">
-                        <el-upload class="avatar-uploader" :action="customerForm.imageUrl" :show-file-list="false"
-                            :before-upload="beforeAvatarUpload" style="text-align: center;" :size="size"
-                            :http-request="uploadPicturePost"
-                            :disabled="customerDialogStatus === CustomerDialogStatus.VIEW || customerDialogStatus === CustomerDialogStatus.RENEWAL">
-                            <img v-if="customerForm.image" :src="customerForm.imageUrl" class="avatar" />
-                            <el-icon v-else class="avatar-uploader-icon">
-                                <Plus />
-                            </el-icon>
-                        </el-upload>
-                    </el-form-item>
-                </el-col>
-            </el-row>
-            <el-row :gutter="10">
-                <el-col :span="12" style="padding-right: 5px;">
-                    <el-form-item label="电话" prop="mobile">
-                        <el-input v-model="customerForm.mobile" :size="size"
-                            :disabled="customerDialogStatus === CustomerDialogStatus.VIEW || customerDialogStatus === CustomerDialogStatus.RENEWAL"></el-input>
-                    </el-form-item>
-                </el-col>
-                <el-col :span="12">
-                    <el-form-item label="余额" prop="balance">
-                        <el-input v-model="customerForm.balance" :size="size"
-                            :disabled="customerDialogStatus === CustomerDialogStatus.VIEW"></el-input>
-                    </el-form-item>
-                </el-col>
-            </el-row>
-            <el-row style="align-items: center;" v-show="customerDialogStatus !== CustomerDialogStatus.ADD">
-                <el-col :span="12" style="padding-right: 5px;">
-                    <el-form-item label="登记时间" prop="checkInTime">
-                        <el-date-picker v-model="customerForm.checkInTime" type="datetime" placeholder="未登记"
-                            :size="size" style="width: 100%" disabled />
-                    </el-form-item>
-                </el-col>
-                <el-col :span="12" style="padding-left: 5px;">
-                    <el-form-item label="退宿时间" prop="checkOutTime" disabled>
-                        <el-date-picker v-model="customerForm.checkOutTime" type="datetime" placeholder="未退宿"
-                            :size="size" style="width: 100%" disabled />
-                    </el-form-item>
-                </el-col>
-            </el-row>
-            <el-row>
-                <el-col :span="10" style="padding-left: 5px;">
-                    <el-form-item label="房间号" prop="roomNo">
-                        <el-input v-model="customerForm.roomNo" :size="size"
-                            :disabled="customerDialogStatus === CustomerDialogStatus.VIEW || customerDialogStatus === CustomerDialogStatus.RENEWAL"></el-input>
-                    </el-form-item>
-                </el-col>
-                <el-col :span="6" style="padding-left: 5px;padding-top: 5px;">
-                    <el-text style="width: 100%" :size="size">{{ roomMessage(customerForm.roomNo)
-                        }}</el-text>
-                </el-col>
-                <el-col :span="8" style="padding-left: 5px;">
-                    <el-form-item label="性别" prop="gender" label-width="40px">
-                        <el-radio-group v-model="customerForm.gender" :size="size"
-                            :disabled="customerDialogStatus === CustomerDialogStatus.VIEW || customerDialogStatus === CustomerDialogStatus.RENEWAL"
-                            style="width: 185px;" fill="#909399">
-                            <el-radio-button value="男">男</el-radio-button>
-                            <el-radio-button value="女">女</el-radio-button>
-                        </el-radio-group>
-                    </el-form-item>
-                </el-col>
-            </el-row>
-
-            <el-row>
-                <el-col :span="18" style="padding-left: 5px;">
-                    <el-form-item label="入住时间" prop="resideTimePeriod">
-                        <el-date-picker type="datetimerange" v-model="customerForm.resideTimePeriod" style="width: 100%"
-                            :size="size" unlink-panels range-separator="-" format="YYYY-MM-DD HH:mm:ss"
-                            start-placeholder="开始" end-placeholder="结束"
-                            :disabled="customerDialogStatus === CustomerDialogStatus.VIEW || customerDialogStatus === CustomerDialogStatus.EDIT"
-                            placement="top-start" />
-                    </el-form-item>
-                </el-col>
-                <el-col :span="6" style="padding-left: 5px;padding-top: 5px;">
-                    <el-text style="width: 100%" :size="size">{{ timeDifference(customerForm.resideTimePeriod)
-                        }}</el-text>
-                </el-col>
             </el-row>
         </el-form>
-        <template #footer>
-            <div class="dialog-footer">
-                <el-button type="primary" v-show="customerDialogStatus !== CustomerDialogStatus.VIEW"
-                    @click="submitForm(ruleFormRef)" :loading="isSubmitting">{{
-                        submitRemand }}</el-button>
-                <el-button type="info" @click="customerDialogVisible = false"
-                    v-show="customerDialogStatus !== CustomerDialogStatus.VIEW">取消</el-button>
-                <el-button type="primary" v-show="customerDialogStatus === CustomerDialogStatus.VIEW"
-                    @click="customerDialogVisible = false">确定</el-button>
-            </div>
-        </template>
-    </el-dialog>
+        <!------------------------------------------------------------------------------------ 表 -------------------------------------------------------------------------------------------->
+        <base-table :table-data="currentPageTableData" :columns="columns" :size="size"
+            :row-class-name="tableRowClassName" :default-sort="{ prop: 'roomNo', order: 'descending' }"
+            :max-height="400" show-selection @selection-change="handleSelectionChange">
+            <!-- 自定义列：住宿时间 -->
+            <template #resideTimePeriod="{ scope }">
+                {{ formatResideTime(scope.row.resideTimePeriod[0], scope.row.resideTimePeriod[1]) }}
+            </template>
+
+            <!-- 自定义操作列 -->
+            <template #actions="{ scope }">
+                <div class="button-group">
+                    <el-button v-if="scope.row.status === '已入住'" plain :size="size"
+                        @click="renewal(scope.row)">续租</el-button>
+                    <el-button v-if="scope.row.status === '已入住'" plain :size="size"
+                        @click="checkOut(scope.row)">退宿</el-button>
+                    <el-button v-if="scope.row.status === '已预订'" plain :size="size"
+                        @click="checkInForServed(scope.row)">预订顾客入住</el-button>
+                    <el-button v-if="scope.row.status === '已退宿'" plain :size="size" disabled>该顾客已退宿</el-button>
+                    <el-button v-if="scope.row.status === '已取消预订'" plain :size="size" disabled>该顾客取消预订</el-button>
+
+                    <el-button type="primary" :size="size" :icon="Edit" circle plain
+                        @click="updateCustomer(scope.row)" />
+                    <el-button type="success" :size="size" :icon="More" circle plain @click="viewCustomer(scope.row)" />
+                    <el-button type="danger" :size="size" :icon="Delete" circle plain
+                        @click="deleteCustomer(scope.row)" />
+                </div>
+            </template>
+        </base-table>
+        <!--------------------------------------------------------------------------------- 底部操作 ------------------------------------------------------>
+        <el-row style="margin-top: 10px;">
+            <el-col :span="8" style="text-align: left;">
+                <el-button type="primary" :icon="Delete" plain @click="deleteCustomers">批量删除</el-button>
+            </el-col>
+            <el-col :span="16" style="text-align: right;">
+                <div style="display: inline-block;">
+                    <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange"
+                        v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[5, 10, 20, 50]"
+                        :size="size" layout="total, sizes, prev, pager, next, jumper" :total="total" />
+                </div>
+            </el-col>
+        </el-row>
+        <!-------------------------------------------------------------------- 表单 ------------------------------------------------------------------>
+        <el-dialog v-model="customerDialogVisible" :title="customerDialogTitle" style="width: 50%"
+            :before-close="handleClose" draggable @closed="closeCustomerDialogForm" @open="resetForm(ruleFormRef)"
+            top="150px">
+            <el-form :inline="true" label-width="110px" label-position="right" :model="customerForm" :rules="rules"
+                ref="ruleFormRef">
+                <el-row style="display: flex; align-items: center;">
+                    <el-col :span="12" style="padding-right: 5px;">
+                        <el-form-item label="编号" prop="cno" v-show="customerDialogStatus !== CustomerDialogStatus.ADD">
+                            <el-input style="width: 100%;" v-model="customerForm.cno" :size="size" disabled
+                                v-show="customerDialogStatus !== CustomerDialogStatus.ADD"></el-input>
+                        </el-form-item>
+                        <el-form-item label="姓名" prop="name">
+                            <el-input style="width: 100%;" v-model="customerForm.name" :size="size"
+                                :disabled="customerDialogStatus === CustomerDialogStatus.VIEW || customerDialogStatus === CustomerDialogStatus.RENEWAL"></el-input>
+                        </el-form-item>
+                        <el-form-item label="身份号" prop="idCardNo">
+                            <el-input style="width: 100%;" v-model="customerForm.idCardNo" :size="size"
+                                :disabled="customerDialogStatus === CustomerDialogStatus.VIEW || customerDialogStatus === CustomerDialogStatus.RENEWAL"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12" style="padding-right: 5px;"> <!-- 证件照部分 -->
+                        <el-form-item label="证件照">
+                            <el-upload class="avatar-uploader" :action="customerForm.imageUrl" :show-file-list="false"
+                                :before-upload="beforeAvatarUpload" style="text-align: center;" :size="size"
+                                :http-request="uploadPicturePost"
+                                :disabled="customerDialogStatus === CustomerDialogStatus.VIEW || customerDialogStatus === CustomerDialogStatus.RENEWAL">
+                                <img v-if="customerForm.image" :src="customerForm.imageUrl" class="avatar" />
+                                <el-icon v-else class="avatar-uploader-icon">
+                                    <Plus />
+                                </el-icon>
+                            </el-upload>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row :gutter="10">
+                    <el-col :span="12" style="padding-right: 5px;">
+                        <el-form-item label="电话" prop="mobile">
+                            <el-input v-model="customerForm.mobile" :size="size"
+                                :disabled="customerDialogStatus === CustomerDialogStatus.VIEW || customerDialogStatus === CustomerDialogStatus.RENEWAL"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="余额" prop="balance">
+                            <el-input v-model="customerForm.balance" :size="size"
+                                :disabled="customerDialogStatus === CustomerDialogStatus.VIEW"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row style="align-items: center;" v-show="customerDialogStatus !== CustomerDialogStatus.ADD">
+                    <el-col :span="12" style="padding-right: 5px;">
+                        <el-form-item label="登记时间" prop="checkInTime">
+                            <el-date-picker v-model="customerForm.checkInTime" type="datetime" placeholder="未登记"
+                                :size="size" style="width: 100%" disabled />
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12" style="padding-left: 5px;">
+                        <el-form-item label="退宿时间" prop="checkOutTime" disabled>
+                            <el-date-picker v-model="customerForm.checkOutTime" type="datetime" placeholder="未退宿"
+                                :size="size" style="width: 100%" disabled />
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="10" style="padding-left: 5px;">
+                        <el-form-item label="房间号" prop="roomNo">
+                            <el-input v-model="customerForm.roomNo" :size="size"
+                                :disabled="customerDialogStatus === CustomerDialogStatus.VIEW || customerDialogStatus === CustomerDialogStatus.RENEWAL"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="6" style="padding-left: 5px;padding-top: 5px;">
+                        <el-text style="width: 100%" :size="size">{{ roomMessage(customerForm.roomNo)
+                            }}</el-text>
+                    </el-col>
+                    <el-col :span="8" style="padding-left: 5px;">
+                        <el-form-item label="性别" prop="gender" label-width="40px">
+                            <el-radio-group v-model="customerForm.gender" :size="size"
+                                :disabled="customerDialogStatus === CustomerDialogStatus.VIEW || customerDialogStatus === CustomerDialogStatus.RENEWAL"
+                                style="width: 185px;" fill="#909399">
+                                <el-radio-button value="男">男</el-radio-button>
+                                <el-radio-button value="女">女</el-radio-button>
+                            </el-radio-group>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+
+                <el-row>
+                    <el-col :span="18" style="padding-left: 5px;">
+                        <el-form-item label="入住时间" prop="resideTimePeriod">
+                            <el-date-picker type="datetimerange" v-model="customerForm.resideTimePeriod"
+                                style="width: 100%" :size="size" unlink-panels range-separator="-"
+                                format="YYYY-MM-DD HH:mm:ss" start-placeholder="开始" end-placeholder="结束"
+                                :disabled="customerDialogStatus === CustomerDialogStatus.VIEW || customerDialogStatus === CustomerDialogStatus.EDIT"
+                                placement="top-start" />
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="6" style="padding-left: 5px;padding-top: 5px;">
+                        <el-text style="width: 100%" :size="size">{{ timeDifference(customerForm.resideTimePeriod)
+                            }}</el-text>
+                    </el-col>
+                </el-row>
+            </el-form>
+            <template #footer>
+                <div class="dialog-footer">
+                    <el-button type="primary" v-show="customerDialogStatus !== CustomerDialogStatus.VIEW"
+                        @click="submitForm(ruleFormRef)" :loading="isSubmitting">{{
+                            submitRemand }}</el-button>
+                    <el-button type="info" @click="customerDialogVisible = false"
+                        v-show="customerDialogStatus !== CustomerDialogStatus.VIEW">取消</el-button>
+                    <el-button type="primary" v-show="customerDialogStatus === CustomerDialogStatus.VIEW"
+                        @click="customerDialogVisible = false">确定</el-button>
+                </div>
+            </template>
+        </el-dialog>
+    </div>
 </template>
 
 <script lang="ts" setup>

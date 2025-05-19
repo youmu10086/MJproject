@@ -10,6 +10,13 @@ import "element-plus/theme-chalk/dark/css-vars.css";
 import piniaPluginPersistedstate from "pinia-plugin-persistedstate";
 import "@/styles/main.scss";
 
+import VChart from 'vue-echarts'; // 导入 vue-echarts
+import * as echarts from 'echarts/core'; // 导入 ECharts 核心模块
+import { CanvasRenderer } from 'echarts/renderers'; // 导入 Canvas 渲染器
+import { RadarChart } from 'echarts/charts'; // 导入雷达图
+import { TitleComponent, TooltipComponent, LegendComponent } from 'echarts/components'; // 导入组件
+echarts.use([CanvasRenderer, RadarChart, TitleComponent, TooltipComponent, LegendComponent]);
+
 // 创建 Vue 应用实例
 const app = createApp(App);
 
@@ -22,7 +29,7 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 }
 // 使用 Element Plus 插件
 app.use(ElementPlus, { locale: zhCn });
-
+app.component('v-chart', VChart);
 app.use(router);
 app.use(pinia);
 // 挂载应用实例

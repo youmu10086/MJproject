@@ -1,22 +1,24 @@
 <template>
-    <el-breadcrumb :separator-icon="ArrowRight" class="no-select">
-        <el-breadcrumb-item to="/Home">首页</el-breadcrumb-item>
-        <el-breadcrumb-item>在线客服</el-breadcrumb-item>
-    </el-breadcrumb>
-    <div class="container">
-        <div class="chat-window" :class="{ dark: isDark }">
-            <div>本页面为客服演示界面，后端服务制作中</div>
-            <div class="messages" :class="{ dark: isDark }">
-                <TransitionGroup name="message">
-                    <div v-for="(message, index) in messages" :key="index"
-                        :class="['message', message.sender === 'user' ? 'user' : 'service']">
-                        <span>{{ message.text }}</span>
-                    </div>
-                </TransitionGroup>
-            </div>
-            <div class="input-area">
-                <el-input v-model="inputMessage" placeholder="请输入消息..." @keyup.enter="sendMessage" />
-                <el-button type="primary" @click="sendMessage">发送</el-button>
+    <div>
+        <el-breadcrumb :separator-icon="ArrowRight" class="no-select">
+            <el-breadcrumb-item to="/Home">首页</el-breadcrumb-item>
+            <el-breadcrumb-item>在线客服</el-breadcrumb-item>
+        </el-breadcrumb>
+        <div class="container">
+            <div class="chat-window" >
+                <div>本页面为客服演示界面，后端服务制作中</div>
+                <div class="messages" >
+                    <TransitionGroup name="message">
+                        <div v-for="(message, index) in messages" :key="index"
+                            :class="['message', message.sender === 'user' ? 'user' : 'service']">
+                            <span>{{ message.text }}</span>
+                        </div>
+                    </TransitionGroup>
+                </div>
+                <div class="input-area">
+                    <el-input v-model="inputMessage" placeholder="请输入消息..." @keyup.enter="sendMessage" />
+                    <el-button type="primary" @click="sendMessage">发送</el-button>
+                </div>
             </div>
         </div>
     </div>

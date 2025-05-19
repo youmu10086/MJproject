@@ -1,243 +1,263 @@
 <template>
-    <el-breadcrumb :separator-icon="ArrowRight" class="no-select mb-4">
-        <el-breadcrumb-item to="/Home">首页</el-breadcrumb-item>
-        <el-breadcrumb-item>公寓房间管理</el-breadcrumb-item>
-    </el-breadcrumb>
-    <div class="container" :class="{ dark: isDark }">
-        <el-skeleton :rows="5" animated v-if="loading" />
-        <el-empty v-else-if="!hasRooms" description="暂无房间数据" />
-        <template v-else>
-            <!-- 所有房间 -->
-            <el-card shadow="never" class="floor-card">
+    <div>
+
+        <el-breadcrumb :separator-icon="ArrowRight" class="no-select mb-4">
+            <el-breadcrumb-item to="/Home">首页</el-breadcrumb-item>
+            <el-breadcrumb-item>公寓房间管理</el-breadcrumb-item>
+        </el-breadcrumb>
+        <div class="container">
+            <el-skeleton :rows="5" animated v-if="loading" />
+            <el-empty v-else-if="!hasRooms" description="暂无房间数据" />
+            <template v-else>
+                <el-card shadow="never" class="floor-card">
+                    <template #header>
+                        <div class="floor-header">
+                            <span class="floor-title">当前楼层：</span>
+                            <el-select v-model="currentFloor" placeholder="选择楼层" size="small" style="width: 120px;"
+                                @change="switchFloor" v-if="isMobile">
+                                <el-option v-for="floor in floors" :key="floor.name" :label="floor.title"
+                                    :value="floor" />
+                            </el-select>
+                            <el-button-group v-else>
+                                <el-button aria-label="提交" v-for="floor in floors" :key="floor.name"
+                                    :type="floor.name === currentFloor.name ? 'primary' : 'default'"
+                                    @click="switchFloor(floor)">
+                                    {{ floor.title }}
+                                </el-button>
+                            </el-button-group>
+                            <el-button-group class="right-aligned">
+                                <el-button v-if="isManager" @click="openAddRoomDialog">添加房间</el-button>
+                                <!-- <el-button v-if="isManager">添加楼层</el-button> -->
+                            </el-button-group>
+                        </div>
+                    </template>
+                    <el-scrollbar>
+                        <el-row v-if="getFloorRooms(currentFloor.name).length" :gutter="12">
+                            <el-col v-for="room in getFloorRooms(currentFloor.name)" :key="room.roomNo || Math.random()"
+                                :xs="12" :sm="8" :md="6" :lg="4" :xl="8" class="room-col">
+                                <el-button class="room-button" :type="getRoomStatus(room).type" :size="size"
+                                    @click="openRoomDialog(room)" :plain="true">
+                                    <div class="room-info">
+                                        <span class="room-number">{{ room.roomNo || '未知房间号' }}</span>
+                                        <el-tag v-if="getRoomStatus(room).status" :type="getRoomStatus(room).type"
+                                            size="small" class="mt-1">
+                                            {{ getRoomStatus(room).status }}
+                                        </el-tag>
+                                    </div>
+                                </el-button>
+                            </el-col>
+                        </el-row>
+                        <el-empty v-else description="暂无房间数据" />
+                    </el-scrollbar>
+                </el-card>
+            </template>
+        </div>
+
+        <teleport to='#app'>
+            <el-dialog v-model="roomDialogVisible" :title="roomDialogTitle" :close-on-click-modal="false"
+                @closed="resetRoomForm" fullscreen :z-index="1000">
                 <template #header>
-                    <div class="floor-header">
-                        <span class="floor-title">当前楼层：{{ currentFloor.title }}</span>
-                        <el-button-group>
-                            <el-button aria-label="提交" v-for="floor in floors" :key="floor.name"
-                                :type="floor.name === currentFloor.name ? 'primary' : 'default'"
-                                @click="switchFloor(floor)">
-                                {{ floor.title }}
-                            </el-button>
-                        </el-button-group>
-                        <el-button-group class="right-aligned">
-                            <el-button v-if="isManager" @click="openAddRoomDialog">添加房间</el-button>
-                            <el-button v-if="isManager">添加楼层</el-button>
-                        </el-button-group>
+                    <div style="display: flex; align-items: center;">
+                        <span>{{ roomDialogTitle }}</span>
+                        <el-input v-if="roomFormStatus === 'isAdding'" v-model="roomForm.roomNo" placeholder="请输入房间号"
+                            size="small" style="margin-left: 10px; width: 100px;" />
                     </div>
                 </template>
-
-                <el-row v-if="getFloorRooms(currentFloor.name).length" :gutter="12">
-                    <el-col v-for="room in getFloorRooms(currentFloor.name)" :key="room.roomNo || Math.random()"
-                        :xs="12" :sm="8" :md="6" :lg="4" :xl="8" class="room-col">
-                        <el-button class="room-button" :type="getRoomStatus(room).type" :size="size"
-                            @click="openRoomDialog(room)" :plain="true">
-                            <div class="room-info">
-                                <span class="room-number">{{ room.roomNo || '未知房间号' }}</span>
-                                <el-tag v-if="getRoomStatus(room).status" :type="getRoomStatus(room).type" size="small"
-                                    class="mt-1">
-                                    {{ getRoomStatus(room).status }}
-                                </el-tag>
-                            </div>
-                        </el-button>
-                    </el-col>
-                </el-row>
-                <el-empty v-else description="暂无房间数据" />
-            </el-card>
-        </template>
-    </div>
-    <el-dialog v-model="roomDialogVisible" :title="roomDialogTitle" width="900px" :close-on-click-modal="false"
-        @closed="resetRoomForm">
-        <template #header>
-            <div style="display: flex; align-items: center;">
-                <span>{{ roomDialogTitle }}</span>
-                <el-input v-if="roomFormStatus === 'isAdding'" v-model="roomForm.roomNo" placeholder="请输入房间号"
-                    size="small" style="margin-left: 10px; width: 100px;" />
-            </div>
-        </template>
-        <el-form :model="roomForm" :rules="roomFormRules" ref="formRef" label-width="120px" label-position="right"
-            class="optimized-form">
-            <div class="form-section">
-                <el-row :gutter="30">
-                    <el-col :xs="24" :sm="12" :md="8">
-                        <el-form-item label="房间状态" prop="roomStatus">
-                            <el-select v-model="roomForm.roomStatus" placeholder="请选择" class="full-width"
-                                :disabled="!isManager">
-                                <el-option v-for="(status, key) in roomStatusOptions" :key="key" :label="status.label"
-                                    :value="key" />
-                            </el-select>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :xs="24" :sm="12" :md="8">
-                        <el-form-item label="房间类型" prop="roomType">
-                            <el-input v-model="roomForm.roomType" placeholder="请输入类型" clearable class="full-width"
-                                :disabled="!isManager" />
-                        </el-form-item>
-                    </el-col>
-                    <el-col :xs="24" :sm="12" :md="8">
-                        <el-form-item label="时间单位" prop="durationType">
-                            <el-select v-model="roomForm.durationType" placeholder="请选择时间单位" class="full-width"
-                                :disabled="!isManager">
-                                <el-option label="钟点房" value="hourly" />
-                                <el-option label="日租" value="daily" />
-                                <el-option label="月租" value="monthly" />
-                            </el-select>
-                        </el-form-item>
-                    </el-col>
-                </el-row>
-            </div>
-            <div class="form-section">
-                <el-row :gutter="30">
-                    <el-col :span="8">
-                        <el-form-item label="房间金额" prop="roomAmount">
-                            <el-input v-model="roomForm.roomAmount" placeholder="0.00" type="number"
-                                class="amount-input" :disabled="!isManager">
-                                <template #append>元</template>
-                            </el-input>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="16">
-                        <el-form-item label="房间配置">
-                            <div class="config-tag-group">
-                                <el-select v-model="roomForm.roomConfig" multiple placeholder="添加配置"
-                                    class="add-config-tag" @change="addFormRoomConfig" :disabled="!isManager">
-                                    <el-option v-for="config in allRoomConfigs" :key="config.id" :label="config.name"
-                                        :value="config.name" />
-                                    <template #footer>
-                                        <el-button v-if="!isAddRoomConfig && !isDeleteRoomConfig" text bg size="small"
-                                            @click="isAddRoomConfig = true">
-                                            添加配置
-                                        </el-button>
-                                        <template v-if="isAddRoomConfig">
-                                            <el-input v-model="newConfigName" class="option-input"
-                                                placeholder="输入需要添加的配置名称" size="small"
-                                                :loading="roomConfigSubmitting" />
-                                            <el-button type="primary" size="small" @click="addRoomConfig">
-                                                {{ roomConfigSubmitting ? '添加中...' : '确认添加' }}
-                                            </el-button>
-                                            <el-button size="small" @click="clear">取消</el-button>
-                                        </template>
-                                        <el-button v-if="!isAddRoomConfig && !isDeleteRoomConfig" text bg size="small"
-                                            @click="isDeleteRoomConfig = true;">
-                                            删除配置
-                                        </el-button>
-                                        <template v-if="isDeleteRoomConfig">
-                                            <el-input v-model="newConfigName" class="option-input"
-                                                placeholder="输入需要删除的配置名称" size="small" />
-                                            <el-button type="primary" size="small" @click="deleteRoomConfig"
-                                                :loading="roomConfigSubmitting">
-                                                {{ roomConfigSubmitting ? '删除中...' : '确认删除' }}
-                                            </el-button>
-                                            <el-button size="small" @click="clear">取消</el-button>
-                                        </template>
-                                    </template>
+                <el-form :model="roomForm" :rules="roomFormRules" ref="formRef" label-width="120px"
+                    label-position="right">
+                    <el-row :gutter="30">
+                        <el-col :xs="24" :sm="12" :md="8">
+                            <el-form-item label="房间状态" prop="roomStatus">
+                                <el-select v-model="roomForm.roomStatus" placeholder="请选择" class="full-width"
+                                    :disabled="!isManager">
+                                    <el-option v-for="(status, key) in roomStatusOptions" :key="key"
+                                        :label="status.label" :value="key" />
                                 </el-select>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :xs="24" :sm="12" :md="8">
+                            <el-form-item label="房间类型" prop="roomType">
+                                <el-input v-model="roomForm.roomType" placeholder="请输入类型" clearable class="full-width"
+                                    :disabled="!isManager" />
+                            </el-form-item>
+                        </el-col>
+                        <el-col :xs="24" :sm="12" :md="8">
+                            <el-form-item label="时间单位" prop="durationType">
+                                <el-select v-model="roomForm.durationType" placeholder="请选择时间单位" class="full-width"
+                                    :disabled="!isManager">
+                                    <el-option label="钟点房" value="hourly" />
+                                    <el-option label="日租" value="daily" />
+                                    <el-option label="月租" value="monthly" />
+                                </el-select>
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                    <el-row :gutter="30">
+                        <el-col :xs="24" :sm="12" :md="8">
+                            <el-form-item label="房间金额" prop="roomAmount">
+                                <el-input v-model="roomForm.roomAmount" placeholder="0.00" type="number"
+                                    class="amount-input" :disabled="!isManager">
+                                    <template #append>元</template>
+                                </el-input>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :xs="24" :sm="12" :md="8">
+                            <el-form-item label="房间配置">
+                                <div class="config-tag-group">
+                                    <el-select v-model="roomForm.roomConfig" multiple placeholder="添加配置"
+                                        class="add-config-tag" @change="addFormRoomConfig" :disabled="!isManager">
+                                        <el-option v-for="config in allRoomConfigs" :key="config.id"
+                                            :label="config.name" :value="config.name" />
+                                        <template #footer>
+                                            <el-button v-if="!isAddRoomConfig && !isDeleteRoomConfig" text bg
+                                                size="small" @click="isAddRoomConfig = true">
+                                                添加配置
+                                            </el-button>
+                                            <template v-if="isAddRoomConfig">
+                                                <el-input v-model="newConfigName" class="option-input"
+                                                    placeholder="输入需要添加的配置名称" size="small"
+                                                    :loading="roomConfigSubmitting" />
+                                                <el-button type="primary" size="small" @click="addRoomConfig">
+                                                    {{ roomConfigSubmitting ? '添加中...' : '确认添加' }}
+                                                </el-button>
+                                                <el-button size="small" @click="clear">取消</el-button>
+                                            </template>
+                                            <el-button v-if="!isAddRoomConfig && !isDeleteRoomConfig" text bg
+                                                size="small" @click="isDeleteRoomConfig = true;">
+                                                删除配置
+                                            </el-button>
+                                            <template v-if="isDeleteRoomConfig">
+                                                <el-input v-model="newConfigName" class="option-input"
+                                                    placeholder="输入需要删除的配置名称" size="small" />
+                                                <el-button type="primary" size="small" @click="deleteRoomConfig"
+                                                    :loading="roomConfigSubmitting">
+                                                    {{ roomConfigSubmitting ? '删除中...' : '确认删除' }}
+                                                </el-button>
+                                                <el-button size="small" @click="clear">取消</el-button>
+                                            </template>
+                                        </template>
+                                    </el-select>
+                                </div>
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                    <el-row :gutter="30">
+                        <el-col :xs="24" :sm="12" :md="8">
+                            <el-form-item>
+                                <el-form-item label="房间图片" prop="roomImage">
+                                    <el-upload action="#" list-type="picture-card" :on-preview="handlePreview"
+                                        :on-remove="handleRemove" :limit="5" class="image-uploader">
+                                        <i class="el-icon-plus"></i>
+                                    </el-upload>
+                                </el-form-item>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :xs="24" :sm="12" :md="8">
+                            <div class="radar-container">
+                                <RadarEchart :roomNo="roomForm.roomNo" />
                             </div>
+                        </el-col>
+                    </el-row>
+                </el-form>
+                <template #footer>
+                    <div class="dialog-footer">
+                        <el-button @click="roomDialogVisible = false" size="small">取消</el-button>
+                        <el-button v-if="isManager" type="primary" @click="submitRoomForm" size="small"
+                            :loading="RoomFormSubmitting">
+                            {{ RoomFormSubmitting ? '提交中...' : '确认' }}
+                        </el-button>
+                        <el-button v-if="isCustomer" type="primary" @click="submitRoomForm" size="small"
+                            :loading="RoomFormSubmitting">
+                            {{ RoomFormSubmitting ? '提交中...' : '预订' }}
+                        </el-button>
+                    </div>
+                </template>
+            </el-dialog>
+        </teleport>
+
+        <el-dialog v-model="customerDialogVisible" title='登记信息' style="width: 50%" :before-close="handleClose" draggable
+            @closed="closeCustomerDialogForm" top="150px">
+            <el-form :inline="true" label-width="110px" label-position="right" :model="customerForm" :rules="rules"
+                ref="ruleFormRef">
+                <el-row style="display: flex; align-items: center;">
+                    <el-col :span="12" style="padding-right: 5px;">
+                        <el-form-item label="姓名" prop="name">
+                            <el-input style="width: 100%;" v-model="customerForm.name" :size="size"></el-input>
+                        </el-form-item>
+                        <el-form-item label="身份号" prop="idCardNo">
+                            <el-input style="width: 100%;" v-model="customerForm.idCardNo" :size="size"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12" style="padding-right: 5px;"> <!-- 证件照部分 -->
+                        <el-form-item label="证件照">
+                            <el-upload class="avatar-uploader" :action="customerForm.imageUrl" :show-file-list="false"
+                                :before-upload="beforeAvatarUpload" style="text-align: center;" :size="size"
+                                :http-request="uploadPicturePost">
+                                <img v-if="customerForm.image" :src="customerForm.imageUrl" class="avatar" />
+                                <el-icon v-else class="avatar-uploader-icon">
+                                    <Plus />
+                                </el-icon>
+                            </el-upload>
                         </el-form-item>
                     </el-col>
                 </el-row>
-            </div>
-            <div class="form-section">
-                <el-form-item>
-                    <el-upload action="#" list-type="picture-card" :on-preview="handlePreview" :on-remove="handleRemove"
-                        :limit="5" class="image-uploader">
-                        <i class="el-icon-plus"></i>
-                    </el-upload>
-                </el-form-item>
-            </div>
-        </el-form>
-        <template #footer>
-            <div class="dialog-footer">
-                <el-button @click="roomDialogVisible = false" size="small">取消</el-button>
-                <el-button v-if="isManager" type="primary" @click="submitRoomForm" size="small"
-                    :loading="RoomFormSubmitting">
-                    {{ RoomFormSubmitting ? '提交中...' : '确认' }}
-                </el-button>
-                <el-button v-if="isCustomer" type="primary" @click="submitRoomForm" size="small"
-                    :loading="RoomFormSubmitting">
-                    {{ RoomFormSubmitting ? '提交中...' : '预订' }}
-                </el-button>
-            </div>
-        </template>
-    </el-dialog>
+                <el-row :gutter="10">
+                    <el-col :span="12" style="padding-right: 5px;">
+                        <el-form-item label="电话" prop="mobile">
+                            <el-input v-model="customerForm.mobile" :size="size"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="10" style="padding-left: 5px;">
+                        <el-form-item label="房间号" prop="roomNo">
+                            <el-input v-model="customerForm.roomNo" :size="size" disabled></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="6" style="padding-left: 5px;padding-top: 5px;">
+                        <el-text style="width: 100%" :size="size">{{ roomMessage(customerForm.roomNo)
+                            }}</el-text>
+                    </el-col>
+                    <el-col :span="8" style="padding-left: 5px;">
+                        <el-form-item label="性别" prop="gender" label-width="40px">
+                            <el-radio-group v-model="customerForm.gender" :size="size" style="width: 185px;"
+                                fill="#909399">
+                                <el-radio-button value="男">男</el-radio-button>
+                                <el-radio-button value="女">女</el-radio-button>
+                            </el-radio-group>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
 
-    <el-dialog v-model="customerDialogVisible" title='登记信息' style="width: 50%" :before-close="handleClose" draggable
-        @closed="closeCustomerDialogForm" top="150px">
-        <el-form :inline="true" label-width="110px" label-position="right" :model="customerForm" :rules="rules"
-            ref="ruleFormRef">
-            <el-row style="display: flex; align-items: center;">
-                <el-col :span="12" style="padding-right: 5px;">
-                    <el-form-item label="姓名" prop="name">
-                        <el-input style="width: 100%;" v-model="customerForm.name" :size="size"></el-input>
-                    </el-form-item>
-                    <el-form-item label="身份号" prop="idCardNo">
-                        <el-input style="width: 100%;" v-model="customerForm.idCardNo" :size="size"></el-input>
-                    </el-form-item>
-                </el-col>
-                <el-col :span="12" style="padding-right: 5px;"> <!-- 证件照部分 -->
-                    <el-form-item label="证件照">
-                        <el-upload class="avatar-uploader" :action="customerForm.imageUrl" :show-file-list="false"
-                            :before-upload="beforeAvatarUpload" style="text-align: center;" :size="size"
-                            :http-request="uploadPicturePost">
-                            <img v-if="customerForm.image" :src="customerForm.imageUrl" class="avatar" />
-                            <el-icon v-else class="avatar-uploader-icon">
-                                <Plus />
-                            </el-icon>
-                        </el-upload>
-                    </el-form-item>
-                </el-col>
-            </el-row>
-            <el-row :gutter="10">
-                <el-col :span="12" style="padding-right: 5px;">
-                    <el-form-item label="电话" prop="mobile">
-                        <el-input v-model="customerForm.mobile" :size="size"></el-input>
-                    </el-form-item>
-                </el-col>
-            </el-row>
-            <el-row>
-                <el-col :span="10" style="padding-left: 5px;">
-                    <el-form-item label="房间号" prop="roomNo">
-                        <el-input v-model="customerForm.roomNo" :size="size" disabled></el-input>
-                    </el-form-item>
-                </el-col>
-                <el-col :span="6" style="padding-left: 5px;padding-top: 5px;">
-                    <el-text style="width: 100%" :size="size">{{ roomMessage(customerForm.roomNo)
-                        }}</el-text>
-                </el-col>
-                <el-col :span="8" style="padding-left: 5px;">
-                    <el-form-item label="性别" prop="gender" label-width="40px">
-                        <el-radio-group v-model="customerForm.gender" :size="size" style="width: 185px;" fill="#909399">
-                            <el-radio-button value="男">男</el-radio-button>
-                            <el-radio-button value="女">女</el-radio-button>
-                        </el-radio-group>
-                    </el-form-item>
-                </el-col>
-            </el-row>
+                <el-row>
+                    <el-col :span="18" style="padding-left: 5px;">
+                        <el-form-item label="入住时间" prop="resideTimePeriod">
+                            <el-date-picker type="datetimerange" v-model="customerForm.resideTimePeriod"
+                                style="width: 100%" :size="size" unlink-panels range-separator="-"
+                                format="YYYY-MM-DD HH:mm:ss" start-placeholder="开始" end-placeholder="结束"
+                                placement="top-start" />
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="6" style="padding-left: 5px;padding-top: 5px;">
+                        <el-text style="width: 100%" :size="size">{{ timeDifference(customerForm.resideTimePeriod)
+                            }}</el-text>
+                    </el-col>
+                </el-row>
+            </el-form>
+            <template #footer>
+                <div class="dialog-footer">
+                    <el-button type="primary" @click="submitForm(ruleFormRef)"
+                        :loading="customerFormisSubmitting">预订</el-button>
+                    <el-button type="info" @click="customerDialogVisible = false">取消</el-button>
+                </div>
+            </template>
+        </el-dialog>
 
-            <el-row>
-                <el-col :span="18" style="padding-left: 5px;">
-                    <el-form-item label="入住时间" prop="resideTimePeriod">
-                        <el-date-picker type="datetimerange" v-model="customerForm.resideTimePeriod" style="width: 100%"
-                            :size="size" unlink-panels range-separator="-" format="YYYY-MM-DD HH:mm:ss"
-                            start-placeholder="开始" end-placeholder="结束" placement="top-start" />
-                    </el-form-item>
-                </el-col>
-                <el-col :span="6" style="padding-left: 5px;padding-top: 5px;">
-                    <el-text style="width: 100%" :size="size">{{ timeDifference(customerForm.resideTimePeriod)
-                        }}</el-text>
-                </el-col>
-            </el-row>
-        </el-form>
-        <template #footer>
-            <div class="dialog-footer">
-                <el-button type="primary" @click="submitForm(ruleFormRef)"
-                    :loading="customerFormisSubmitting">预订</el-button>
-                <el-button type="info" @click="customerDialogVisible = false">取消</el-button>
-            </div>
-        </template>
-    </el-dialog>
+    </div>
 </template>
 
 <script lang="ts" setup>
+import RadarEchart from '@/components/RadarEchart.vue';
 import { ElMessage, ElUpload, UploadProps, FormInstance, FormItemRule } from 'element-plus';
 import { ArrowRight } from '@element-plus/icons-vue';
 import { ComponentSize } from 'element-plus';
@@ -247,6 +267,11 @@ import { useDark } from '@vueuse/core';
 import { useUserStore } from '@/store/userStore';
 import { Plus } from '@element-plus/icons-vue';
 import showConfirmDialog from '@/utils/showConfirmDialog';
+import { useDeviceStore } from '@/store/deviceStore';
+
+const deviceStore = useDeviceStore();
+const isMobile = computed(() => deviceStore.isMobile);
+const isComputer = computed(() => deviceStore.isComputer);
 
 const customerFormisSubmitting = ref(false); // 提交状态
 
@@ -496,7 +521,7 @@ const roomDialogTitle = computed(() => {
     } else if (roomFormStatus.value === 'isReserving') {
         return `预订房间：${roomForm.value.roomNo}`;
     } else {
-        return '房间详情';
+        return '房间详情（需要预订请先登录）';
     }
 });
 const roomDialogVisible = ref(false); // 控制房间表单弹窗的显示

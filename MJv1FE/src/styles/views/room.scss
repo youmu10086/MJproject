@@ -12,7 +12,7 @@
     border-radius: 4px;
     cursor: pointer;
     position: relative;
-    overflow: hidden;
+    // overflow: hidden;
     transition: var(--el-transition-duration-fast);
 
     &:hover {
@@ -55,10 +55,6 @@
   margin: 0;
 }
 
-.optimized-form {
-  padding: 0;
-}
-
 :root {
   --card-bg: #F5F5F5;
 }
@@ -92,6 +88,7 @@
 .floor-card {
   border-radius: 12px;
   transition: transform 0.3s ease;
+  height:auto;
 }
 
 // .floor-card:hover {
