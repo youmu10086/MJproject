@@ -145,7 +145,12 @@ const userStore = useUserStore();
 
 // 员工数据
 const userList = ref([])
-const selectedUser = ref([])
+interface User {
+    id: number | string;
+    username: string;
+    [key: string]: any;
+}
+const selectedUser = ref<User[]>([])
 const searchKeyword = ref('')
 const editDialogVisible = ref(false)
 const currentUser = ref({
@@ -164,12 +169,13 @@ const fetchUserList = async () => {
     try {
         const response = await apiClient.get('get_user/')
         if (response.data.code === 1) {
-            userList.value = response.data.data.map(user => ({
+            userList.value = response.data.data.map((user: any) => ({
                 ...user,
             }))
         }
     } catch (error) {
-        ElMessage.error('获取员工列表失败: ' + (error.response?.data?.msg || error.message))
+        const errMsg = (error as any)?.response?.data?.msg || (error as any)?.message || '未知错误';
+        ElMessage.error('获取员工列表失败: ' + errMsg)
     }
 }
 
@@ -180,19 +186,20 @@ const handleSearch = async () => {
             inputstr: searchKeyword.value
         })
         if (response.data.code === 1) {
-            userList.value = response.data.data.map(user => ({
+            userList.value = response.data.data.map((user: { role: string }) => ({
                 ...user,
                 position: user.role === 'manager' ? '经理' : '管理员',
                 department: '管理部门'
             }))
         }
     } catch (error) {
-        ElMessage.error('搜索失败: ' + (error.response?.data?.msg || error.message))
+        const err = error as any;
+        ElMessage.error('搜索失败: ' + (err.response?.data?.msg || err.message))
     }
 }
 
 // 删除
-const deleteUser = async (row) => {
+const deleteUser = async (row: { username: string; id: any }) => {
     // 检查是否尝试删除自己
     if (row.username === userStore.userInfo.name) {
         ElMessage.warning('您不能删除自己的账户');
@@ -214,7 +221,7 @@ const deleteUser = async (row) => {
         } else {
             ElMessage.error('删除失败: ' + (response.data.msg || '未知错误'));
         }
-    } catch (error) {
+    } catch (error: any) {
         if (error !== 'cancel') {
             ElMessage.error('删除失败: ' + (error.response?.data?.msg || error.message));
         }
@@ -247,12 +254,13 @@ const handleBatchDelete = async () => {
         }
     } catch (error) {
         if (error !== 'cancel') {
-            ElMessage.error('删除失败: ' + (error.response?.data?.msg || error.message))
+            const err = error as any;
+            ElMessage.error('删除失败: ' + (err.response?.data?.msg || err.message))
         }
     }
 }
 
-const editUser = (row) => {
+const editUser = (row: { id: null; username: string; mobile: string } | { id: null; username: string; mobile: string }) => {
     if (!row) {
         ElMessage.error('编辑失败: 未选择员工')
         return
@@ -286,16 +294,18 @@ const confirmEdit = async () => {
             ElMessage.error('修改失败: ' + (response.data.msg || '未知错误'))
         }
     } catch (error) {
-        ElMessage.error('修改失败: ' + (error.response?.data?.msg || error.message))
+        const err = error as any;
+        ElMessage.error('修改失败: ' + (err.response?.data?.msg || err.message))
     }
 }
 // 多选处理
-const handleSelectionChange = (selection) => {
+const handleSelectionChange = (selection: never[]) => {
     selectedUser.value = selection
 }
 
 
-const formRef = ref(null);
+import type { FormInstance } from 'element-plus'
+const formRef = ref<FormInstance | null>(null);
 const isSubmitting = ref(false);
 
 const formData = ref({
@@ -328,6 +338,10 @@ const formRules = {
 
 const handleSubmit = async () => {
     try {
+        if (!formRef.value) {
+            ElMessage.error('表单未初始化');
+            return;
+        }
         await formRef.value.validate();
         isSubmitting.value = true;
 

@@ -63,3 +63,30 @@ export const processResideTimePeriod = (item: { resideTimePeriod: any }): string
         return [];
     }
 };
+
+// 返回时间差
+export const timeDifference = (times: string[]) => {
+    if (times[0] === '' || times[1] === '')
+        return '';
+    else {
+        const endDate = new Date(times[1]);
+        const startDate = new Date(times[0]);
+
+        // 计算时间差（毫秒）  
+        const diffTime = endDate.getTime() - startDate.getTime();
+
+        // 计算年、月、日、小时  
+        const diffSeconds = Math.floor(diffTime / 1000);
+        const diffMinutes = Math.floor(diffSeconds / 60);
+        const diffHours = Math.floor(diffMinutes / 60);
+        const diffDays = Math.floor(diffHours / 24);
+
+        // 计算年和月  
+        const years = Math.floor(diffDays / 365);
+        const months = Math.floor((diffDays % 365) / 30);
+        const days = diffDays % 30;
+        const hours = diffHours % 24;
+
+        return `${years}年${months}月${days}日${hours}小时`
+    }
+}

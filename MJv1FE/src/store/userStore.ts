@@ -3,7 +3,7 @@ import { ref, computed, watch, onMounted } from "vue";
 import apiClient from "@/services/apiClient";
 
 export const useUserStore = defineStore("user", () => {
-  const validateRole = (value) =>
+  const validateRole = (value: string) =>
     ["guest", "customer", "manager", "admin"].includes(value);
 
   const getInitialState = () => ({
@@ -23,7 +23,7 @@ export const useUserStore = defineStore("user", () => {
 
   // 持久化
   const persistState = () => {
-    localStorage.setItem("isLoggedIn", isLoggedIn.value);
+    localStorage.setItem("isLoggedIn", isLoggedIn.value.toString());
     localStorage.setItem("userInfo", JSON.stringify(userInfo.value));
   };
   watch([isLoggedIn, userInfo], persistState, { deep: true });

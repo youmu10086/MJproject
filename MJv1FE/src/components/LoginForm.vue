@@ -50,7 +50,8 @@ import CryptoJS from 'crypto-js';
 
 
 const userStore = useUserStore();
-const formRef = ref(null);
+import type { FormInstance } from 'element-plus';
+const formRef = ref<FormInstance | null>(null);
 
 const formStatus = ref('login'); // 'login', 'resetPassword', 'enroll'
 
@@ -77,11 +78,11 @@ const formRules = computed(() => ({
     ],
     confirmPassword: [
         {
-            validator: (rule, value, callback) => {
+            validator: (rule: any, value: string, callback: (arg0: Error | undefined) => void) => {
                 if (formStatus.value === 'resetPassword' && value !== formData.value.password) {
                     callback(new Error('两次输入的密码不一致'));
                 } else {
-                    callback();
+                    callback(undefined);
                 }
             },
             trigger: ['blur']
@@ -138,6 +139,7 @@ const handleSubmit = async () => {
         }
         else {
             try {
+                if (!formRef.value) return;
                 await formRef.value.validate();
                 isSubmitting.value = true;
 
@@ -154,7 +156,8 @@ const handleSubmit = async () => {
                     userStore.loginDialogVisible = false;
                 }
             } catch (error) {
-                ElMessage.error(error.response?.data?.msg || '密码重置失败');
+                const errMsg = (error as any)?.response?.data?.msg || '密码重置失败';
+                ElMessage.error(errMsg);
             } finally {
                 isSubmitting.value = false;
             }
@@ -162,6 +165,7 @@ const handleSubmit = async () => {
     }
     else {
         try {
+            if (!formRef.value) return;
             await formRef.value.validate();
             isSubmitting.value = true;
 
@@ -173,7 +177,7 @@ const handleSubmit = async () => {
                 email: formData.value.email,
             });
 
-            userStore.$patch(state => {
+            userStore.$patch((state: { isLoggedIn: boolean; role: any; userInfo: { username: any; id: any; }; }) => {
                 state.isLoggedIn = true;
                 state.role = response.data.role;
                 state.userInfo = {

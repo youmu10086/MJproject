@@ -99,23 +99,23 @@ const fetchReservationHistory = async () => {
 };
 
 // 分页处理
-const handleSizeChange = (size) => {
+const handleSizeChange = (size: number) => {
     pageSize.value = size;
     fetchReservationHistory();
 };
 
-const handleCurrentChange = (page) => {
+const handleCurrentChange = (page: number) => {
     currentPage.value = page;
     fetchReservationHistory();
 };
 
 // 查看详情
-const viewDetails = (row) => {
+const viewDetails = (row: { cno: any; }) => {
     ElMessage.info(`查看订单详情：${row.cno}`);
 };
 
 // 自定义行样式
-const rowClassName = (row) => {
+const rowClassName = (row: { status: string; }) => {
     return row.status === '已退宿' ? 'row-inactive' : '';
 };
 

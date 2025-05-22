@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from "vue-router";
+import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import { useUserStore } from "@/store/userStore";
 import { ElMessage } from "element-plus";
 
@@ -14,69 +14,69 @@ const Test = () => import("@/views/Test.vue");
 const Room = () => import("@/views/Room.vue");
 const NotFound = () => import("@/views/NotFound.vue");
 
-const routes = [
+const routes: Array<RouteRecordRaw> = [
   {
     path: "/customer",
     name: "顾客管理",
     component: Customer,
-    meta: { requiresAuth: true, requiredRole: "manager" },
+    meta: { requiresAuth: true, requiredRole: "manager" }
   },
   {
     path: "/home",
     name: "主页面",
-    component: Home,
+    component: Home
   },
   {
     path: "/supplies",
     name: "住房用品管理",
     component: Supplies,
-    meta: { requiresAuth: true, requiredRole: "manager" },
+    meta: { requiresAuth: true, requiredRole: "manager" }
   },
   {
     path: "/room",
     name: "房间管理",
     component: Room,
-    meta: { requiredRole: ["manager", "customer", "guest"] },
+    meta: { requiredRole: ["manager", "customer", "guest"] }
   },
   {
     path: "/employee",
     name: "员工管理",
     component: Employee,
-    meta: { requiresAuth: true, requiredRole: "manager" },
+    meta: { requiresAuth: true, requiredRole: "manager" }
   },
   {
     path: "/onlineService",
     name: "在线服务",
-    component: OnlineService,
+    component: OnlineService
   },
   {
     path: "/reservationManage",
     name: "历史记录",
     component: ReservationManage,
-    meta: { requiresAuth: true, requiredRole: "customer" },
+    meta: { requiresAuth: true, requiredRole: "customer" }
   },
   {
     path: "/reviewsFeedback",
     name: "反馈",
-    component: ReviewsFeedback,
+    component: ReviewsFeedback
   },
   {
     path: "/userManage",
     name: "用户管理",
     component: userManage,
-    meta: { requiresAuth: true, requiredRole: "admin" },
+    meta: { requiresAuth: true, requiredRole: "admin" }
   },
   {
     path: "/test",
     name: "Test",
-    component: Test,
+    component: Test
   },
   { path: "/", redirect: "/home" },
   {
     path: "/:pathMatch(.*)*", // 通配符路由
     name: "NotFound",
-    component: NotFound,
-  },
+    component: NotFound
+  }
 ];
 
 const router = createRouter({
@@ -111,6 +111,7 @@ router.beforeEach(async (to, from, next) => {
     // 角色权限验证
     if (
       to.meta.requiredRole &&
+      Array.isArray(to.meta.requiredRole) &&
       !to.meta.requiredRole.includes(userStore.role)
     ) {
       ElMessage.error("您没有访问该页面的权限");

@@ -5,7 +5,7 @@ import ElementPlus from "element-plus";
 import "element-plus/dist/index.css";
 import * as ElementPlusIconsVue from "@element-plus/icons-vue";
 import zhCn from "element-plus/es/locale/lang/zh-cn"; // 引入中文语言包
-import router from "./router"; // 导入路由
+import router from "./router/index"; // 导入路由
 import "element-plus/theme-chalk/dark/css-vars.css";
 import piniaPluginPersistedstate from "pinia-plugin-persistedstate";
 import "@/styles/main.scss";

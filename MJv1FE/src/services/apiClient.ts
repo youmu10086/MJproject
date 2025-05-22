@@ -1,8 +1,9 @@
 // src/services/apiClient.js
 import axios from "axios";
-import { ElMessage, ElLoading } from "element-plus";
+import { ElMessage, ElLoading, LoadingParentElement } from "element-plus";
+import { ComponentPublicInstance, ComponentOptionsBase, ComponentProvideOptions, Ref } from "vue";
 
-let loadingInstance = null; // 存储全局加载实例
+let loadingInstance: { close: any; setText?: (text: string) => void; removeElLoadingChild?: () => void; handleAfterLeave?: () => void; vm?: ComponentPublicInstance<{}, {}, {}, {}, {}, {}, {}, {}, false, ComponentOptionsBase<any, any, any, any, any, any, any, any, any, {}, {}, string, {}, {}, {}, string, ComponentProvideOptions>>; $el?: HTMLElement; originalPosition?: Ref<string, string>; originalOverflow?: Ref<string, string>; visible?: Ref<boolean, boolean>; parent?: Ref<LoadingParentElement, LoadingParentElement>; background?: Ref<string, string>; svg?: Ref<string, string>; svgViewBox?: Ref<string, string>; spinner?: Ref<string | boolean, string | boolean>; text?: Ref<string, string>; fullscreen?: Ref<boolean, boolean>; lock?: Ref<boolean, boolean>; customClass?: Ref<string, string>; target?: Ref<HTMLElement, HTMLElement>; beforeClose?: Ref<(() => boolean) | undefined, (() => boolean) | undefined> | undefined; closed?: Ref<(() => void) | undefined, (() => void) | undefined> | undefined; } | null = null; // 存储全局加载实例
 
 const apiClient = axios.create({
   baseURL: "/api", // API 基础路径
@@ -33,9 +34,9 @@ apiClient.interceptors.request.use(
 );
 
 let isRefreshing = false; // 是否正在刷新 Token
-let failedQueue = []; // 存储等待刷新 Token 的请求队列
+let failedQueue: { resolve: (value: unknown) => void; reject: (reason?: any) => void; }[] = []; // 存储等待刷新 Token 的请求队列
 
-const processQueue = (error, token = null) => {
+const processQueue = (error: unknown, token = null) => {
   failedQueue.forEach((prom) => {
     if (error) {
       prom.reject(error);
@@ -125,7 +126,7 @@ apiClient.interceptors.response.use(
   }
 );
 
-const getDefaultMessage = (status) => {
+const getDefaultMessage = (status: 400 | 403 | 404 | 500 | 502 | 503 | 504) => {
   const messages = {
     400: "请求参数错误",
     403: "没有访问权限",

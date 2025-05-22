@@ -21,14 +21,6 @@
                         <el-button type="primary" :icon="Plus" plain @click="addCustomer()">现场入住</el-button>
                     </el-button-group>
                 </el-col>
-                <!-- <el-col :span="2" class="upload-container">
-                <el-upload>
-                    <el-button type="primary" plain>导入excel</el-button>
-                </el-upload>
-            </el-col>
-            <el-col :span="2" class="export-container">
-                <el-button type="primary" plain>导出excel</el-button>
-            </el-col> -->
             </el-row>
         </el-form>
         <!------------------------------------------------------------------------------------ 表 -------------------------------------------------------------------------------------------->
@@ -74,124 +66,26 @@
             </el-col>
         </el-row>
         <!-------------------------------------------------------------------- 表单 ------------------------------------------------------------------>
-        <el-dialog v-model="customerDialogVisible" :title="customerDialogTitle" style="width: 50%"
-            :before-close="handleClose" draggable @closed="closeCustomerDialogForm" @open="resetForm(ruleFormRef)"
-            top="150px">
-            <el-form :inline="true" label-width="110px" label-position="right" :model="customerForm" :rules="rules"
-                ref="ruleFormRef">
-                <el-row style="display: flex; align-items: center;">
-                    <el-col :span="12" style="padding-right: 5px;">
-                        <el-form-item label="编号" prop="cno" v-show="customerDialogStatus !== CustomerDialogStatus.ADD">
-                            <el-input style="width: 100%;" v-model="customerForm.cno" :size="size" disabled
-                                v-show="customerDialogStatus !== CustomerDialogStatus.ADD"></el-input>
-                        </el-form-item>
-                        <el-form-item label="姓名" prop="name">
-                            <el-input style="width: 100%;" v-model="customerForm.name" :size="size"
-                                :disabled="customerDialogStatus === CustomerDialogStatus.VIEW || customerDialogStatus === CustomerDialogStatus.RENEWAL"></el-input>
-                        </el-form-item>
-                        <el-form-item label="身份号" prop="idCardNo">
-                            <el-input style="width: 100%;" v-model="customerForm.idCardNo" :size="size"
-                                :disabled="customerDialogStatus === CustomerDialogStatus.VIEW || customerDialogStatus === CustomerDialogStatus.RENEWAL"></el-input>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="12" style="padding-right: 5px;"> <!-- 证件照部分 -->
-                        <el-form-item label="证件照">
-                            <el-upload class="avatar-uploader" :action="customerForm.imageUrl" :show-file-list="false"
-                                :before-upload="beforeAvatarUpload" style="text-align: center;" :size="size"
-                                :http-request="uploadPicturePost"
-                                :disabled="customerDialogStatus === CustomerDialogStatus.VIEW || customerDialogStatus === CustomerDialogStatus.RENEWAL">
-                                <img v-if="customerForm.image" :src="customerForm.imageUrl" class="avatar" />
-                                <el-icon v-else class="avatar-uploader-icon">
-                                    <Plus />
-                                </el-icon>
-                            </el-upload>
-                        </el-form-item>
-                    </el-col>
-                </el-row>
-                <el-row :gutter="10">
-                    <el-col :span="12" style="padding-right: 5px;">
-                        <el-form-item label="电话" prop="mobile">
-                            <el-input v-model="customerForm.mobile" :size="size"
-                                :disabled="customerDialogStatus === CustomerDialogStatus.VIEW || customerDialogStatus === CustomerDialogStatus.RENEWAL"></el-input>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="12">
-                        <el-form-item label="余额" prop="balance">
-                            <el-input v-model="customerForm.balance" :size="size"
-                                :disabled="customerDialogStatus === CustomerDialogStatus.VIEW"></el-input>
-                        </el-form-item>
-                    </el-col>
-                </el-row>
-                <el-row style="align-items: center;" v-show="customerDialogStatus !== CustomerDialogStatus.ADD">
-                    <el-col :span="12" style="padding-right: 5px;">
-                        <el-form-item label="登记时间" prop="checkInTime">
-                            <el-date-picker v-model="customerForm.checkInTime" type="datetime" placeholder="未登记"
-                                :size="size" style="width: 100%" disabled />
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="12" style="padding-left: 5px;">
-                        <el-form-item label="退宿时间" prop="checkOutTime" disabled>
-                            <el-date-picker v-model="customerForm.checkOutTime" type="datetime" placeholder="未退宿"
-                                :size="size" style="width: 100%" disabled />
-                        </el-form-item>
-                    </el-col>
-                </el-row>
-                <el-row>
-                    <el-col :span="10" style="padding-left: 5px;">
-                        <el-form-item label="房间号" prop="roomNo">
-                            <el-input v-model="customerForm.roomNo" :size="size"
-                                :disabled="customerDialogStatus === CustomerDialogStatus.VIEW || customerDialogStatus === CustomerDialogStatus.RENEWAL"></el-input>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="6" style="padding-left: 5px;padding-top: 5px;">
-                        <el-text style="width: 100%" :size="size">{{ roomMessage(customerForm.roomNo)
-                            }}</el-text>
-                    </el-col>
-                    <el-col :span="8" style="padding-left: 5px;">
-                        <el-form-item label="性别" prop="gender" label-width="40px">
-                            <el-radio-group v-model="customerForm.gender" :size="size"
-                                :disabled="customerDialogStatus === CustomerDialogStatus.VIEW || customerDialogStatus === CustomerDialogStatus.RENEWAL"
-                                style="width: 185px;" fill="#909399">
-                                <el-radio-button value="男">男</el-radio-button>
-                                <el-radio-button value="女">女</el-radio-button>
-                            </el-radio-group>
-                        </el-form-item>
-                    </el-col>
-                </el-row>
-
-                <el-row>
-                    <el-col :span="18" style="padding-left: 5px;">
-                        <el-form-item label="入住时间" prop="resideTimePeriod">
-                            <el-date-picker type="datetimerange" v-model="customerForm.resideTimePeriod"
-                                style="width: 100%" :size="size" unlink-panels range-separator="-"
-                                format="YYYY-MM-DD HH:mm:ss" start-placeholder="开始" end-placeholder="结束"
-                                :disabled="customerDialogStatus === CustomerDialogStatus.VIEW || customerDialogStatus === CustomerDialogStatus.EDIT"
-                                placement="top-start" />
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="6" style="padding-left: 5px;padding-top: 5px;">
-                        <el-text style="width: 100%" :size="size">{{ timeDifference(customerForm.resideTimePeriod)
-                            }}</el-text>
-                    </el-col>
-                </el-row>
-            </el-form>
-            <template #footer>
-                <div class="dialog-footer">
-                    <el-button type="primary" v-show="customerDialogStatus !== CustomerDialogStatus.VIEW"
-                        @click="submitForm(ruleFormRef)" :loading="isSubmitting">{{
-                            submitRemand }}</el-button>
-                    <el-button type="info" @click="customerDialogVisible = false"
-                        v-show="customerDialogStatus !== CustomerDialogStatus.VIEW">取消</el-button>
-                    <el-button type="primary" v-show="customerDialogStatus === CustomerDialogStatus.VIEW"
-                        @click="customerDialogVisible = false">确定</el-button>
-                </div>
-            </template>
-        </el-dialog>
+        <CoustomerMessageForm v-model:visible="customerDialogVisible" :title="customerDialogTitle"
+            :customerForm="customerForm" :rules="rules" :status="customerDialogStatus" :loading="isSubmitting"
+            :submitRemand="submitRemand" :size="size" @submit="submitForm" @before-close="handleClose" @resetForm="resetForm"
+            @close="closeCustomerDialogForm" @room-message="roomMessage" @upload-picture-post="uploadPicturePost"
+            @before-avatar-upload="beforeAvatarUpload" @close-customer-dialog-form="closeCustomerDialogForm" />
     </div>
 </template>
 
 <script lang="ts" setup>
 import BaseTable from '@/components/BaseTable.vue';
+import CoustomerMessageForm from '@/components/CoustomerMessageForm.vue';
+import showConfirmDialog from '@/utils/showConfirmDialog';
+import {computed, onMounted, ref} from 'vue'
+import {ArrowRight, Delete, Edit, More, Plus, Refresh, Search} from '@element-plus/icons-vue'
+import {ComponentSize, dayjs, ElMessage, FormInstance, FormItemRule, UploadProps} from 'element-plus'
+import apiClient from '@/services/apiClient';
+import {AxiosResponse} from 'axios';
+import {Room} from '@/types/Room'; // 引入Room类型
+import {Customer} from '@/types/Customer'; // 引入Customer类型
+import {formatResideTime, processResideTimePeriod} from '@/utils/dateUtils'; // 引入工具函数
 
 const columns = [
     { prop: 'name', label: '姓名', minWidth: 50, showOverflowTooltip: true },
@@ -202,8 +96,6 @@ const columns = [
     { prop: 'idCardNo', label: '身份证', minWidth: 150, showOverflowTooltip: true },
     { prop: 'mobile', label: '电话号码', minWidth: 100, showOverflowTooltip: true },
 ];
-
-import showConfirmDialog from '@/utils/showConfirmDialog';
 
 const isSubmitting = ref(false); // 控制按钮的加载状态
 const roomMessage = (roomNo: string) => {
@@ -218,32 +110,6 @@ const roomMessage = (roomNo: string) => {
 
 const deposit = 100;//押金
 
-// 返回时间差
-const timeDifference = (times: string[]) => {
-    if (times[0] === '' || times[1] === '')
-        return '';
-    else {
-        const endDate = new Date(times[1]);
-        const startDate = new Date(times[0]);
-
-        // 计算时间差（毫秒）  
-        const diffTime = endDate.getTime() - startDate.getTime();
-
-        // 计算年、月、日、小时  
-        const diffSeconds = Math.floor(diffTime / 1000);
-        const diffMinutes = Math.floor(diffSeconds / 60);
-        const diffHours = Math.floor(diffMinutes / 60);
-        const diffDays = Math.floor(diffHours / 24);
-
-        // 计算年和月  
-        const years = Math.floor(diffDays / 365);
-        const months = Math.floor((diffDays % 365) / 30);
-        const days = diffDays % 30;
-        const hours = diffHours % 24;
-
-        return `${years}年${months}月${days}日${hours}小时`
-    }
-}
 // 退租
 const checkOut = (row: { resideTimePeriod: (string | number | Date)[]; roomNo: string; name: string; balance: number; cno: any; }) => {
     const startDate = new Date(row.resideTimePeriod[0]);
@@ -251,7 +117,7 @@ const checkOut = (row: { resideTimePeriod: (string | number | Date)[]; roomNo: s
 
     let timeDifference: number = endDate.getTime() - startDate.getTime();
     const info = roomData.value.find(room => room.roomNo === row.roomNo);
-    let minimumAmount: number
+    let minimumAmount: number = 0;
     if (info) {
         if (info.durationType === "日租") {
             timeDifference = timeDifference / 86400000; // 转换为天数
@@ -289,7 +155,6 @@ const renewal = (row: { resideTimePeriod: string[]; cno: any }) => {
     customerDialogStatus.value = CustomerDialogStatus.RENEWAL;
     customerDialogVisible.value = true;
 };
-
 // 预订顾客办理入住
 const checkInForServed = (row: { resideTimePeriod: string[]; cno: any }) => {
     initializeCustomerForm(row, {
@@ -310,12 +175,6 @@ const initializeCustomerForm = (row: any, overrides: Partial<Customer> = {}) => 
     // 应用 overrides 参数覆盖指定字段
     Object.assign(customerForm.value, overrides);
 };
-import { computed, onMounted, ref } from 'vue'
-import { Search, Delete, Edit, Refresh, More, FolderOpened, Plus, ArrowRight } from '@element-plus/icons-vue'
-import { dayjs, ElMessage, FormItemRule, ComponentSize, FormInstance, UploadProps } from 'element-plus'
-import apiClient from '@/services/apiClient';
-import { AxiosResponse } from 'axios';
-
 // 定义对话框状态枚举
 enum CustomerDialogStatus {
     NONE = 'none',           // 无状态
@@ -367,6 +226,8 @@ const rules = ref({
         {
             validator: (rule, value, callback) => {
                 const room = roomData.value.find(room => room.roomNo === value);
+                if (!room)
+                    return callback(new Error('没有这个房间'));
                 if (room.roomStatus === 'reserved' && customerDialogStatus.value === CustomerDialogStatus.CHECKINFORSERVED && customerForm.value.roomNo === value)
                     return callback(); // 预约用户入住时跳过验证
                 else if (room.roomStatus === 'occupied' && customerDialogStatus.value === CustomerDialogStatus.RENEWAL && customerForm.value.roomNo === value)
@@ -452,31 +313,6 @@ const rules = ref({
         }
     ] as Array<FormItemRule>,
 });
-interface Customer {
-    cno: string
-    name: string
-    idCardNo: string
-    mobile: string
-    gender: string
-    roomNo: string
-    checkOutTime: Date
-    checkInTime: Date
-    image: string
-    imageUrl: string
-    balance: number
-    resideTimePeriod: string[]
-    status: string
-}
-interface Room {
-    roomNo: string;
-    roomAmount: number;
-    durationType: string;
-    roomType: string;
-    roomStatus: string;
-    imageUrl?: string;
-    roomConfig?: string[];
-    status?: string;
-}
 const customerForm = ref<Customer>({
     cno: '',
     name: '',
@@ -539,7 +375,6 @@ onMounted(() => {
     getCustomer();
     getRoom();
 })
-import { formatResideTime, processResideTimePeriod } from '@/utils/dateUtils'; // 引入工具函数
 
 // ————————————————————————————————————————————————————————————————————————————————————————————操作—————————————————————————————————————————————————————————————————————————————————— //
 const customerDialogVisible = ref(false) // 显示dialog
@@ -548,7 +383,7 @@ const getCustomer = () => {
     inputStr.value = '';
     apiClient
         .get("customer/")
-        .then((res) => {
+        .then((res: AxiosResponse<any, any>) => {
             // 请求成功后执行的函数
             if (res.data.code === 1) {
                 flushedDate(res);
@@ -641,13 +476,13 @@ const resetForm = (formEl: FormInstance | undefined) => {
     if (!formEl) return
     formEl.clearValidate()
 }
-const ruleFormRef = ref<FormInstance>()
+// const ruleFormRef = ref<FormInstance>()
 // 校验
 const submitForm = async (formEl: FormInstance | undefined) => {
     if (!formEl) return;
     isSubmitting.value = true; // 开始加载
     try {
-        await formEl.validate((valid, fields) => {
+        await formEl.validate((valid) => {
             if (valid) {
                 if (customerDialogStatus.value === CustomerDialogStatus.ADD) submitAddCustomer();
                 else submitUpdateCustomer();
@@ -661,7 +496,7 @@ const submitForm = async (formEl: FormInstance | undefined) => {
 const queryCustomer = () => {
     apiClient
         .post('customer/query/', { inputstr: inputStr.value })
-        .then((res) => {
+        .then((res: AxiosResponse<any, any>) => {
             if (res.data.code === 1) {
                 flushedDate(res);
                 ElMessage.success('查询成功')
@@ -671,25 +506,24 @@ const queryCustomer = () => {
 const submitUpdateCustomer = async () => {
     return apiClient
         .post("customer/update/", customerForm.value)
-        .then((res) => {
+        .then((res: AxiosResponse<any, any>) => {
             if (res.data.code === 1) {
                 flushedDate(res);
                 ElMessage.success('修改成功');
                 closeCustomerDialogForm();
             } else return Promise.reject(new Error(res.data.msg));
         })
-        .catch((err) => {
+        .catch((err: any) => {
             return Promise.reject(err);
         });
 };
 // 提交添加
 const submitAddCustomer = () => {
-    const now = new Date();
-    customerForm.value.checkInTime = now;
+  customerForm.value.checkInTime = new Date();
     customerForm.value.status = '已入住';
     apiClient
         .post("customer/add/", customerForm.value)
-        .then((res) => {
+        .then((res: AxiosResponse<any, any>) => {
             if (res.data.code === 1) {
                 flushedDate(res);
 
@@ -705,7 +539,7 @@ const deleteCustomer = (row: { name: string; cno: any; }) => {
         .then(() => {
             apiClient
                 .post("customer/delete/", row.cno)
-                .then((res) => {
+                .then((res: AxiosResponse) => {
                     // 请求成功后执行的函数
                     if (res.data.code === 1) {
                         flushedDate(res);
@@ -717,7 +551,7 @@ const deleteCustomer = (row: { name: string; cno: any; }) => {
         .catch()
 }
 // 批量删除
-const selectCustomers = ref([])
+const selectCustomers = ref<any[]>([])
 const handleSelectionChange = (data: any[]) => {
     selectCustomers.value = data
 }
@@ -726,7 +560,7 @@ const deleteCustomers = (row: any) => {
         .then(() => {
             apiClient
                 .post("customers/delete/", { customers: selectCustomers.value })
-                .then((res) => {
+                .then((res: AxiosResponse<any, any>) => {
                     // 请求成功后执行的函数
                     if (res.data.code === 1) {
                         flushedDate(res);
@@ -774,5 +608,6 @@ const getImage = (cno: string) => {
             return oneCustomer.image;
         }
     }
+    return '';
 }
 </script>

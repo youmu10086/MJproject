@@ -6,7 +6,7 @@ export const useMessageCardStore = defineStore("messageCard", () => {
   const messageCardIsDisplayed = ref(
     localStorage.getItem("isDisplay") === "true"
   );
-  const setMessageCardDisplayed = (isDisplayed) => {
+  const setMessageCardDisplayed = (isDisplayed: boolean) => {
     messageCardIsDisplayed.value = isDisplayed;
     localStorage.setItem("isDisplay", isDisplayed.toString());
   };

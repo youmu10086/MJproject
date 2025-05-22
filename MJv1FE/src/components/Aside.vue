@@ -73,10 +73,10 @@ const handleSelect = (index: string) => {
 const isCollapse = ref(true);
 
 // 防抖函数
-let debounceTimer: NodeJS.Timeout | null = null;
+let debounceTimer: number | null = null;
 const debounce = (callback: () => void, delay: number) => {
     if (debounceTimer) clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(callback, delay);
+    debounceTimer = window.setTimeout(callback, delay);
 };
 
 // 鼠标进入时展开菜单
@@ -90,7 +90,7 @@ const handleMouseEnter = () => {
 const handleMouseLeave = () => {
     debounce(() => {
         isCollapse.value = true;
-    }, 300); // 延迟 200ms
+    }, 300); // 延迟 300ms
 };
 </script>
 

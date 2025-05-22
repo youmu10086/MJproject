@@ -7,13 +7,14 @@
       <Aside v-if="deviceStore.isComputer" class="sidebar"></Aside>
       <el-main
         :style="{ marginLeft: deviceStore.isComputer ? '70px' : '0px', flex: 1, position: 'relative', zIndex: 1, transition: 'margin-left 0.3s ease' }">
-        <el-scrollbar>
-          <router-view v-slot="{ Component }">
-            <transition name="fade-slide" mode="out-in">
+        <router-view v-slot="{ Component }">
+          <transition name="fade-slide" mode="out-in">
+            <el-scrollbar>
+
               <component :is="Component" />
-            </transition>
-          </router-view>
-        </el-scrollbar>
+            </el-scrollbar>
+          </transition>
+        </router-view>
       </el-main>
     </el-container>
   </el-container>

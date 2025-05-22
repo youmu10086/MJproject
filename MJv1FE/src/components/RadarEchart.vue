@@ -1,19 +1,18 @@
 <template>
-  <v-chart :option="chartOption" style="width: 400px; height: 300px;" />
+  <v-chart :option="chartOption" style="width: 300px; height: 300px;" :theme="isDark ? 'dark' : 'light'" />
 </template>
 
 <script setup>
+import { useDark } from '@vueuse/core';
+
+const { isDark } = useDark();
+
+
 const chartOption = {
-//   title: {
-//     text: '公寓评分雷达图',
-//     textStyle: {
-//       fontSize: 10, // 缩小标题字体大小
-//     },
-//   },
   tooltip: {},
   legend: {
     orient: 'vertical', // 垂直排列
-    left: '5%', // 距离左侧 5%
+    left: '15%', // 距离左侧 5%
     top: '20%', // 距离顶部 20%，位于标题下方
     textStyle: {
       fontSize: 10, // 缩小图例字体大小
@@ -21,7 +20,7 @@ const chartOption = {
     data: ['当前评分', '历史平均分'],
   },
   radar: {
-    radius: '60%', // 设置雷达图的半径为容器的 60%
+    radius: '100%', // 设置雷达图的半径为容器的 100%
     indicator: [
       { name: '卫生状况', max: 10 },
       { name: '设施设备', max: 10 },

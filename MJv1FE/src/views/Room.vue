@@ -152,7 +152,7 @@
                                 </el-form-item>
                             </el-form-item>
                         </el-col>
-                        <el-col :xs="24" :sm="12" :md="8">
+                        <el-col :xs="24" :sm="12" :md="8" class="radar-col">
                             <div class="radar-container">
                                 <RadarEchart :roomNo="roomForm.roomNo" />
                             </div>
@@ -253,6 +253,10 @@
             </template>
         </el-dialog>
 
+        <CustomerMessageForm v-model:visible="customerDialogVisible" title="登记信息" :customer-form="customerForm"
+            :rules="rules" :loading="customerFormisSubmitting" :size="size" :status="'ADD'" :submit-remand="'预订'"
+            @submit="submitForm" :before-close="handleClose" @closed="closeCustomerDialogForm" @room-message="roomMessage"
+            @upload-picture-post="uploadPicturePost" @before-avatar-upload="beforeAvatarUpload" />
     </div>
 </template>
 
@@ -268,6 +272,8 @@ import { useUserStore } from '@/store/userStore';
 import { Plus } from '@element-plus/icons-vue';
 import showConfirmDialog from '@/utils/showConfirmDialog';
 import { useDeviceStore } from '@/store/deviceStore';
+
+import CustomerMessageForm from '@/components/CustomerMessageForm.vue';
 
 const deviceStore = useDeviceStore();
 const isMobile = computed(() => deviceStore.isMobile);
@@ -291,7 +297,7 @@ const submitForm = async (formEl: FormInstance | undefined) => {
         customerForm.value.checkInTime = now;
         customerForm.value.status = '已预订'; // 设置状态为已预订
         customerForm.value.balance = 0; // 余额设置为0
-        customerForm.value.user_id = userStore.userInfo.id; // 设置用户ID
+        customerForm.value.user_id = String(userStore.userInfo.id); // 设置用户ID，确保为字符串类型
         const response = await apiClient.post("customer/reserve/", customerForm.value);
         if (response.data.code === 1) {
             ElMessage.success('房间预订成功');
@@ -401,6 +407,9 @@ const rules = ref({
         {
             validator: (rule, value, callback) => {
                 const room = roomData.value.find(room => room.roomNo === value);
+                if (!room) {
+                    return callback(new Error('没有这个房间'));
+                }
                 if (room.roomStatus !== 'vacant')
                     return callback(new Error('该房间已被占用'));
                 callback(); // 验证通过
@@ -462,22 +471,8 @@ const resetCustomerForm = () => {
     customerForm.value.balance = 0;
     customerForm.value.resideTimePeriod = ['', '']
 }
-interface Customer {
-    cno: string
-    name: string
-    idCardNo: string
-    mobile: string
-    gender: string
-    roomNo: string
-    checkOutTime: Date
-    checkInTime: Date
-    image: string
-    imageUrl: string
-    balance: number
-    resideTimePeriod: string[]
-    status: string
-    user_id?: string
-}
+import { Customer } from '@/types/Customer';
+
 const customerForm = ref<Customer>({
     cno: '',
     name: '',
@@ -610,7 +605,7 @@ const addRoom = async () => {
             roomType: roomForm.value.roomType,
             roomAmount: roomForm.value.roomAmount,
             durationType: roomForm.value.durationType || null, // 可选字段
-            roomConfig: roomForm.value.roomConfig.map(configName => {
+            roomConfig: (roomForm.value.roomConfig ?? []).map(configName => {
                 const config = allRoomConfigs.value.find(c => c.name === configName);
                 return config ? config.id : null;
             }).filter(id => id !== null), // 转换为配置项的 ID 数组
@@ -653,7 +648,7 @@ const addRoomConfig = async () => {
             ElMessage.success('添加房间配置成功');
             newConfigName.value = ''; // 清空输入框
             getRoomConfig(); // 重新获取房间配置  
-            roomForm.value.roomConfig = roomForm.value.roomConfig.filter(name => name !== newConfigName.value); // 同步更新房间配置
+            roomForm.value.roomConfig = (roomForm.value.roomConfig || []).filter(name => name !== newConfigName.value); // 同步更新房间配置
         }
     } catch (error) { }
     finally {
@@ -681,7 +676,7 @@ const deleteRoomConfig = async () => {
                     ElMessage.success('删除房间配置成功');
                     newConfigName.value = ''; // 清空输入框;
                     getRoomConfig(); // 重新获取房间配置
-                    roomForm.value.roomConfig = roomForm.value.roomConfig.filter(name => name !== configName); // 同步更新房间配置
+                    roomForm.value.roomConfig = (roomForm.value.roomConfig || []).filter(name => name !== configName); // 同步更新房间配置
 
                 } else { }
             } catch (error) { }
@@ -702,6 +697,9 @@ const clear = () => {
 // 添加配置项
 const addFormRoomConfig = (configId: number) => {
     const configName = allRoomConfigs.value.find((config) => config.id === configId)?.name;
+    if (!Array.isArray(roomForm.value.roomConfig)) {
+        roomForm.value.roomConfig = [];
+    }
     if (configName && !roomForm.value.roomConfig.includes(configName)) {
         roomForm.value.roomConfig.push(configName);
     }
@@ -753,7 +751,7 @@ const submitRoomForm = () => {
     } else if (roomFormStatus.value === 'isEditing') {
         updateRoom(); // 更新房间信息
     } else if (roomFormStatus.value === 'isReserving') {
-        if (roomForm.value.roomStatus !== 'vacant') {
+        if (!roomForm.value || roomForm.value.roomStatus !== 'vacant') {
             ElMessage.error('该房间不允许预订');
             return;
         }

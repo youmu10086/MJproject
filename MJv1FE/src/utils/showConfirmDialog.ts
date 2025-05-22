@@ -7,7 +7,7 @@ import { ElMessageBox } from 'element-plus';
  * @param {Object} options - 可选的配置项
  * @returns {Promise} 返回一个 Promise，用户点击确定时 resolve，点击取消时 reject
  */
-const showConfirmDialog = (message, title = '提示', options = {}) => {
+const showConfirmDialog = (message: string, title: string = '提示', options: object = {}): Promise<any> => {
     return ElMessageBox.confirm(
         message,
         title,
