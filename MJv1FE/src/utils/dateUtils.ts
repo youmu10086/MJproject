@@ -46,8 +46,8 @@ export const formatResideTime = (beginTime: string, endTime: string): string => 
  * @param item 包含 `resideTimePeriod` 属性的对象
  * @returns 转换后的数组，如果解析失败则返回空数组
  */
-export const processResideTimePeriod = (item: { resideTimePeriod: any }): string[] => {
-    let resideTimePeriodString = item.resideTimePeriod;
+export const processResideTimePeriod = (resideTimePeriod: string): string[] => {
+    let resideTimePeriodString = resideTimePeriod;
 
     if (!resideTimePeriodString || typeof resideTimePeriodString !== 'string') {
         return [];
@@ -59,9 +59,7 @@ export const processResideTimePeriod = (item: { resideTimePeriod: any }): string
     try {
         // 使用 JSON.parse 将字符串转换为数组
         return JSON.parse(resideTimePeriodString);
-    } catch (error) {
-        return [];
-    }
+    } catch { return []; }
 };
 
 // 返回时间差

@@ -17,7 +17,7 @@
     <div class="dashboard-cards">
       <el-row :gutter="20">
         <el-col v-for="(stat, index) in stats" :key="index" :xs="24" :sm="12" :md="6">
-          <div class="stat-card" :class="`theme-${index % 4}`" @mouseenter="handleCardHover(index)">
+          <div class="stat-card" :class="`theme-${index % 4}`" @mouseenter="handleCardHover()">
             <div class="card-icon">
               <component :is="stat.icon" class="icon" />
             </div>
@@ -43,8 +43,8 @@
 </template>
 
 <script lang="ts" setup>
+defineOptions({ name: 'HomePage' });
 import { markRaw, ref } from 'vue';
-import { useDark } from '@vueuse/core';
 import { User, TrendCharts, Money, ChatRound } from '@element-plus/icons-vue'
 import CountUp from 'vue-countup-v3'
 
@@ -62,7 +62,6 @@ const source = ref(0);
 source.value = 172000;
 
 // 深色主题切换
-const isDark = useDark(); // 检测当前是否为深色模式
 
 // 统计卡片数据
 const stats = ref([
@@ -112,7 +111,7 @@ const countUpOptions = {
 }
 
 // 卡片悬停效果
-const handleCardHover = (index: number) => {
+const handleCardHover = () => {
   // 可以添加额外交互逻辑
 }
 </script>

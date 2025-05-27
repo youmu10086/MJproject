@@ -54,6 +54,8 @@
 </template>
 
 <script setup lang="ts">
+defineOptions({ name: 'AsideComponent' });
+
 import { UserFilled, Avatar, HomeFilled, Briefcase, House, More, Service, SwitchFilled } from '@element-plus/icons-vue';
 import { useUserStore } from '@/store/userStore';
 import { useRouter } from 'vue-router';

@@ -37,7 +37,7 @@
 
 .add-config-tag {
   flex-grow: 1;
-  width: 400px;
+  width: auto;
   display: inline-block;
   align-items: center;
   cursor: pointer;
@@ -87,13 +87,8 @@
 
 .floor-card {
   border-radius: 12px;
-  transition: transform 0.3s ease;
-  height:auto;
+  // height:auto;
 }
-
-// .floor-card:hover {
-//   transform: translateY(-2px);
-// }
 
 .floor-header {
   display: flex;
@@ -104,17 +99,13 @@
 .room-col {
   padding: 8px;
   display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
 .room-button {
   height: 60px;
   width: 70%;
+  margin: 0 auto; /* 添加这行 */
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
   transition: all 0.3s ease;
 }
 

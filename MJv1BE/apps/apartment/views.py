@@ -441,6 +441,9 @@ def upload(request):
 def customer_reserve(request):
     try:
         data = request.data
+        user_id = request.query_params.get('user_id')
+        if not user_id:
+            return JsonResponse({'code': 0, 'msg': '缺少用户ID'}, status=status.HTTP_400_BAD_REQUEST)
 
         required_fields = ['name', 'roomNo', 'gender', 'idCardNo', 'mobile', 'balance', 'resideTimePeriod',
                            'checkInTime']
@@ -455,6 +458,7 @@ def customer_reserve(request):
         room.save()
 
         obj_customer = Customer(
+            user_id=user_id,
             name=data['name'],
             room_id=data['roomNo'],  # 使用外键的ID来设置房间
             gender=data['gender'],
@@ -465,6 +469,7 @@ def customer_reserve(request):
             resideTimePeriod=data['resideTimePeriod'],
             status='已预订',
             checkInTime=data['checkInTime'],
+
         )
         obj_customer.cno = get_cno()
         obj_customer.save()

@@ -11,27 +11,6 @@ import { ref } from "vue";
 const show = ref(false);
 const progress = ref(0);
 
-// 定义方法
-const start = () => {
-    show.value = true;
-    progress.value = 0;
-};
-
-const update = (value) => {
-    progress.value = value;
-};
-
-const finish = () => {
-    progress.value = 100;
-    setTimeout(() => {
-        show.value = false;
-    }, 200);
-};
-
-const error = () => {
-    progress.value = 100;
-    show.value = false;
-};
 </script>
 
 <style scoped>

@@ -7,6 +7,7 @@
 </template>
 
 <script setup>
+defineOptions({ name: 'NotFoundPage' });
 import { useRouter } from 'vue-router';
 
 const router = useRouter();

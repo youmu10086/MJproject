@@ -8,6 +8,7 @@
 </template>
 
 <script setup lang="ts">
+defineOptions({ name: 'DarkThemeFloatButton' });
 import { Moon, Sunny } from '@element-plus/icons-vue'; // 引入图标组件
 import { useDark, useToggle } from '@vueuse/core';
 
@@ -16,7 +17,6 @@ const toggleTheme = useToggle(isDark); // 切换主题
 </script>
 
 <style scoped lang="scss">
-
 .float-button:hover {
     transform: rotate(45deg);
 }

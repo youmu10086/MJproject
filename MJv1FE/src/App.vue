@@ -5,12 +5,10 @@
     </el-header>
     <el-container style="flex: 1; display: flex; position: relative;">
       <Aside v-if="deviceStore.isComputer" class="sidebar"></Aside>
-      <el-main
-        :style="{ marginLeft: deviceStore.isComputer ? '70px' : '0px', flex: 1, position: 'relative', zIndex: 1, transition: 'margin-left 0.3s ease' }">
+      <el-main :class="['main-content', deviceStore.isComputer ? 'main-with-sidebar' : 'main-without-sidebar']">
         <router-view v-slot="{ Component }">
           <transition name="fade-slide" mode="out-in">
             <el-scrollbar>
-
               <component :is="Component" />
             </el-scrollbar>
           </transition>
@@ -37,6 +35,22 @@ const deviceStore = useDeviceStore();
 </script>
 
 <style lang="scss" scoped>
+.main-content {
+  flex: 1;
+  position: relative;
+  z-index: 1;
+  transition: margin-left 0.3s ease;
+}
+
+.main-with-sidebar {
+  margin-left: 70px;
+}
+
+.main-without-sidebar {
+  margin-left: 0;
+}
+
+
 .fade-slide-enter-active,
 .fade-slide-leave-active {
   transition: opacity 0.3s, transform 0.3s;

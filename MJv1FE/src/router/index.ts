@@ -67,7 +67,7 @@ const routes: Array<RouteRecordRaw> = [
     meta: { requiresAuth: true, requiredRole: "admin" }
   },
   {
-    path: "/test",
+    path: "/custList",
     name: "Test",
     component: Test
   },
@@ -103,7 +103,7 @@ router.beforeEach(async (to, from, next) => {
           ElMessage.error("获取用户权限失败");
           return next("/home");
         }
-      } catch (error) {
+      } catch {
         return next("/login");
       }
     }

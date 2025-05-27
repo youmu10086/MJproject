@@ -66,26 +66,29 @@
             </el-col>
         </el-row>
         <!-------------------------------------------------------------------- 表单 ------------------------------------------------------------------>
-        <CoustomerMessageForm v-model:visible="customerDialogVisible" :title="customerDialogTitle"
-            :customerForm="customerForm" :rules="rules" :status="customerDialogStatus" :loading="isSubmitting"
-            :submitRemand="submitRemand" :size="size" @submit="submitForm" @before-close="handleClose" @resetForm="resetForm"
-            @close="closeCustomerDialogForm" @room-message="roomMessage" @upload-picture-post="uploadPicturePost"
-            @before-avatar-upload="beforeAvatarUpload" @close-customer-dialog-form="closeCustomerDialogForm" />
+        <CustomerMessageForm v-model:visible="customerDialogVisible" :title="customerDialogTitle"
+            v-model:customerForm="customerForm" :rules="rules" :customer-dialog-status="customerDialogStatus"
+            :loading="isSubmitting" :submitRemand="submitRemand" :size="size" @submit="submitForm"
+            @before-close="handleClose" @resetForm="resetForm" @close="closeCustomerDialog" @room-message="roomMessage"
+            @upload-picture-post="uploadPicturePost" @before-avatar-upload="beforeAvatarUpload"
+            @close-customer-dialog-form="closedCustomerDialog" />
     </div>
 </template>
 
 <script lang="ts" setup>
+defineOptions({ name: 'CustomerPage' });
 import BaseTable from '@/components/BaseTable.vue';
-import CoustomerMessageForm from '@/components/CoustomerMessageForm.vue';
+import CustomerMessageForm from '@/components/CustomerMessageForm.vue';
 import showConfirmDialog from '@/utils/showConfirmDialog';
-import {computed, onMounted, ref} from 'vue'
-import {ArrowRight, Delete, Edit, More, Plus, Refresh, Search} from '@element-plus/icons-vue'
-import {ComponentSize, dayjs, ElMessage, FormInstance, FormItemRule, UploadProps} from 'element-plus'
+import { computed, onMounted, ref } from 'vue'
+import { ArrowRight, Delete, Edit, More, Plus, Refresh, Search } from '@element-plus/icons-vue'
+import { ComponentSize, dayjs, ElMessage, FormInstance, FormItemRule, UploadProps } from 'element-plus'
 import apiClient from '@/services/apiClient';
-import {AxiosResponse} from 'axios';
-import {Room} from '@/types/Room'; // 引入Room类型
-import {Customer} from '@/types/Customer'; // 引入Customer类型
-import {formatResideTime, processResideTimePeriod} from '@/utils/dateUtils'; // 引入工具函数
+import { AxiosResponse } from 'axios';
+import { Room } from '@/types/Room'; // 引入Room类型
+import { Customer, CustomerDialogStatus, CustomerInterface } from '@/types/Customer'; // 引入Customer类型
+import { formatResideTime, processResideTimePeriod } from '@/utils/dateUtils'; // 引入工具函数
+import { RoomInterface } from '@/types/Room';
 
 const columns = [
     { prop: 'name', label: '姓名', minWidth: 50, showOverflowTooltip: true },
@@ -99,7 +102,7 @@ const columns = [
 
 const isSubmitting = ref(false); // 控制按钮的加载状态
 const roomMessage = (roomNo: string) => {
-    const roomInfo = roomData.value.find(room => room.roomNo === roomNo) || null;
+    const roomInfo = roomData.value.find(room => room.room_no === roomNo) || null;
     if (roomNo === '' || roomInfo === null)
         return '';
     else {
@@ -111,12 +114,12 @@ const roomMessage = (roomNo: string) => {
 const deposit = 100;//押金
 
 // 退租
-const checkOut = (row: { resideTimePeriod: (string | number | Date)[]; roomNo: string; name: string; balance: number; cno: any; }) => {
+const checkOut = (row: Customer) => {
     const startDate = new Date(row.resideTimePeriod[0]);
     const endDate = new Date(row.resideTimePeriod[1]);
 
     let timeDifference: number = endDate.getTime() - startDate.getTime();
-    const info = roomData.value.find(room => room.roomNo === row.roomNo);
+    const info = roomData.value.find(room => room.room_no === row.roomNo);
     let minimumAmount: number = 0;
     if (info) {
         if (info.durationType === "日租") {
@@ -130,6 +133,7 @@ const checkOut = (row: { resideTimePeriod: (string | number | Date)[]; roomNo: s
             minimumAmount = timeDifference * info.roomAmount;
         }
     }
+    if (row.balance === null) return;
     showConfirmDialog('确定为顾客' + row.name + '退宿吗？(若退宿请返还押金' + deposit + '元、充值剩余' + (row.balance - minimumAmount) + '元)', '警告')
         .then(() => {
             customerForm.value = JSON.parse(JSON.stringify(row));
@@ -149,14 +153,14 @@ const checkOut = (row: { resideTimePeriod: (string | number | Date)[]; roomNo: s
 }
 // 续租
 const oldResideTimePeriod = ref<string[]>([]);
-const renewal = (row: { resideTimePeriod: string[]; cno: any }) => {
+const renewal = (row: Customer) => {
     oldResideTimePeriod.value = row.resideTimePeriod;
     initializeCustomerForm(row, { resideTimePeriod: ['', ''] }); // 清空居住时间
     customerDialogStatus.value = CustomerDialogStatus.RENEWAL;
     customerDialogVisible.value = true;
 };
 // 预订顾客办理入住
-const checkInForServed = (row: { resideTimePeriod: string[]; cno: any }) => {
+const checkInForServed = (row: Customer) => {
     initializeCustomerForm(row, {
         checkInTime: new Date(),
         status: '已入住',
@@ -164,7 +168,7 @@ const checkInForServed = (row: { resideTimePeriod: string[]; cno: any }) => {
     customerDialogStatus.value = CustomerDialogStatus.CHECKINFORSERVED;
     customerDialogVisible.value = true;
 };
-const initializeCustomerForm = (row: any, overrides: Partial<Customer> = {}) => {
+const initializeCustomerForm = (row: Customer, overrides: Partial<Customer> = {}) => {
     // 深拷贝 row 数据到 customerForm
     customerForm.value = { ...JSON.parse(JSON.stringify(row)) };
 
@@ -175,15 +179,6 @@ const initializeCustomerForm = (row: any, overrides: Partial<Customer> = {}) => 
     // 应用 overrides 参数覆盖指定字段
     Object.assign(customerForm.value, overrides);
 };
-// 定义对话框状态枚举
-enum CustomerDialogStatus {
-    NONE = 'none',           // 无状态
-    EDIT = 'edit',           // 修改状态
-    VIEW = 'view',           // 查看状态
-    ADD = 'add',             // 添加状态
-    RENEWAL = 'renewal',      // 续租状态
-    CHECKINFORSERVED = 'checkInForServed', // 预订顾客办理入住
-}
 
 const size = ref<ComponentSize>('small')                           // 组件大小
 const customerDate = ref<Customer[]>([])                              // 储存请求信息
@@ -216,16 +211,16 @@ const rules = ref({
     roomNo: [
         { required: true, message: '房间号不能为空', trigger: 'blur', },
         {
-            validator: (rule, value, callback) => {
-                const exists = roomData.value.some(room => room.roomNo === value);
+            validator: (_, value, callback) => {
+                const exists = roomData.value.some(room => room.room_no === value);
                 if (!exists)
                     return callback(new Error('没有这个房间'));
                 callback(); // 验证通过
             }, trigger: 'blur'
         },
         {
-            validator: (rule, value, callback) => {
-                const room = roomData.value.find(room => room.roomNo === value);
+            validator: (_, value, callback) => {
+                const room = roomData.value.find(room => room.room_no === value);
                 if (!room)
                     return callback(new Error('没有这个房间'));
                 if (room.roomStatus === 'reserved' && customerDialogStatus.value === CustomerDialogStatus.CHECKINFORSERVED && customerForm.value.roomNo === value)
@@ -247,7 +242,7 @@ const rules = ref({
     resideTimePeriod: [
         { required: true, message: '时间不能为空', trigger: 'blur' },
         {
-            validator: (rule, value, callback) => {
+            validator: (_, value, callback) => {
                 if (value[0] === '' || value === '')
                     callback(new Error('时间不能为空')); // 跳过验证  
                 else
@@ -256,7 +251,7 @@ const rules = ref({
             trigger: 'blur'
         },
         {
-            validator: (rule, value, callback) => {
+            validator: (_, value, callback) => {
                 if (customerDialogStatus.value !== CustomerDialogStatus.RENEWAL) {
                     callback(); // 跳过验证  
                 } else {
@@ -279,12 +274,12 @@ const rules = ref({
     balance: [
         { required: true, message: '余额不能为空', trigger: 'blur' },
         {
-            validator: (rule, value, callback) => {
+            validator: (_, value, callback) => {
                 const startDate = new Date(customerForm.value.resideTimePeriod[0]);
                 const endDate = new Date(customerForm.value.resideTimePeriod[1]);
 
                 let timeDifference: number = endDate.getTime() - startDate.getTime();
-                const info = roomData.value.find(room => room.roomNo === customerForm.value.roomNo);
+                const info = roomData.value.find(room => room.room_no === customerForm.value.roomNo);
 
                 if (info) {
                     if (info.durationType === "日租") {
@@ -354,13 +349,29 @@ const handleClose = (done: () => void) => {
     }
 }
 // 根据截至时间改变列的颜色
-const tableRowClassName = ({ row }: { row: Customer }) => {
-    const now = dayjs();
-    const resideTimePeriod = dayjs(row.resideTimePeriod[1], undefined, true)
-    if (row.status == '已退宿') return ''
-    else if (resideTimePeriod.isBefore(now)) return 'danger-row'; // 过期
-    else if (resideTimePeriod.isAfter(now.add(1, 'day'))) return 'success-row'; // 正常
-    else return 'warning-row'; // 即将到期
+const tableRowClassName = (row: Record<string, unknown>) => {
+    // 防御性检查
+    if (!row.resideTimePeriod || !Array.isArray(row.resideTimePeriod) || row.resideTimePeriod.length < 2) {
+        return ''; // 返回默认样式
+    }
+
+    try {
+        const now = dayjs();
+        const endDate = dayjs((row.resideTimePeriod as [string, string])[1], undefined, true);
+
+        // 检查日期是否有效
+        if (!endDate.isValid()) {
+            return '';
+        }
+
+        if (row.status === '已退宿') return '';
+        else if (endDate.isBefore(now)) return 'danger-row'; // 过期
+        else if (endDate.isAfter(now.add(1, 'day'))) return 'success-row'; // 正常
+        else return 'warning-row'; // 即将到期
+    } catch (error) {
+        console.error('日期处理错误:', error);
+        return ''; // 出错时返回默认样式
+    }
 }
 // 根据页面设置加载当前页顾客的信息
 const getPageCustomer = () => {
@@ -379,27 +390,25 @@ onMounted(() => {
 // ————————————————————————————————————————————————————————————————————————————————————————————操作—————————————————————————————————————————————————————————————————————————————————— //
 const customerDialogVisible = ref(false) // 显示dialog
 // 获取所有房客信息
-const getCustomer = () => {
-    inputStr.value = '';
-    apiClient
-        .get("customer/")
-        .then((res: AxiosResponse<any, any>) => {
-            // 请求成功后执行的函数
-            if (res.data.code === 1) {
-                flushedDate(res);
-            }
-        })
-        .finally(() => {
-        })
-}
+const getCustomer = async () => {
+    try {
+        inputStr.value = '';
+        const response = await apiClient.get("customer/");
+        if (response.data.code === 1) {
+            flushedDate(response);
+        }
+    } catch {/* empty */ }
+};
 // 根据返回值重新加载页面（customerDate和total.value赋值）
-const flushedDate = (res: AxiosResponse<any, any>) => {
-    customerDate.value = res.data.data.map((item: any) => ({
+const flushedDate = (res: AxiosResponse<unknown>) => {
+    const data = res.data as { data: CustomerInterface[] };
+    customerDate.value = data.data.map((item: CustomerInterface) => ({
         ...item,
-        roomNo: item.room_id,
-        resideTimePeriod: processResideTimePeriod(item), // 自定义处理函数
+        image: item.image || '', // 确保 image 字段存在
+        imageUrl: item.image ? `${apiClient.defaults.baseURL}media/${item.image}` : '', // 拼接图片 URL
+        resideTimePeriod: processResideTimePeriod(item.resideTimePeriod), // 自定义处理函数
     }));
-    total.value = res.data.data.length;
+    total.value = data.data.length;
     getPageCustomer();
 }
 const getRoom = async () => {
@@ -407,7 +416,7 @@ const getRoom = async () => {
         const res = await apiClient.get("room/");
         if (res.data.code === 1) {
             // 解析后端返回的数据
-            roomData.value = res.data.data.map((room: any) => ({
+            roomData.value = res.data.data.map((room: RoomInterface) => ({
                 roomNo: room.room_no,
                 roomStatus: room.room_status,
                 roomType: room.room_type,
@@ -416,17 +425,16 @@ const getRoom = async () => {
                 roomConfig: room.room_config || [], // 确保 roomConfig 存在
             }));
         }
-    } finally {
-    }
+    } finally { /* empty */ }
 };
 // 显示查看明细对话框
-const viewCustomer = (row: { cno: any }) => {
+const viewCustomer = (row: Customer) => {
     initializeCustomerForm(row); // 不需要额外覆盖字段
     customerDialogStatus.value = CustomerDialogStatus.VIEW;
     customerDialogVisible.value = true;
 };
 // 显示修改信息对话框
-const updateCustomer = (row: { cno: any }) => {
+const updateCustomer = (row: Customer) => {
     initializeCustomerForm(row); // 调用封装的函数
     customerDialogStatus.value = CustomerDialogStatus.EDIT;
     customerDialogVisible.value = true;
@@ -448,15 +456,16 @@ const resetCustomerForm = () => {
     customerForm.value.image = '';
     customerForm.value.imageUrl = '';
     customerForm.value.balance = 0;
-    customerForm.value.resideTimePeriod = ['', '']
-}
-// 关闭对话框重置customerForm
-const closeCustomerDialogForm = () => {
-    customerDialogVisible.value = false;
-    resetCustomerForm();
+    customerForm.value.resideTimePeriod = ['', ''];
     customerDialogStatus.value = CustomerDialogStatus.NONE;
 }
-// 重置验证信息
+const closeCustomerDialog = () => {
+    customerDialogVisible.value = false;
+}
+// 关闭对话框重置customerForm
+const closedCustomerDialog = () => {
+    resetCustomerForm();
+}
 const submitRemand = computed(() => {
     if (customerDialogStatus.value === CustomerDialogStatus.ADD)
         return '提交'
@@ -473,14 +482,13 @@ const submitRemand = computed(() => {
 })
 // 重置表单验证状态
 const resetForm = (formEl: FormInstance | undefined) => {
-    if (!formEl) return
-    formEl.clearValidate()
+    if (!formEl) return;
+    formEl.clearValidate();
 }
-// const ruleFormRef = ref<FormInstance>()
 // 校验
 const submitForm = async (formEl: FormInstance | undefined) => {
     if (!formEl) return;
-    isSubmitting.value = true; // 开始加载
+    isSubmitting.value = true;
     try {
         await formEl.validate((valid) => {
             if (valid) {
@@ -489,87 +497,84 @@ const submitForm = async (formEl: FormInstance | undefined) => {
             }
         });
     } finally {
-        isSubmitting.value = false; // 提交完成后停止加载
+        isSubmitting.value = false;
     }
 };
 // 查询
-const queryCustomer = () => {
-    apiClient
-        .post('customer/query/', { inputstr: inputStr.value })
-        .then((res: AxiosResponse<any, any>) => {
-            if (res.data.code === 1) {
-                flushedDate(res);
-                ElMessage.success('查询成功')
-            }
-        })
-}
+const queryCustomer = async () => {
+    try {
+        const response = await apiClient.post('customer/query/', { inputstr: inputStr.value });
+        if (response.data.code === 1) {
+            flushedDate(response);
+            ElMessage.success('查询成功');
+        }
+    } catch { /*sb8*/ }
+};
+// 提交修改
 const submitUpdateCustomer = async () => {
-    return apiClient
-        .post("customer/update/", customerForm.value)
-        .then((res: AxiosResponse<any, any>) => {
-            if (res.data.code === 1) {
-                flushedDate(res);
-                ElMessage.success('修改成功');
-                closeCustomerDialogForm();
-            } else return Promise.reject(new Error(res.data.msg));
-        })
-        .catch((err: any) => {
-            return Promise.reject(err);
-        });
+    try {
+        const response = await apiClient.post("customer/update/", customerForm.value);
+        if (response.data.code === 1) {
+            flushedDate(response);
+            ElMessage.success('修改成功');
+            closeCustomerDialog();
+            closedCustomerDialog();
+        } else {
+            ElMessage.error('修改失败');
+        }
+    } catch { /*empty*/ }
 };
 // 提交添加
-const submitAddCustomer = () => {
-  customerForm.value.checkInTime = new Date();
+const submitAddCustomer = async () => {
+    customerForm.value.checkInTime = new Date();
     customerForm.value.status = '已入住';
-    apiClient
-        .post("customer/add/", customerForm.value)
-        .then((res: AxiosResponse<any, any>) => {
-            if (res.data.code === 1) {
-                flushedDate(res);
-
-                ElMessage.success('办理入住成功')
-                closeCustomerDialogForm()
-            }
-        })
-}
+    try {
+        const response = await apiClient.post("customer/add/", customerForm.value);
+        if (response.data.code === 1) {
+            flushedDate(response);
+            ElMessage.success('办理入住成功')
+            closeCustomerDialog();
+            closedCustomerDialog();
+        }
+    } catch { /* empty */ }
+};
 // 删除
-const deleteCustomer = (row: { name: string; cno: any; }) => {
-    showConfirmDialog('是否永久删除姓名为' + row.name + '的顾客信息?', '警告')
+const deleteCustomer = async (row: { name: string; cno: string }) => {
+    try {
+        // 显示确认对话框，并等待用户确认
+        await showConfirmDialog(
+            `是否永久删除姓名为 ${row.name} 的顾客信息?`,
+            '警告'
+        );
 
-        .then(() => {
-            apiClient
-                .post("customer/delete/", row.cno)
-                .then((res: AxiosResponse) => {
-                    // 请求成功后执行的函数
-                    if (res.data.code === 1) {
-                        flushedDate(res);
-                        ElMessage.success('删除成功')
-                        closeCustomerDialogForm()
-                    }
-                })
-        })
-        .catch()
-}
+        // 发送删除请求，并等待响应
+        const response = await apiClient.post("customer/delete/", row.cno);
+
+        // 检查响应状态
+        if (response.data.code === 1) {
+            flushedDate(response);
+            ElMessage.success('删除成功');
+            closeCustomerDialog();
+            closedCustomerDialog();
+        }
+    } catch { /* empty */ }
+};
 // 批量删除
-const selectCustomers = ref<any[]>([])
-const handleSelectionChange = (data: any[]) => {
+const selectCustomers = ref<Customer[]>([])
+const handleSelectionChange = (data: Customer[]) => {
     selectCustomers.value = data
 }
-const deleteCustomers = (row: any) => {
-    showConfirmDialog('是否批量删除' + selectCustomers.value.length + '个顾客的信息?', '警告')
-        .then(() => {
-            apiClient
-                .post("customers/delete/", { customers: selectCustomers.value })
-                .then((res: AxiosResponse<any, any>) => {
-                    // 请求成功后执行的函数
-                    if (res.data.code === 1) {
-                        flushedDate(res);
-                        ElMessage.success('批量删除成功')
-                        closeCustomerDialogForm()
-                    }
-                })
-        })
-        .catch()
+const deleteCustomers = async () => {
+    try {
+        await showConfirmDialog('是否批量删除' + selectCustomers.value.length + '个顾客的信息?', '警告')
+        const response = await apiClient.post("customers/delete/", { customers: selectCustomers.value })
+        if (response.data.code === 1) {
+            flushedDate(response);
+            ElMessage.success('批量删除成功')
+            closeCustomerDialog();
+            closedCustomerDialog();
+        }
+    } catch { /* empty */ }
 }
 // 判断图片类型
 const beforeAvatarUpload: UploadProps['beforeUpload'] = (rawFile) => {
@@ -599,7 +604,7 @@ const uploadPicturePost = async (file: { file: string | Blob; }) => {
             customerForm.value.imageUrl = apiClient.defaults.baseURL + 'media/' + res.data.name;
             return res;  // 返回结果以便于后续处理
         } else throw new Error(res.data.msg); // 抛出错误以便于后续处理
-    } catch (err) { }
+    } catch { /* 错误处理 */ }
 };
 // 根据id获取image
 const getImage = (cno: string) => {

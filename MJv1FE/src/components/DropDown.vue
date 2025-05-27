@@ -37,7 +37,7 @@
 <script setup lang="ts">
 import { useUserStore } from '@/store/userStore';
 import { useRouter } from 'vue-router';
-import { Menu, Setting, User } from '@element-plus/icons-vue'
+import { Menu } from '@element-plus/icons-vue'
 
 const userStore = useUserStore();
 const router = useRouter();

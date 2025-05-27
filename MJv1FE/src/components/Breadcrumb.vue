@@ -7,6 +7,7 @@
 </template>
 
 <script setup lang="ts">
+defineOptions({ name: 'BreadcrumbComponent' });
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { ArrowRight } from '@element-plus/icons-vue';

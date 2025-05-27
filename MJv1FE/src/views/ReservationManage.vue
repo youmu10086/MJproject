@@ -74,7 +74,7 @@ const cancelReservation = async (row: { cno: string; room_no: string }) => {
             fetchReservationHistory(); // 重新加载数据
         }
     }
-    catch (error) { }
+    catch { /* empty */ }
 };
 
 // 获取租住记录数据
@@ -83,17 +83,15 @@ const fetchReservationHistory = async () => {
     try {
         const { data } = await apiClient.get(`/reservations/${userStore.userInfo.id}/`);
         if (data.code === 1) {
-            reservations.value = data.data.map((item: { resideTimePeriod: any; }) => ({
+            reservations.value = data.data.map((item: { resideTimePeriod: string; }) => ({
                 ...item,
-                resideTimePeriod: processResideTimePeriod(item),
+                resideTimePeriod: processResideTimePeriod(item.resideTimePeriod), // 处理住宿时间段
             }));
             total.value = data.data.length;
         } else {
             ElMessage.error(data.msg || '获取租住记录失败');
         }
-    } catch (error) {
-        ElMessage.error('网络错误，请稍后重试');
-    } finally {
+    } catch { /*sb*/ } finally {
         loading.value = false;
     }
 };
@@ -110,12 +108,12 @@ const handleCurrentChange = (page: number) => {
 };
 
 // 查看详情
-const viewDetails = (row: { cno: any; }) => {
+const viewDetails = (row: { cno: string; }) => {
     ElMessage.info(`查看订单详情：${row.cno}`);
 };
 
 // 自定义行样式
-const rowClassName = (row: { status: string; }) => {
+const rowClassName = (row: Record<string, unknown>) => {
     return row.status === '已退宿' ? 'row-inactive' : '';
 };
 

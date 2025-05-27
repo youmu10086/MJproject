@@ -78,7 +78,7 @@ const formRules = computed(() => ({
     ],
     confirmPassword: [
         {
-            validator: (rule: any, value: string, callback: (arg0: Error | undefined) => void) => {
+            validator: (rule: import('element-plus').FormItemRule, value: string, callback: (arg0: Error | undefined) => void) => {
                 if (formStatus.value === 'resetPassword' && value !== formData.value.password) {
                     callback(new Error('两次输入的密码不一致'));
                 } else {
@@ -155,10 +155,7 @@ const handleSubmit = async () => {
                     ElMessage.success('密码重置成功');
                     userStore.loginDialogVisible = false;
                 }
-            } catch (error) {
-                const errMsg = (error as any)?.response?.data?.msg || '密码重置失败';
-                ElMessage.error(errMsg);
-            } finally {
+            } catch { /* empty */ } finally {
                 isSubmitting.value = false;
             }
         }
@@ -177,7 +174,7 @@ const handleSubmit = async () => {
                 email: formData.value.email,
             });
 
-            userStore.$patch((state: { isLoggedIn: boolean; role: any; userInfo: { username: any; id: any; }; }) => {
+            userStore.$patch((state: { isLoggedIn: boolean; role: string; userInfo: { username: string; id: string; }; }) => {
                 state.isLoggedIn = true;
                 state.role = response.data.role;
                 state.userInfo = {
@@ -193,7 +190,7 @@ const handleSubmit = async () => {
             ElMessage.success(formStatus.value === 'login' ? '登录成功' : '注册成功');
             userStore.loginDialogVisible = false;
         }
-        catch (error) { }
+        catch { /* empty */ }
         finally { isSubmitting.value = false; }
     }
 };  

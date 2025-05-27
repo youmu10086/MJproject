@@ -9,6 +9,7 @@
 </template>
 
 <script setup>
+defineOptions({ name: 'SuppliesPage' });
 import { ArrowRight } from '@element-plus/icons-vue'
 
 </script>

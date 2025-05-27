@@ -4,6 +4,7 @@
 </template>
 
 <script setup lang="ts">
+defineOptions({ name: 'DarkThemeSwitch' });
 import { Moon, Sunny } from '@element-plus/icons-vue';
 import { useDark } from '@vueuse/core';
 import { computed } from 'vue';

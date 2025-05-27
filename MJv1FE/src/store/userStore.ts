@@ -34,7 +34,7 @@ export const useUserStore = defineStore("user", () => {
     userInfo.value = { username: "", id: "" };
     ["isLoggedIn", "userInfo"].forEach((key) => localStorage.removeItem(key));
   };
-  const fetchUserRole = async () => {
+  const fetchUserRole = async (): Promise<boolean> => {
     try {
       const response = await apiClient.post("get_userRole/");
       if (response.status === 200) {
@@ -45,6 +45,7 @@ export const useUserStore = defineStore("user", () => {
         }
         return false;
       }
+      return false; // 如果响应状态不是200，返回失败状态
     } catch (error) {
       console.error("获取角色失败:", error);
       resetUser();

@@ -11,5 +11,6 @@
 
 <script setup>
 import { ArrowRight } from '@element-plus/icons-vue'
+defineOptions({ name: 'EmployeePage' });
 
 </script>

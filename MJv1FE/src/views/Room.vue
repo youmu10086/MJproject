@@ -27,20 +27,19 @@
                             </el-button-group>
                             <el-button-group class="right-aligned">
                                 <el-button v-if="isManager" @click="openAddRoomDialog">添加房间</el-button>
-                                <!-- <el-button v-if="isManager">添加楼层</el-button> -->
                             </el-button-group>
                         </div>
                     </template>
-                    <el-scrollbar>
+                    <el-scrollbar style="height: 400px;">
                         <el-row v-if="getFloorRooms(currentFloor.name).length" :gutter="12">
-                            <el-col v-for="room in getFloorRooms(currentFloor.name)" :key="room.roomNo || Math.random()"
-                                :xs="12" :sm="8" :md="6" :lg="4" :xl="8" class="room-col">
+                            <el-col v-for="room in getFloorRooms(currentFloor.name)" :key="room.roomNo" :xs="12" :sm="8"
+                                :md="6" :lg="4" :xl="8" class="room-col">
                                 <el-button class="room-button" :type="getRoomStatus(room).type" :size="size"
                                     @click="openRoomDialog(room)" :plain="true">
                                     <div class="room-info">
                                         <span class="room-number">{{ room.roomNo || '未知房间号' }}</span>
                                         <el-tag v-if="getRoomStatus(room).status" :type="getRoomStatus(room).type"
-                                            size="small" class="mt-1">
+                                            size="small">
                                             {{ getRoomStatus(room).status }}
                                         </el-tag>
                                     </div>
@@ -175,113 +174,37 @@
             </el-dialog>
         </teleport>
 
-        <el-dialog v-model="customerDialogVisible" title='登记信息' style="width: 50%" :before-close="handleClose" draggable
-            @closed="closeCustomerDialogForm" top="150px">
-            <el-form :inline="true" label-width="110px" label-position="right" :model="customerForm" :rules="rules"
-                ref="ruleFormRef">
-                <el-row style="display: flex; align-items: center;">
-                    <el-col :span="12" style="padding-right: 5px;">
-                        <el-form-item label="姓名" prop="name">
-                            <el-input style="width: 100%;" v-model="customerForm.name" :size="size"></el-input>
-                        </el-form-item>
-                        <el-form-item label="身份号" prop="idCardNo">
-                            <el-input style="width: 100%;" v-model="customerForm.idCardNo" :size="size"></el-input>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="12" style="padding-right: 5px;"> <!-- 证件照部分 -->
-                        <el-form-item label="证件照">
-                            <el-upload class="avatar-uploader" :action="customerForm.imageUrl" :show-file-list="false"
-                                :before-upload="beforeAvatarUpload" style="text-align: center;" :size="size"
-                                :http-request="uploadPicturePost">
-                                <img v-if="customerForm.image" :src="customerForm.imageUrl" class="avatar" />
-                                <el-icon v-else class="avatar-uploader-icon">
-                                    <Plus />
-                                </el-icon>
-                            </el-upload>
-                        </el-form-item>
-                    </el-col>
-                </el-row>
-                <el-row :gutter="10">
-                    <el-col :span="12" style="padding-right: 5px;">
-                        <el-form-item label="电话" prop="mobile">
-                            <el-input v-model="customerForm.mobile" :size="size"></el-input>
-                        </el-form-item>
-                    </el-col>
-                </el-row>
-                <el-row>
-                    <el-col :span="10" style="padding-left: 5px;">
-                        <el-form-item label="房间号" prop="roomNo">
-                            <el-input v-model="customerForm.roomNo" :size="size" disabled></el-input>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="6" style="padding-left: 5px;padding-top: 5px;">
-                        <el-text style="width: 100%" :size="size">{{ roomMessage(customerForm.roomNo)
-                            }}</el-text>
-                    </el-col>
-                    <el-col :span="8" style="padding-left: 5px;">
-                        <el-form-item label="性别" prop="gender" label-width="40px">
-                            <el-radio-group v-model="customerForm.gender" :size="size" style="width: 185px;"
-                                fill="#909399">
-                                <el-radio-button value="男">男</el-radio-button>
-                                <el-radio-button value="女">女</el-radio-button>
-                            </el-radio-group>
-                        </el-form-item>
-                    </el-col>
-                </el-row>
-
-                <el-row>
-                    <el-col :span="18" style="padding-left: 5px;">
-                        <el-form-item label="入住时间" prop="resideTimePeriod">
-                            <el-date-picker type="datetimerange" v-model="customerForm.resideTimePeriod"
-                                style="width: 100%" :size="size" unlink-panels range-separator="-"
-                                format="YYYY-MM-DD HH:mm:ss" start-placeholder="开始" end-placeholder="结束"
-                                placement="top-start" />
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="6" style="padding-left: 5px;padding-top: 5px;">
-                        <el-text style="width: 100%" :size="size">{{ timeDifference(customerForm.resideTimePeriod)
-                            }}</el-text>
-                    </el-col>
-                </el-row>
-            </el-form>
-            <template #footer>
-                <div class="dialog-footer">
-                    <el-button type="primary" @click="submitForm(ruleFormRef)"
-                        :loading="customerFormisSubmitting">预订</el-button>
-                    <el-button type="info" @click="customerDialogVisible = false">取消</el-button>
-                </div>
-            </template>
-        </el-dialog>
-
         <CustomerMessageForm v-model:visible="customerDialogVisible" title="登记信息" :customer-form="customerForm"
-            :rules="rules" :loading="customerFormisSubmitting" :size="size" :status="'ADD'" :submit-remand="'预订'"
-            @submit="submitForm" :before-close="handleClose" @closed="closeCustomerDialogForm" @room-message="roomMessage"
-            @upload-picture-post="uploadPicturePost" @before-avatar-upload="beforeAvatarUpload" />
+            :rules="rules" :loading="customerFormisSubmitting" :size="size"
+            :customer-dialog-status="CustomerDialogStatus.CUSTOMERRSERVED" :submitRemand="'预订'" @submit="submitForm"
+            :before-close="handleClose" @closed="closedCustomerDialog" @close="closeCustomerDialog"
+            @room-message="roomMessage" @upload-picture-post="uploadPicturePost"
+            @before-avatar-upload="beforeAvatarUpload" />
     </div>
 </template>
 
 <script lang="ts" setup>
+defineOptions({ name: 'RoomManagement' });
+import { CustomerDialogStatus } from '@/types/Customer';
 import RadarEchart from '@/components/RadarEchart.vue';
-import { ElMessage, ElUpload, UploadProps, FormInstance, FormItemRule } from 'element-plus';
+import { ElMessage, ElUpload, UploadProps, FormItemRule } from 'element-plus';
 import { ArrowRight } from '@element-plus/icons-vue';
 import { ComponentSize } from 'element-plus';
 import { onMounted, ref, computed } from 'vue';
 import apiClient from '@/services/apiClient';
-import { useDark } from '@vueuse/core';
 import { useUserStore } from '@/store/userStore';
-import { Plus } from '@element-plus/icons-vue';
 import showConfirmDialog from '@/utils/showConfirmDialog';
 import { useDeviceStore } from '@/store/deviceStore';
+import { RoomInterface } from '@/types/Room';
 
 import CustomerMessageForm from '@/components/CustomerMessageForm.vue';
 
 const deviceStore = useDeviceStore();
 const isMobile = computed(() => deviceStore.isMobile);
-const isComputer = computed(() => deviceStore.isComputer);
 
 const customerFormisSubmitting = ref(false); // 提交状态
 
-const submitForm = async (formEl: FormInstance | undefined) => {
+const submitForm = async () => {
     customerFormisSubmitting.value = true; // 提交中状态
     // 检查表单必填项
     if (!customerForm.value.name || !customerForm.value.idCardNo || !customerForm.value.mobile) {
@@ -297,16 +220,17 @@ const submitForm = async (formEl: FormInstance | undefined) => {
         customerForm.value.checkInTime = now;
         customerForm.value.status = '已预订'; // 设置状态为已预订
         customerForm.value.balance = 0; // 余额设置为0
-        customerForm.value.user_id = String(userStore.userInfo.id); // 设置用户ID，确保为字符串类型
-        const response = await apiClient.post("customer/reserve/", customerForm.value);
+        const user_id = String(userStore.userInfo.id); // 设置用户ID，确保为字符串类型
+        const response = await apiClient.post("customer/reserve/", customerForm.value, {
+            params: { user_id }, // 传递用户ID作为查询参数
+        });
         if (response.data.code === 1) {
             ElMessage.success('房间预订成功');
             getRoom();
         } else {
             ElMessage.error(response.data.msg || '房间预订失败');
         }
-    } catch (error) {
-    } finally {
+    } catch { /* empty */ } finally {
         customerFormisSubmitting.value = false; // 无论请求成功还是失败，都重置提交状态
         customerDialogVisible.value = false; // 关闭弹窗
     }
@@ -317,40 +241,13 @@ const reservedRoom = async () => {
         RoomFormSubmitting.value = true; // 提交中状态
         customerForm.value.roomNo = roomForm.value.roomNo; // 设置房间号
         customerDialogVisible.value = true; // 打开登记信息弹窗
-    } catch (error) { }
-    finally {
+    } catch { /* empty */ } finally {
         RoomFormSubmitting.value = false; // 提交完成状态
         roomDialogVisible.value = false; // 关闭房间信息弹窗
     }
 };
-const ruleFormRef = ref<FormInstance>()
 
 // 返回时间差
-const timeDifference = (times: string[]) => {
-    if (times[0] === '' || times[1] === '')
-        return '';
-    else {
-        const endDate = new Date(times[1]);
-        const startDate = new Date(times[0]);
-
-        // 计算时间差（毫秒）  
-        const diffTime = endDate.getTime() - startDate.getTime();
-
-        // 计算年、月、日、小时  
-        const diffSeconds = Math.floor(diffTime / 1000);
-        const diffMinutes = Math.floor(diffSeconds / 60);
-        const diffHours = Math.floor(diffMinutes / 60);
-        const diffDays = Math.floor(diffHours / 24);
-
-        // 计算年和月  
-        const years = Math.floor(diffDays / 365);
-        const months = Math.floor((diffDays % 365) / 30);
-        const days = diffDays % 30;
-        const hours = diffHours % 24;
-
-        return `${years}年${months}月${days}日${hours}小时`
-    }
-}
 // 判断图片类型
 const beforeAvatarUpload: UploadProps['beforeUpload'] = (rawFile) => {
     if (rawFile.type !== 'image/jpeg') {
@@ -379,7 +276,7 @@ const uploadPicturePost = async (file: { file: string | Blob; }) => {
             customerForm.value.imageUrl = apiClient.defaults.baseURL + 'media/' + res.data.name;
             return res;  // 返回结果以便于后续处理
         } else throw new Error(res.data.msg); // 抛出错误以便于后续处理
-    } catch (err) { }
+    } catch { /* empty */ }
 };
 const roomMessage = (roomNo: string) => {
     const roomInfo = roomData.value.find(room => room.roomNo === roomNo) || null;
@@ -452,9 +349,12 @@ const handleClose = (done: () => void) => {
         .then(() => { done() })
         .catch(() => { })
 }
+
+const closeCustomerDialog = () => {
+    customerDialogVisible.value = false; // 关闭弹窗
+}
 // 关闭对话框重置customerForm
-const closeCustomerDialogForm = () => {
-    customerDialogVisible.value = false;
+const closedCustomerDialog = () => {
     resetCustomerForm();
 }
 // 重置CustomerForm
@@ -490,7 +390,6 @@ const customerForm = ref<Customer>({
 });
 
 const userStore = useUserStore();
-const isDark = useDark();
 
 const isManager = computed(() => userStore.role === 'manager');
 const isCustomer = computed(() => userStore.role === 'customer');
@@ -622,7 +521,7 @@ const addRoom = async () => {
         } else {
             ElMessage.error(response.data.msg || '房间添加失败');
         }
-    } catch (error) { }
+    } catch { /* empty */ }
     finally {
         RoomFormSubmitting.value = false; // 提交完成状态
     }
@@ -650,7 +549,7 @@ const addRoomConfig = async () => {
             getRoomConfig(); // 重新获取房间配置  
             roomForm.value.roomConfig = (roomForm.value.roomConfig || []).filter(name => name !== newConfigName.value); // 同步更新房间配置
         }
-    } catch (error) { }
+    } catch { /* empty */ }
     finally {
         roomConfigSubmitting.value = false; // 提交完成状态
     }
@@ -678,8 +577,8 @@ const deleteRoomConfig = async () => {
                     getRoomConfig(); // 重新获取房间配置
                     roomForm.value.roomConfig = (roomForm.value.roomConfig || []).filter(name => name !== configName); // 同步更新房间配置
 
-                } else { }
-            } catch (error) { }
+                }
+            } catch { /* empty */ }
         })
         .catch(() => {
             ElMessage.info('已取消删除');
@@ -723,7 +622,7 @@ const updateRoom = async () => {
             getRoom();
             roomDialogVisible.value = false; // 关闭弹窗
         }
-    } catch (error) { }
+    } catch { /* empty */ }
     finally {
         RoomFormSubmitting.value = false; // 提交完成状态
     }
@@ -794,11 +693,13 @@ const getRoomStatus = (room: Room) => {
     return statusMap[room.roomStatus] || { type: 'primary', status: '未知' };
 };
 // 图片预览事件
-const handlePreview = (file: any) => {
+import type { UploadFile } from 'element-plus';
+
+const handlePreview = (file: UploadFile) => {
     console.log('预览图片:', file);
 };
 // 图片移除事件
-const handleRemove = (file: any) => {
+const handleRemove = (file: UploadFile) => {
     console.log('移除图片:', file);
 };
 // 获取房间数据
@@ -808,7 +709,7 @@ const getRoom = async () => {
         const res = await apiClient.get("room/");
         if (res.data.code === 1) {
             // 解析后端返回的数据
-            roomData.value = res.data.data.map((room: any) => ({
+            roomData.value = res.data.data.map((room: RoomInterface) => ({
                 roomNo: room.room_no,
                 roomStatus: room.room_status,
                 roomType: room.room_type,
@@ -828,13 +729,13 @@ const getRoomConfig = async () => {
         const response = await apiClient.get("room/config/");
         if (response.data.code === 1) {
             // 更新 allRoomConfigs 数据
-            allRoomConfigs.value = response.data.data.map((config: any) => ({
+            allRoomConfigs.value = response.data.data.map((config: { id: number; name: string; description: string }) => ({
                 id: config.id,
                 name: config.name,
                 description: config.description,
             }));
         }
-    } catch (error) { }
+    } catch { /* empty */ }
 };
 // 生命周期
 onMounted(() => {

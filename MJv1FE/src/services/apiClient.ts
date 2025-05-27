@@ -1,10 +1,8 @@
 // src/services/apiClient.js
 import axios from "axios";
-import { ElMessage, ElLoading, LoadingParentElement } from "element-plus";
-import { ComponentPublicInstance, ComponentOptionsBase, ComponentProvideOptions, Ref } from "vue";
+import { ElMessage, ElLoading } from "element-plus";
 
-let loadingInstance: { close: any; setText?: (text: string) => void; removeElLoadingChild?: () => void; handleAfterLeave?: () => void; vm?: ComponentPublicInstance<{}, {}, {}, {}, {}, {}, {}, {}, false, ComponentOptionsBase<any, any, any, any, any, any, any, any, any, {}, {}, string, {}, {}, {}, string, ComponentProvideOptions>>; $el?: HTMLElement; originalPosition?: Ref<string, string>; originalOverflow?: Ref<string, string>; visible?: Ref<boolean, boolean>; parent?: Ref<LoadingParentElement, LoadingParentElement>; background?: Ref<string, string>; svg?: Ref<string, string>; svgViewBox?: Ref<string, string>; spinner?: Ref<string | boolean, string | boolean>; text?: Ref<string, string>; fullscreen?: Ref<boolean, boolean>; lock?: Ref<boolean, boolean>; customClass?: Ref<string, string>; target?: Ref<HTMLElement, HTMLElement>; beforeClose?: Ref<(() => boolean) | undefined, (() => boolean) | undefined> | undefined; closed?: Ref<(() => void) | undefined, (() => void) | undefined> | undefined; } | null = null; // 存储全局加载实例
-
+let loadingInstance: ReturnType<typeof ElLoading.service> | null = null;
 const apiClient = axios.create({
   baseURL: "/api", // API 基础路径
   withCredentials: true, // 允许跨域请求携带 cookies
@@ -34,7 +32,7 @@ apiClient.interceptors.request.use(
 );
 
 let isRefreshing = false; // 是否正在刷新 Token
-let failedQueue: { resolve: (value: unknown) => void; reject: (reason?: any) => void; }[] = []; // 存储等待刷新 Token 的请求队列
+let failedQueue: { resolve: (value: unknown) => void; reject: (reason?: unknown) => void; }[] = []; // 存储等待刷新 Token 的请求队列
 
 const processQueue = (error: unknown, token = null) => {
   failedQueue.forEach((prom) => {
@@ -95,7 +93,7 @@ apiClient.interceptors.response.use(
         localStorage.removeItem("accessToken");
         try {
           await apiClient.post("logout/");
-        } catch (e) {}
+        } catch { /* empty */ }
         window.location.href = "/home";
         processQueue(refreshError, null);
         return Promise.reject(refreshError);

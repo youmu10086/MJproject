@@ -25,11 +25,13 @@
 </template>
 
 <script setup lang="ts">
+defineOptions({ name: 'BaseTableComponent' });
+
 import { PropType } from 'vue';
 
-const props = defineProps({
+defineProps({
     tableData: {
-        type: Array as PropType<any[]>,
+        type: Array as PropType<Record<string, unknown>[]>,
         required: true,
     },
     columns: {
@@ -50,7 +52,7 @@ const props = defineProps({
         default: 'small',
     },
     rowClassName: {
-        type: Function as PropType<(row: any) => string>,
+        type: Function as PropType<(row: Record<string, unknown>) => string>,
         default: () => '',
     },
     defaultSort: {
@@ -73,7 +75,7 @@ const props = defineProps({
 
 const emit = defineEmits(['selection-change']);
 
-const handleSelectionChange = (selection: any[]) => {
+const handleSelectionChange = (selection: Record<string, unknown>[]) => {
     emit('selection-change', selection);
 };
 </script>

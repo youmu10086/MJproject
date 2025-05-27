@@ -1,32 +1,28 @@
 <template>
-  <el-row>
-
-    <el-link @click="router.push('/home')" style="font-weight: bold; font-size: 20px;">
+  <el-row class="header-container">
+    <el-link @click="router.push('/home')" class="logo-text">
       美家公寓
     </el-link>
-    <div class="header-right">
-      <drop-down v-if="isMobile"></drop-down>
-      <div class="avatar-container">
-        <el-popover v-if="userStore.isLoggedIn" placement="bottom-end" trigger="hover" width="155">
-          <template #reference>
-            <el-avatar :title="userStore.userInfo.username" class="user-avatar">
-              {{ nameInitial }}
-            </el-avatar>
-          </template>
-          <div class="button-group">
-            <el-button aria-label="退出登录" type="danger" plain @click="handleLogout">退出登录</el-button>
-            <el-button aria-label="设置" type="primary" plain :icon="Setting" circle class="setting-button" />
-          </div>
-        </el-popover>
-        <el-avatar v-else @click="userStore.loginDialogVisible = true" class="user-avatar">
-          登录
+    <drop-down v-if="isMobile"></drop-down>
+    <el-popover v-if="userStore.isLoggedIn" placement="bottom-end" trigger="hover" width="155">
+      <template #reference>
+        <el-avatar :title="userStore.userInfo.username" class="user-avatar">
+          {{ nameInitial }}
         </el-avatar>
+      </template>
+      <div class="button-group">
+        <el-button aria-label="退出登录" type="danger" plain @click="handleLogout">退出登录</el-button>
+        <el-button aria-label="设置" type="primary" plain :icon="Setting" circle class="setting-button" />
       </div>
-    </div>
+    </el-popover>
+    <el-avatar v-else @click="userStore.loginDialogVisible = true" class="user-avatar">
+      登录
+    </el-avatar>
   </el-row>
 </template>
 
 <script setup lang="ts">
+defineOptions({ name: 'HeaderComponent' });
 import { computed } from 'vue';
 import { useUserStore } from '@/store/userStore';
 import { ElMessage } from 'element-plus';
@@ -55,25 +51,21 @@ const handleLogout = async () => {
     setTimeout(() => {
       window.location.href = '/home';
     }, 1000);
-  } catch (error) { }
+  } catch { /*empty*/ }
 };
 </script>
 
 <style scoped>
-.header-right {
+.header-container {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: flex-end;
-  position: absolute;
-  right: 0px;
-  /* 距离右边框 20px */
-  top: 50%;
-  /* 垂直居中 */
-  transform: translateY(-50%);
-  /* 修正垂直居中偏移 */
-  gap: 20px;
-  
-  /* drop-down 和头像之间的间距 */
+  width: 100%;
+}
+
+.logo-text {
+  font-weight: bold;
+  font-size: 20px;
 }
 
 .user-avatar {
@@ -93,11 +85,9 @@ const handleLogout = async () => {
 
 .setting-button {
   transition: transform 0.3s ease;
-  /* 添加平滑的旋转效果 */
 }
 
 .setting-button:hover {
   transform: rotate(90deg);
-  /* 鼠标悬停时旋转 90 度 */
 }
 </style>

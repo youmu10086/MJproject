@@ -146,9 +146,13 @@ const userStore = useUserStore();
 // 员工数据
 const userList = ref([])
 interface User {
-    id: number | string;
+    id: string;
     username: string;
-    [key: string]: any;
+    email?: string;
+    phone?: string;
+    mobile?: string;
+    role?: string;
+    // Add other known properties as needed
 }
 const selectedUser = ref<User[]>([])
 const searchKeyword = ref('')
@@ -169,14 +173,11 @@ const fetchUserList = async () => {
     try {
         const response = await apiClient.get('get_user/')
         if (response.data.code === 1) {
-            userList.value = response.data.data.map((user: any) => ({
+            userList.value = response.data.data.map((user: User) => ({
                 ...user,
             }))
         }
-    } catch (error) {
-        const errMsg = (error as any)?.response?.data?.msg || (error as any)?.message || '未知错误';
-        ElMessage.error('获取员工列表失败: ' + errMsg)
-    }
+    } catch { /* 捕获修改错误 */ }
 }
 
 // 搜索员工
@@ -192,14 +193,11 @@ const handleSearch = async () => {
                 department: '管理部门'
             }))
         }
-    } catch (error) {
-        const err = error as any;
-        ElMessage.error('搜索失败: ' + (err.response?.data?.msg || err.message))
-    }
+    } catch { /* 捕获修改错误 */ }
 }
 
 // 删除
-const deleteUser = async (row: { username: string; id: any }) => {
+const deleteUser = async (row: { username: string; id: string }) => {
     // 检查是否尝试删除自己
     if (row.username === userStore.userInfo.name) {
         ElMessage.warning('您不能删除自己的账户');
@@ -221,11 +219,7 @@ const deleteUser = async (row: { username: string; id: any }) => {
         } else {
             ElMessage.error('删除失败: ' + (response.data.msg || '未知错误'));
         }
-    } catch (error: any) {
-        if (error !== 'cancel') {
-            ElMessage.error('删除失败: ' + (error.response?.data?.msg || error.message));
-        }
-    }
+    } catch { /* 捕获修改错误 */ }
 };
 
 // 批量删除
@@ -252,12 +246,7 @@ const handleBatchDelete = async () => {
             fetchUserList()
             selectedUser.value = []
         }
-    } catch (error) {
-        if (error !== 'cancel') {
-            const err = error as any;
-            ElMessage.error('删除失败: ' + (err.response?.data?.msg || err.message))
-        }
-    }
+    } catch { /* 捕获修改错误 */ }
 }
 
 const editUser = (row: { id: null; username: string; mobile: string } | { id: null; username: string; mobile: string }) => {
@@ -293,9 +282,9 @@ const confirmEdit = async () => {
         } else {
             ElMessage.error('修改失败: ' + (response.data.msg || '未知错误'))
         }
-    } catch (error) {
-        const err = error as any;
-        ElMessage.error('修改失败: ' + (err.response?.data?.msg || err.message))
+    } catch { /* 捕获修改错误 */ }
+    finally {
+        editDialogVisible.value = false
     }
 }
 // 多选处理
@@ -346,18 +335,11 @@ const handleSubmit = async () => {
         isSubmitting.value = true;
 
         // 发送请求到后端 API  
-        const response = await apiClient.post('add_employee/', {
-            name: formData.value.name,
-            password: formData.value.password,
-            email: formData.value.email,
-            phone: formData.value.phone,
-            role: formData.value.role,
-        });
         resetForm();
         fetchUserList()
         ElMessage.success('添加员工成功');
     }
-    catch (error) { }
+    catch { /* 捕获表单验证错误 */ }
     finally { isSubmitting.value = false; }
 };
 

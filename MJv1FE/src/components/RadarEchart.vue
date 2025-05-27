@@ -3,6 +3,7 @@
 </template>
 
 <script setup>
+defineOptions({ name: 'RadarEchart' });
 import { useDark } from '@vueuse/core';
 
 const { isDark } = useDark();

@@ -1,5 +1,5 @@
 export interface Room {
-  roomNo: string
+  room_no: string
   roomAmount: number
   durationType: string
   roomType: string
@@ -7,4 +7,13 @@ export interface Room {
   imageUrl?: string
   roomConfig?: string[]
   status?: string
+}
+
+export interface RoomInterface {
+  room_no: string;
+  room_status: string;
+  room_type: string;
+  room_amount: number;
+  duration_type: string;
+  room_config: string[];
 }

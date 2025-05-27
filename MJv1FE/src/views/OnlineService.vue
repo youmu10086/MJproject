@@ -27,9 +27,6 @@
 <script setup>
 import { ref } from 'vue';
 import { ArrowRight } from '@element-plus/icons-vue';
-import { useDark } from '@vueuse/core';
-
-const isDark = useDark();
 
 const messages = ref([
     { sender: 'service', text: '您好！有什么可以帮助您的吗？' },
