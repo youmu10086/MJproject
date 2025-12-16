@@ -51,7 +51,8 @@
                     <!-- 第三行 -->
                     <el-col :xs="24" :sm="12" :md="10">
                         <el-form-item class="submit-button">
-                            <el-button aria-label="提交" type="primary" @click="handleSubmit" :loading="isSubmitting" icon="Plus">
+                            <el-button aria-label="提交" type="primary" @click="handleSubmit" :loading="isSubmitting"
+                                icon="Plus">
                                 添加员工
                             </el-button>
                         </el-form-item>
@@ -91,8 +92,8 @@
             </div>
 
             <div class="toolbar-right">
-                <el-button aria-label="提交" type="danger" :disabled="selectedUser.length === 0" @click="handleBatchDelete" icon="Delete"
-                    plain>
+                <el-button aria-label="提交" type="danger" :disabled="selectedUser.length === 0"
+                    @click="handleBatchDelete" icon="Delete" plain>
                     批量删除 ({{ selectedUser.length }})
                 </el-button>
             </div>

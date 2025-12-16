@@ -2,17 +2,17 @@ import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import { useUserStore } from "@/store/userStore";
 import { ElMessage } from "element-plus";
 
-import Home from "@/views/Home.vue";
-const Customer = () => import("@/views/Customer.vue");
-const Employee = () => import("@/views/Employee.vue");
-const Supplies = () => import("@/views/Supplies.vue");
-const OnlineService = () => import("@/views/OnlineService.vue");
-const ReviewsFeedback = () => import("@/views/ReviewsFeedback.vue");
-const ReservationManage = () => import("@/views/ReservationManage.vue");
-const userManage = () => import("@/views/userManage.vue");
+import Home from "@/views/home/index.vue";
+const Customer = () => import("@/views/customer/index.vue");
+const Employee = () => import("@/views/employee/index.vue");
+const Supplies = () => import("@/views/supplies/index.vue");
+const OnlineService = () => import("@/views/onlineService/index.vue");
+const ReviewsFeedback = () => import("@/views/reviewsFeedback/index.vue");
+const ReservationManage = () => import("@/views/reservationManage/index.vue");
+const userManage = () => import("@/views/userManage/index.vue");
 const Test = () => import("@/views/Test.vue");
-const Room = () => import("@/views/Room.vue");
-const NotFound = () => import("@/views/NotFound.vue");
+const Room = () => import("@/views/room/index.vue");
+const NotFound = () => import("@/views/notFound/notFound/index.vue");
 
 const routes: Array<RouteRecordRaw> = [
   {
