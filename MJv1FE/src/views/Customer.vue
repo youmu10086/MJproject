@@ -1,6 +1,5 @@
 <template>
     <div>
-
         <el-breadcrumb :separator-icon="ArrowRight" class="no-select">
             <el-breadcrumb-item to="/Home">首页</el-breadcrumb-item>
             <el-breadcrumb-item>入住人员管理</el-breadcrumb-item>
